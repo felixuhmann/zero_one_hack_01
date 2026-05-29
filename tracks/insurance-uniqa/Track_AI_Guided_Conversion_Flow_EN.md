@@ -116,7 +116,89 @@ Customers arrive on the UNIQA website with concrete interest in a health insuran
 - **Known pitfalls:** Persona bots become too generic when prompts are too short (use the full briefings), intervention triggers fire too often and become annoying, the temptation to build too many things at once instead of validating one axis cleanly, fair baseline comparisons require identical persona seeds. **Scope pitfall:** Do not attempt to coach the hospital path or the "other persons" branch — these are out of scope.
 - **Known baseline:** ~5.6% online conversion on the real journey; 66% drop-off at initial price and 78% at final price are the two targets. A Coach logic that visibly reduces these drop-offs (even just for one persona group) is already a strong result.
 
-### 9. Evaluation Criteria (track-specific)
+### 9. Demo Options & Feasibility
+
+Teams do **NOT** have access to the actual UNIQA calculator code or API. All demos are simulation-based — you build a journey simulator, persona bots, and coach logic, then demonstrate impact by running personas through simulated journeys with and without coaching.
+
+The core deliverable is the **Conversion Coach logic** (detection layer + decision layer), not a replica of the UNIQA frontend.
+
+#### Option 1: State-Machine Simulation with Log Output ⭐ — Recommended, Most Feasible
+
+**What:** A Python-based journey state machine (~7–8 states for the in-scope path) that tracks which step a persona is on, what they've selected, and how long they've been there. Persona bots generate behavioral signals. The coach logic monitors these signals and decides when/how to intervene. Output is log-based: journey progression with/without coach, aggregated conversion rates.
+
+**Effort:** ~2–3 hours for the state machine, ~4–6 hours for persona bots (LLM prompts using provided briefings), ~3–4 hours for coach detection logic, ~4–6 hours for decision/intervention logic, ~2–3 hours for simulation runner + results aggregation.
+
+**Why recommended:**
+- Fastest path to a working, evaluable prototype
+- No frontend needed — results validate the coach logic, not the UI
+- Clean quantitative before/after comparison (the evaluation requirement)
+- All 36 hours go into thecoach logic and persona realism, not UI chrome
+- Scales easily to thousands of simulated journeys on the cluster
+
+**Output example:**
+```
+[Step 4] Franz sees tariff prices → dwells 45s on Optimal row → starts scrolling back
+[COACH] Detected: long dwell on price + backward scroll. Intervention: price reframing.
+[COACH] "Optimal costs €2.25/day — less than a coffee. Covers therapies, medications, and medical aids."
+[Step 4] Franz selects Optimal → continues to Step 6
+[Step 7] Franz sees final price €74.82 → hesitates (17s, 3 hovers on "Cancel")
+[COACH] Detected: price gap + near-abandonment. Intervention: transparency + reassurance.
+[COACH] "Your final price accounts for your personal health profile. It's €6.68 more than estimated. You can still complete online right now."
+[Step 7] Franz completes purchase → ✅ CONVERSION
+```
+
+#### Option 2: Streamlit/Gradio Interactive Demo ⭐⭐ — Good Stretch Goal
+
+**What:** Same simulation backend as Option 1, plus a lightweight web UI showing: step-by-step journey visualization (schematic, not the real calculator), coach intervention popups appearing at the right moments, and a before/after comparison dashboard.
+
+**Effort:** Option 1 + ~4–6 additional hours for the Streamlit/Gradio frontend.
+
+**Why it's a good stretch goal:**
+- Visually compelling for the demo presentation
+- Makes the coach's impact immediately visible to non-technical judges
+- The spec explicitly mentions this as the suggested optional frontend
+- Does NOT require building a real calculator UI — just a schematic state visualization
+
+**Caveat:** Only build this if Option 1 is solid. A pretty demo with weak coach logic scores lower than a log-output demo with strong coach logic.
+
+#### Option 3: Browser Extension Injecting Coach into Live Calculator ⭐ — Possible but High Effort, Medium Risk
+
+**What:** A Chrome/Firefox extension that injects coach UI elements (tooltips, popups, nudges) into the actual live UNIQA calculator at [uniqa.at/rechner/krankenversicherung](https://www.uniqa.at/rechner/krankenversicherung/). The coach logic runs locally or on a remote server.
+
+**Why it's risky:**
+- The live calculator is a third-party website — no guarantee it won't change during the hackathon
+- Injecting UI into someone else's DOM is fragile (class names change, structure changes)
+- You can't control persona behavior on a real website — you'd need real humans or a browser automation tool (Selenium/Playwright), which adds significant complexity
+- Hard to run at scale (thousands of journeys) for quantitative evaluation
+- Evaluation is observational, not statistically rigorous
+
+**When to consider:** Only if your team has strong frontend/browser-extension experience AND has already validated coach logic via Option 1. This should be a "wow factor" add-on, not your primary demo.
+
+#### Option 4: Standalone Simulation Abstracted into States (No Frontend) ⭐ — Viable Alternative to Option 1
+
+**What:** Similar to Option 1 but with a more formal state machine model (e.g., Markov chains, probabilistic transitions between states based on persona profiles). Each persona has probabilistic transition probabilities between steps, and the coach modifies these probabilities.
+
+**Why it's an alternative:**
+- More rigorous mathematical foundation for transition modeling
+- Easier to run Monte Carlo simulations at scale
+- Natural fit for the cluster (thousands of runs are trivial)
+- No frontend needed
+- Directly produces statistical significance testing
+
+**Caveat:** Less visually compelling for a demo than Options 1 or 2. The "state machine" abstraction is less intuitive for non-technical judges. Consider pairing with Option 2 for presentation.
+
+#### Summary: Recommended Approach
+
+| Priority | What to build | Time | Risk |
+|---|---|---|---|
+| **1st** | Option 1: State-machine simulation + log output + persona bots + coach logic | ~15–20h | Low |
+| **2nd** | Option 2: Streamlit/Gradio UI on top of Option 1 | +4–6h | Low (additive) |
+| 3rd | Option 4: Formal Markov model (alternative to Option 1) | ~15–20h | Low |
+| 4th | Option 3: Browser extension on live calculator | ~10–15h extra | High |
+
+**Recommended path:** Start with Option 1 (get the coach logic working, validate with simulation). If time allows, add Option 2 for presentation. Option 3 is a high-risk bonus.
+
+### 10. Evaluation Criteria (track-specific)
 
 - Technical depth of the Conversion Coach logic and traceable decision rules
 - Quality and realism of the persona setup (custom personas or variants are welcome)
@@ -125,7 +207,7 @@ Customers arrive on the UNIQA website with concrete interest in a health insuran
 - Robustness of conclusions — which hypotheses are recommended for production and how are they validated?
 - Quality of demo, visualization, and presentation of results
 
-### 10. Contact & Support During the Event
+### 11. Contact & Support During the Event
 
 - **Challenge Owner:** Catarina, UNIQA (Slack channel `#help-insurance`)
 - **On-site mentor:** TBD

@@ -63,7 +63,7 @@ Kund:innen kommen mit konkretem Interesse an einer Krankenversicherung auf die U
 
 - **Level 1:** Die bestehende Strecke verstehen (Live-Rechner durchlaufen, Streckendoku lesen), die drei bereitgestellten Personas in lauffähige Persona-Bots überführen, eine erste Conversion-Coach-Logik mit klar definierten Trigger-Regeln und Interventionstypen bauen.
 - **Level 2:** Die Logik im Persona-Setup testen, mindestens drei Interventionsvarianten gegeneinander vergleichen, Vorher-/Nachher-Conversion messen, erste Hypothesen formulieren, warum welche Intervention bei welcher Persona wirkt.
-- **Level 3 / Stretch:** Großskalig auf dem Cluster simulieren (tausende Journeys, Persona-Varianten, Timing-Permutationen), neue Abbruchmuster aufdecken, die in den heutigen UNIQA-Daten heute nicht sichtbar sind, validierte Hypothesen für die Weiterentwicklung des Coachs in den Echtbetrieb formulieren.
+- **Level 3 / Stretch:** Großskalig auf dem Cluster simulieren (tausende Journeys, Persona-Varianten, Timing-Permutationen), neue Abbruchmuster aufdecken, die in den heutigen UNIQA-Daten noch nicht sichtbar sind, validierte Hypothesen für die Weiterentwicklung des Coachs in den Echtbetrieb formulieren.
 
 ### 6. Daten & Ressourcen
 
@@ -125,7 +125,89 @@ Kund:innen kommen mit konkretem Interesse an einer Krankenversicherung auf die U
 - Belastbarkeit der Ableitungen — welche Hypothesen werden für den Echtbetrieb empfohlen und wie sind sie validiert?
 - Qualität von Demo, Visualisierung und Ergebnisaufbereitung
 
-### 10. Kontakt & Support während des Events
+### 10. Demo-Optionen & Machbarkeit
+
+Teams haben **KEINEN** Zugriff auf den tatsächlichen UNIQA-Rechner-Code oder die API. Alle Demos sind simulationsbasiert — Teams bauen einen Journey-Simulator, Persona-Bots und Coach-Logik und demonstrieren die Wirkung des Coachs, indem Personas simulierte Journeys mit und ohne Coaching durchlaufen.
+
+Das Kern-Deliverable ist die **Conversion Coach Logik** (Detection Layer + Decision Layer), nicht ein Nachbau des UNIQA-Rechners. Die Streckendokumentation und die Produktreferenz enthalten alles, was für die Simulation der Journey-Zustände benötigt wird.
+
+#### Option 1: Zustandsautomaten-Simulation mit Log-Output ⭐ — Empfohlen, am machbarsten
+
+**Was:** Ein Python-basierter Journey-Zustandsautomat (~7–8 Zustände für den In-Scope-Pfad), der verfolgt, auf welchem Step sich eine Persona befindet, was sie ausgewählt hat und wie lange sie dort verweilt. Persona-Bots generieren Verhaltenssignale. Die Coach-Logik überwacht diese Signale und entscheidet, wann/wie interveniert wird. Output ist logbasiert: Journey-Fortschritt mit/ohne Coach, aggregierte Conversion-Raten.
+
+**Aufwand:** ~2–3h für den Zustandsautomaten, ~4–6h für Persona-Bots (LLM-Prompts mit bereitgestellten Briefings), ~3–4h für Coach-Detection-Logik, ~4–6h für Decision/Interventions-Logik, ~2–3h für Simulations-Runner + Ergebnis-Aggregation.
+
+**Warum empfohlen:**
+- Schnellster Weg zu einem funktionierenden, evalvierbaren Prototyp
+- Kein Frontend nötig — Ergebnisse validieren die Coach-Logik, nicht die UI
+- Sauberer quantitativer Vorher-/Nachher-Vergleich (die Evaluationsanforderung)
+- Alle 36h fließen in Coach-Logik und Persona-Realismus, nicht in UI-Chrome
+- Skaliert einfach auf tausende simulierte Journeys auf dem Cluster
+
+**Output-Beispiel:**
+```
+[Step 4] Franz sieht Tarif-Preise → verweilt 45s auf Optimal-Zeile → beginnt zurückzuscrollen
+[COACH] Erkannt: lange Verweildauer auf Preis + Rückwärts-Scroll. Intervention: Preis-Reframing.
+[COACH] "Optimal kostet 2,25 €/Tag — weniger als ein Kaffee. Deckt Therapien, Medikamente und Heilbehelfe."
+[Step 4] Franz wählt Optimal → weiter zu Step 6
+[Step 7] Franz sieht Finalpreis 74,82 € → zögert (17s, 3x Hover auf "Abbrechen")
+[COACH] Erkannt: Preis-Lücke + kurz vor Abbruch. Intervention: Transparenz + Bestätigung.
+[COACH] "Der Finalpreis berücksichtigt Ihr persönliches Gesundheitsprofil. Er liegt 6,68 € über der Schätzung. Sie können jetzt online abschließen."
+[Step 7] Franz schließt Kauf ab → ✅ CONVERSION
+```
+
+#### Option 2: Streamlit/Gradio Interaktive Demo ⭐⭐ — Gutes Stretch Goal
+
+**Was:** Gleicher Simulations-Backend wie Option 1, plus ein leichtgewichtiges Web-UI das zeigt: schrittweise Journey-Visualisierung (schematisch, nicht der echte Rechner), Coach-Interventions-Popups zum richtigen Zeitpunkt, und ein Before-/After-Vergleichs-Dashboard.
+
+**Aufwand:** Option 1 + ~4–6 zusätzliche Stunden für das Streamlit/Gradio-Frontend.
+
+**Warum es ein gutes Stretch Goal ist:**
+- Visuell überzeugend für die Demo-Präsentation
+- Macht die Coach-Wirkung für nicht-technische Juroren sofort sichtbar
+- Die Spec erwähnt explizit ein optionales Frontend
+- Erfordert KEINEN Bau des echten Rechner-UIs — nur eine schematische Zustandsvisualisierung
+
+**Vorbehalt:** Nur bauen wenn Option 1 solide ist. Eine hübsche Demo mit schwacher Coach-Logik punktet weniger als eine Log-Output-Demo mit starker Coach-Logik.
+
+#### Option 3: Browser-Extension mit Coach im Live-Rechner ⭐ — Möglich, aber hoher Aufwand, mittleres Risiko
+
+**Was:** Eine Chrome/Firefox-Extension, die Coach-UI-Elemente (Tooltips, Popups, Nudges) in den echten Live-UNIQA-Rechner unter [uniqa.at/rechner/krankenversicherung](https://www.uniqa.at/rechner/krankenversicherung/) injiziert. Die Coach-Logik läuft lokal oder auf einem Remote-Server.
+
+**Warum es riskant ist:**
+- Der Live-Rechner ist eine Drittanbieter-Website — keine Garantie, dass er sich während des Hackathons nicht ändert
+- UI-Injektion in fremdes DOM ist fragil (Klassennamen ändern sich, Struktur ändert sich)
+- Persona-Verhalten auf einer echten Website lässt sich nicht kontrollieren — man bräuchte echte Menschen oder Browser-Automatisierung (Selenium/Playwright), was erhebliche Komplexität hinzufügt
+- Schwer im Maßstab zu skalieren (tausende Journeys) für quantitative Evaluation
+- Evaluation ist beobachtend, nicht statistisch rigoros
+
+**Wann erwägen:** Nur wenn das Team starke Frontend-/Browser-Extension-Erfahrung hat UND die Coach-Logik bereits via Option 1 validiert ist. Dies sollte ein "Wow-Faktor"-Add-on sein, nicht die primäre Demo.
+
+#### Option 4: Formale Markov-Modell-Simulation (ohne Frontend) ⭐ — Machbare Alternative zu Option 1
+
+**Was:** Ähnlich wie Option 1, aber mit einem formelleren Zustandsautomaten-Modell (z.B. Markov-Ketten, probabilistische Übergänge zwischen Zuständen basierend auf Persona-Profilen). Jede Persona hat probabilistische Übergangswahrscheinlichkeiten zwischen Steps, und der Coach modifiziert diese Wahrscheinlichkeiten.
+
+**Warum es eine Alternative ist:**
+- Mathematisch rigorosere Grundlage für Übergangsmodellierung
+- Leichter im Maßstab zu skalieren (Monte-Carlo-Simulationen auf dem Cluster)
+- Natürlicher Fit für den Cluster (tausende Runs sind trivial)
+- Kein Frontend nötig
+- Produziert direkt statistische Signifikanz-Tests
+
+**Vorbehalt:** Weniger visuell überzeugend für eine Demo als Optionen 1 oder 2. Die "Zustandsautomaten"-Abstraktion ist weniger intuitiv für nicht-technische Juroren. In Erwägung ziehen, mit Option 2 für die Präsentation zu kombinieren.
+
+#### Zusammenfassung: Empfohlener Ansatz
+
+| Priorität | Was bauen | Zeit | Risiko |
+|---|---|---|---|
+| **1.** | Option 1: Zustandsautomaten-Simulation + Log-Output + Persona-Bots + Coach-Logik | ~15–20h | Niedrig |
+| **2.** | Option 2: Streamlit/Gradio-UI obendrauf auf Option 1 | +4–6h | Niedrig (additiv) |
+| 3. | Option 4: Formales Markov-Modell (Alternative zu Option 1) | ~15–20h | Niedrig |
+| 4. | Option 3: Browser-Extension auf Live-Rechner | +10–15h extra | Hoch |
+
+**Empfohlener Pfad:** Mit Option 1 starten (Coach-Logik zum Laufen bringen, mit Simulation validieren). Wenn Zeit bleibt, Option 2 für die Präsentation hinzufügen. Option 3 ist ein hochriskantes Bonus-Feature.
+
+### 11. Kontakt & Support während des Events
 
 - **Challenge Owner:** Catarina, UNIQA (Slack-Channel `#help-insurance`)
 - **Mentor vor Ort:** TBD

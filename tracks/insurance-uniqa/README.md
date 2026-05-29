@@ -36,8 +36,8 @@ All information currently asked in the calculator must still be collected — no
 | Order | File | What you get | Time |
 |---|---|---|---|
 | **1** | This README | Folder structure, what matters, what doesn't | 3 min |
-| **2** | `Track_AI_Guided_Conversion_Flow_EN.md` | Full case spec — problem, architecture, deliverables, eval criteria | 10 min |
-| **3** | `uniqa-funnel-doc_german.md` | The 15-step calculator journey — every screen, every drop-off point | 7 min |
+| **2** | `Track_AI_Guided_Conversion_Flow_EN.md` | Full case spec — problem, architecture, deliverables, eval criteria, **demo options** | 10 min |
+| **3** | `uniqa-funnel-doc_en.md` or `uniqa-funnel-doc_german.md` | The 15-step calculator journey — every screen, every drop-off point | 7 min |
 | **4** | `personas_comparison_matrix.md` | Cheat sheet — all three personas side-by-side | 5 min |
 | **5** | `persona_judith_segment_1.md` / `_franz_` / `_peter_` | Full persona briefings (use as system prompts for persona bots) | 5 min each |
 | **6** | `personas.json` | All quantitative data — demographics, channel prefs, purchase drivers, life events | reference |
@@ -52,9 +52,10 @@ All information currently asked in the calculator must still be collected — no
 
 | File | Role | Language |
 |---|---|---|
-| `Track_AI_Guided_Conversion_Flow_EN.md` | **Case specification** — problem statement, architecture, deliverables, evaluation criteria, technical notes. This is the contract. | English |
+| `Track_AI_Guided_Conversion_Flow_EN.md` | **Case specification** — problem, architecture, deliverables, evaluation criteria, technical notes, **demo options & feasibility**. This is the contract. | English |
 | `Track_AI_Guided_Conversion_Flow.md` | Same case spec in German. | German |
-| `uniqa-funnel-doc_german.md` | **Funnel documentation** — the 15-step journey, UI description, drop-off points, conversion-killer hypotheses. No English version exists — use translation if needed. | German |
+| `uniqa-funnel-doc_german.md` | **Funnel documentation** — the 15-step journey, UI description, drop-off points, conversion-killer hypotheses. | German |
+| `uniqa-funnel-doc_en.md` | Same funnel documentation in English. | English |
 
 ### Persona files (you need all three)
 
@@ -149,6 +150,16 @@ PPTX files (3×)
 
 ---
 
+## How Teams Demo Their Products
+
+Teams do **NOT** have access to the actual UNIQA calculator code or API. The demo approach is **simulation-based**: teams build a lightweight journey simulator, persona bots, and the coach logic — then demonstrate the coach's impact by running personas through simulated journeys with and without coaching.
+
+The core deliverable is the **Conversion Coach logic** (detection + decision layer), not a replica of the UNIQA calculator. The funnel documentation and product reference provide everything needed to simulate the journey states.
+
+For detailed demo options and feasibility rankings, see the track spec (`Track_AI_Guided_Conversion_Flow_EN.md`, Section 9).
+
+---
+
 ## Architecture at a Glance
 
 ```
@@ -212,6 +223,8 @@ These are documented unknowns, not oversights. Teams should flag them in their r
 | `Track_AI_Guided_Conversion_Flow_EN.md` | ~14 KB | Markdown |
 | `Track_AI_Guided_Conversion_Flow.md` | ~15 KB | Markdown (German) |
 | `uniqa-funnel-doc_german.md` | ~10 KB | Markdown (German) |
+| `uniqa-funnel-doc_en.md` | ~14 KB | Markdown (English translation) |
+| `Private_Doctor_Tariff_Product_Reference_EN.md` | ~26 KB | Markdown — full product reference (in-scope tariffs, coverage, pricing, Coach arguments) |
 | `persona_judith_segment_1.md` | ~7 KB | Markdown |
 | `persona_franz_segment_2.md` | ~7 KB | Markdown |
 | `persona_peter_segment_3.md` | ~11 KB | Markdown |
