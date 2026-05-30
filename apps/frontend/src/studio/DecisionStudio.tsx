@@ -15,7 +15,6 @@ import { Processing } from "@/studio/steps/Processing";
 import { ForecastReview } from "@/studio/steps/ForecastReview";
 import { Recommendation } from "@/studio/steps/Recommendation";
 import { ModeToggle } from "@/components/theme/mode-toggle";
-import { Badge } from "@/components/ui/badge";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 
@@ -68,12 +67,7 @@ export function DecisionStudio() {
               </div>
             </div>
           </div>
-          <div className="flex items-center gap-3">
-            <Badge variant="secondary" className="hidden font-mono md:inline-flex">
-              prototype · mock data
-            </Badge>
-            <ModeToggle />
-          </div>
+          <ModeToggle />
         </header>
 
         <div className="flex min-h-0 flex-1">
@@ -120,14 +114,6 @@ export function DecisionStudio() {
                 </button>
               );
             })}
-            <div className="mt-auto rounded-lg border bg-card p-3">
-              <div className="st-eyebrow mb-1" style={{ fontSize: 9 }}>
-                live demo ready
-              </div>
-              <p className="text-[11px] leading-relaxed text-muted-foreground">
-                The decision step accepts a mid-run assumption shift and re-derives the call in real time.
-              </p>
-            </div>
           </nav>
 
           {/* content */}
