@@ -1,9 +1,15 @@
 import { useMemo, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { ArrowLeft, ArrowRight, Check, Database, Plus, Sparkles } from "lucide-react";
+import { ArrowLeft, ArrowRight, Database, Plus, Sparkles } from "lucide-react";
 
 import { PROPOSED_SOURCES, ROLE_LABEL, type CalibrationState } from "@/studio/data";
 import { AgentBubble, Eyebrow, Pill, StudioButton } from "@/studio/ui/bits";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Progress } from "@/components/ui/progress";
+import { cn } from "@/lib/utils";
 
 interface Props {
   include: Record<string, boolean>;
@@ -50,16 +56,14 @@ export function DataSources({ include, setInclude, calibration, onBack, onNext }
     <div className="space-y-7">
       <div className="space-y-3">
         <Eyebrow>Step 02 · Data sources</Eyebrow>
-        <h1 className="st-display text-4xl md:text-5xl" style={{ color: "var(--st-ink)" }}>
-          Approve the inputs
-        </h1>
+        <h1 className="st-display text-4xl text-foreground md:text-5xl">Approve the inputs</h1>
         <div className="max-w-2xl">
           <AgentBubble>
             {note ?? (
               <>
                 Based on your {calibration.mandate < 40 ? "price-stability lean" : calibration.mandate > 60 ? "employment lean" : "balanced stance"}, I
                 selected these monthly series — each clears Sybilion's minimum-data threshold. Toggle any off, or
-                ask me to reconsider. <span style={{ color: "var(--st-brand)" }}>Keyword quality drives forecast accuracy</span>, so I've tuned the
+                ask me to reconsider. <span className="font-medium text-foreground">Keyword quality drives forecast accuracy</span>, so I've tuned the
                 keywords per series.
               </>
             )}
@@ -69,19 +73,13 @@ export function DataSources({ include, setInclude, calibration, onBack, onNext }
 
       {/* refinement chips — the planning loop */}
       <div className="flex flex-wrap items-center gap-2">
-        <span className="st-eyebrow mr-1" style={{ fontSize: 9.5 }}>
-          <Sparkles className="mr-1 inline h-3 w-3" /> refine
+        <span className="st-eyebrow mr-1 inline-flex items-center" style={{ fontSize: 9.5 }}>
+          <Sparkles className="mr-1 inline size-3" /> refine
         </span>
         {REFINEMENTS.map((r) => (
-          <button
-            key={r.id}
-            type="button"
-            onClick={() => applyRefinement(r)}
-            className="st-focus-ring rounded-full px-3 py-1.5 text-[12px] transition-all hover:brightness-110"
-            style={{ background: "var(--st-panel-2)", color: "var(--st-ink-soft)", border: "1px solid var(--st-line)" }}
-          >
+          <Button key={r.id} type="button" size="sm" variant="outline" onClick={() => applyRefinement(r)}>
             {r.chip}
-          </button>
+          </Button>
         ))}
       </div>
 
@@ -96,116 +94,105 @@ export function DataSources({ include, setInclude, calibration, onBack, onNext }
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.04 }}
-                className="st-panel flex items-start gap-4 p-4 transition-all"
-                style={{ opacity: on ? 1 : 0.55, borderColor: on ? "var(--st-line-strong)" : "var(--st-line)" }}
               >
-                <button
-                  type="button"
-                  onClick={() => toggle(s.seriesId)}
-                  className="st-focus-ring mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-md transition-all"
-                  style={{
-                    background: on ? "var(--st-brand)" : "transparent",
-                    border: `1.5px solid ${on ? "var(--st-brand)" : "var(--st-line-strong)"}`,
-                  }}
-                  aria-label={on ? `Exclude ${s.title}` : `Include ${s.title}`}
+                <Card
+                  size="sm"
+                  className={cn(
+                    "flex-row items-start gap-4 p-4 transition-all",
+                    on ? "ring-foreground/15" : "opacity-60",
+                  )}
                 >
-                  {on && <Check className="h-4 w-4" style={{ color: "var(--st-bg-deep)" }} />}
-                </button>
+                  <Checkbox
+                    checked={on}
+                    onCheckedChange={() => toggle(s.seriesId)}
+                    className="mt-0.5"
+                    aria-label={on ? `Exclude ${s.title}` : `Include ${s.title}`}
+                  />
 
-                <div className="min-w-0 flex-1">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="text-[14px] font-medium" style={{ color: "var(--st-ink)" }}>
-                      {s.title}
-                    </span>
-                    <span className="st-mono text-[10.5px]" style={{ color: "var(--st-faint)" }}>
-                      {s.seriesId}
-                    </span>
-                    <Pill tone={s.role === "inflation" ? "hike" : s.role === "labor" ? "cut" : s.role === "leading" ? "brand" : "neutral"}>
-                      {ROLE_LABEL[s.role]}
-                    </Pill>
-                  </div>
-                  <p className="mt-1.5 text-[12.5px] leading-relaxed" style={{ color: "var(--st-muted)" }}>
-                    {s.rationale}
-                  </p>
-                  <div className="mt-2.5 flex flex-wrap items-center gap-x-5 gap-y-1.5">
-                    <DataMeter ratio={ratio} points={s.points} min={s.minRequired} />
-                    <span className="st-mono text-[10.5px]" style={{ color: "var(--st-faint)" }}>
-                      {s.source} · {s.cadence}
-                    </span>
-                  </div>
-                  <div className="mt-2 flex flex-wrap gap-1.5">
-                    {s.keywords.map((k) => (
-                      <span key={k} className="rounded px-1.5 py-0.5 text-[10px]" style={{ background: "var(--st-panel-2)", color: "var(--st-faint)" }}>
-                        {k}
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="text-[14px] font-medium text-foreground">{s.title}</span>
+                      <span className="st-mono text-[10.5px] text-muted-foreground">{s.seriesId}</span>
+                      <Pill tone={s.role === "inflation" ? "hike" : s.role === "labor" ? "cut" : s.role === "leading" ? "brand" : "neutral"}>
+                        {ROLE_LABEL[s.role]}
+                      </Pill>
+                    </div>
+                    <p className="mt-1.5 text-[12.5px] leading-relaxed text-muted-foreground">{s.rationale}</p>
+                    <div className="mt-2.5 flex flex-wrap items-center gap-x-5 gap-y-1.5">
+                      <DataMeter ratio={ratio} points={s.points} min={s.minRequired} />
+                      <span className="st-mono text-[10.5px] text-muted-foreground">
+                        {s.source} · {s.cadence}
                       </span>
-                    ))}
+                    </div>
+                    <div className="mt-2 flex flex-wrap gap-1.5">
+                      {s.keywords.map((k) => (
+                        <Badge key={k} variant="secondary" className="font-normal text-[10px] text-muted-foreground">
+                          {k}
+                        </Badge>
+                      ))}
+                    </div>
                   </div>
-                </div>
+                </Card>
               </motion.div>
             );
           })}
         </div>
 
         {/* ensemble preview */}
-        <div className="st-panel h-fit p-5 lg:sticky lg:top-4">
-          <div className="flex items-center gap-2">
-            <Database className="h-4 w-4" style={{ color: "var(--st-brand)" }} />
-            <span className="text-sm font-medium" style={{ color: "var(--st-ink)" }}>
-              Ensemble preview
-            </span>
-          </div>
-          <p className="mt-1 text-[11.5px]" style={{ color: "var(--st-faint)" }}>
-            {selected.length} signals · weights re-normalise live
-          </p>
-
-          <div className="mt-4 space-y-2.5">
-            <AnimatePresence initial={false}>
-              {normalized
-                .sort((a, b) => b.w - a.w)
-                .map(({ id, w }) => {
-                  const s = PROPOSED_SOURCES.find((x) => x.seriesId === id)!;
-                  return (
-                    <motion.div
-                      key={id}
-                      layout
-                      initial={{ opacity: 0, scale: 0.95 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.95 }}
-                    >
-                      <div className="mb-1 flex items-center justify-between text-[11.5px]">
-                        <span style={{ color: "var(--st-ink-soft)" }}>{s.seriesId}</span>
-                        <span className="st-mono" style={{ color: "var(--st-brand)" }}>
-                          {(w * 100).toFixed(0)}%
-                        </span>
-                      </div>
-                      <div className="h-1.5 w-full overflow-hidden rounded-full" style={{ background: "var(--st-line)" }}>
-                        <motion.div
-                          layout
-                          className="h-full rounded-full"
-                          style={{ width: `${w * 100}%`, background: "var(--st-brand)" }}
-                        />
-                      </div>
-                    </motion.div>
-                  );
-                })}
-            </AnimatePresence>
-          </div>
-
-          {!enoughInputs && (
-            <p className="mt-4 flex items-center gap-1.5 text-[11.5px]" style={{ color: "var(--st-hold)" }}>
-              <Plus className="h-3 w-3" /> Include at least two signals to run.
+        <Card className="h-fit gap-0 py-5 lg:sticky lg:top-4">
+          <CardContent>
+            <div className="flex items-center gap-2">
+              <Database className="size-4 text-[var(--st-brand)]" />
+              <span className="text-sm font-medium text-foreground">Ensemble preview</span>
+            </div>
+            <p className="mt-1 text-[11.5px] text-muted-foreground">
+              {selected.length} signals · weights re-normalise live
             </p>
-          )}
 
-          <StudioButton onClick={onNext} disabled={!enoughInputs} className="mt-5 w-full">
-            Run on Sybilion <ArrowRight className="h-4 w-4" />
-          </StudioButton>
-        </div>
+            <div className="mt-4 space-y-2.5">
+              <AnimatePresence initial={false}>
+                {normalized
+                  .sort((a, b) => b.w - a.w)
+                  .map(({ id, w }) => {
+                    const s = PROPOSED_SOURCES.find((x) => x.seriesId === id)!;
+                    return (
+                      <motion.div
+                        key={id}
+                        layout
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.95 }}
+                      >
+                        <div className="mb-1 flex items-center justify-between text-[11.5px]">
+                          <span className="text-foreground/80">{s.seriesId}</span>
+                          <span className="st-mono text-[var(--st-brand)]">{(w * 100).toFixed(0)}%</span>
+                        </div>
+                        <Progress
+                          value={w * 100}
+                          className="h-1.5 [&_[data-slot=progress-indicator]]:bg-[var(--st-brand)]"
+                        />
+                      </motion.div>
+                    );
+                  })}
+              </AnimatePresence>
+            </div>
+
+            {!enoughInputs && (
+              <p className="mt-4 flex items-center gap-1.5 text-[11.5px] text-[var(--st-hold)]">
+                <Plus className="size-3" /> Include at least two signals to run.
+              </p>
+            )}
+
+            <StudioButton onClick={onNext} disabled={!enoughInputs} className="mt-5 w-full">
+              Run on Sybilion <ArrowRight className="size-4" />
+            </StudioButton>
+          </CardContent>
+        </Card>
       </div>
 
       <div className="flex items-center justify-between pt-2">
         <StudioButton variant="ghost" onClick={onBack}>
-          <ArrowLeft className="h-4 w-4" /> Back
+          <ArrowLeft className="size-4" /> Back
         </StudioButton>
       </div>
     </div>
@@ -224,7 +211,7 @@ function DataMeter({ ratio, points, min }: { ratio: number; points: number; min:
           />
         ))}
       </div>
-      <span className="st-mono text-[10.5px]" style={{ color: "var(--st-faint)" }}>
+      <span className="st-mono text-[10.5px] text-muted-foreground">
         {points} pts · min {min}
       </span>
     </div>

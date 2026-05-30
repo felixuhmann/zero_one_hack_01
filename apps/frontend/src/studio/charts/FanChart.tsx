@@ -185,7 +185,7 @@ export function FanChart({
           y={PAD.t}
           width={W - PAD.r - model.x(model.seamIdx)}
           height={H - PAD.t - PAD.b}
-          fill="oklch(0.2 0.02 255 / 3.5%)"
+          fill="color-mix(in oklch, var(--st-ink) 4%, transparent)"
         />
 
         {/* bands */}

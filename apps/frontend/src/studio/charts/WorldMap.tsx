@@ -89,7 +89,7 @@ export function WorldMap({ countries, selected, hovered, onSelect, onHover, full
       )}
       style={{
         ...(fullBleed ? {} : { aspectRatio: "1000 / 372", borderColor: "var(--st-line)" }),
-        background: "radial-gradient(120% 130% at 28% 4%, oklch(0.95 0.02 205), var(--st-panel-2))",
+        background: "radial-gradient(120% 130% at 28% 4%, color-mix(in oklch, var(--st-brand) 10%, var(--st-bg)), var(--st-panel-2))",
       }}
     >
       <svg
