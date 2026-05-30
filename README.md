@@ -38,7 +38,7 @@ This repo is a monorepo for the **Sybilion forecasting** track app:
 
 ### Prerequisites
 
-- **Node.js** 20+ and npm (for the frontend)
+- **Node.js** 20.19+ (or 22.12+) and npm (for the frontend — Vite 8 + Tailwind v4)
 - **Python** 3.11+
 - API keys (see [Environment variables](#environment-variables)):
   - [FRED API key](https://fred.stlouisfed.org/docs/api/api_key.html)
@@ -59,8 +59,16 @@ pip install -e apps/backend
 cp .env.example .env
 # Edit .env and set FRED_API_KEY and SYBILION_API_KEY
 
-# Frontend
+# Frontend (use Node 20.19+; `nvm use` if you have .nvmrc)
 cd apps/frontend && npm install && cd ../..
+```
+
+If `npm run dev:frontend` fails with **Cannot find native binding** / `@rolldown/binding-linux-x64-gnu`, npm skipped an optional dependency. From `apps/frontend`:
+
+```bash
+rm -rf node_modules package-lock.json && npm install
+# still broken on Linux/WSL:
+npm install @rolldown/binding-linux-x64-gnu@1.0.2 --save-dev
 ```
 
 ### Run in dev mode
@@ -80,6 +88,8 @@ cd apps/frontend && npm run dev
 ```
 
 The Vite dev server proxies `/api` to `http://127.0.0.1:8000` for when a backend HTTP server is added. There is no API server yet; the UI runs standalone.
+
+The frontend uses **Tailwind CSS v4** with **shadcn/ui** (`@tailwindcss/vite` plugin). Add components with `npx shadcn@latest add <name>` from `apps/frontend/`.
 
 **Terminal 2 — backend pipeline** (CLI, long-running Sybilion jobs):
 
