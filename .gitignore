@@ -26,8 +26,6 @@ venv/
 .DS_Store
 Thumbs.db
 
-# Generated artifacts
-artifacts/
 
 # Environment variables and secrets
 .env

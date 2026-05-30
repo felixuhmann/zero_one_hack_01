@@ -1,0 +1,3611 @@
+{
+  "data": {
+    "01d7c6f1-ccf0-8384-29e2-996790c5bcfe": {
+      "direction": {
+        "horizon_1": {
+          "1.0": -0.45072
+        },
+        "horizon_2": {
+          "1.0": -0.45072
+        },
+        "horizon_3": {
+          "1.0": -0.45072
+        },
+        "overall": {
+          "max": -0.45072,
+          "mean": -0.45072,
+          "min": -0.45072
+        }
+      },
+      "driver_name": "Commodities - World",
+      "importance": {
+        "horizon_1": {
+          "1.0": 0.0
+        },
+        "horizon_2": {
+          "1.0": 0.0
+        },
+        "horizon_3": {
+          "1.0": 0.0
+        },
+        "overall": {
+          "max": 0.0,
+          "mean": 0.0,
+          "min": 0.0
+        }
+      },
+      "pearson_correlation": {
+        "lag_1": -0.4948,
+        "lag_2": -0.545749,
+        "lag_3": -0.514316,
+        "overall": {
+          "max": -0.4948,
+          "mean": -0.518288,
+          "min": -0.545749
+        }
+      }
+    },
+    "026a1fd9-27f1-efb9-d7a8-a9b9b7def05c": {
+      "direction": {
+        "horizon_1": {
+          "1.0": -0.883985
+        },
+        "horizon_2": {
+          "1.0": -0.883985
+        },
+        "horizon_3": {
+          "1.0": -0.883985
+        },
+        "overall": {
+          "max": -0.883985,
+          "mean": -0.883985,
+          "min": -0.883985
+        }
+      },
+      "driver_name": "Construction - France",
+      "importance": {
+        "horizon_1": {
+          "1.0": 0.0
+        },
+        "horizon_2": {
+          "1.0": 0.0
+        },
+        "horizon_3": {
+          "1.0": 0.0
+        },
+        "overall": {
+          "max": 0.0,
+          "mean": 0.0,
+          "min": 0.0
+        }
+      },
+      "pearson_correlation": {
+        "lag_1": -0.883985,
+        "lag_2": -0.885773,
+        "lag_3": -0.860607,
+        "overall": {
+          "max": -0.860607,
+          "mean": -0.876788,
+          "min": -0.885773
+        }
+      }
+    },
+    "02750b57-99d6-5a80-65f5-1f9372d66e6b": {
+      "direction": {
+        "horizon_1": {
+          "3.0": 0.85516
+        },
+        "horizon_2": {
+          "3.0": 0.85516
+        },
+        "horizon_3": {
+          "3.0": 0.85516
+        },
+        "overall": {
+          "max": 0.85516,
+          "mean": 0.85516,
+          "min": 0.85516
+        }
+      },
+      "driver_name": "Interest Rates - United States of America",
+      "importance": {
+        "horizon_1": {
+          "3.0": 0.0
+        },
+        "horizon_2": {
+          "3.0": 0.0
+        },
+        "horizon_3": {
+          "3.0": 0.0
+        },
+        "overall": {
+          "max": 0.0,
+          "mean": 0.0,
+          "min": 0.0
+        }
+      },
+      "pearson_correlation": {
+        "lag_1": 0.801317,
+        "lag_2": 0.839893,
+        "lag_3": 0.85516,
+        "overall": {
+          "max": 0.85516,
+          "mean": 0.832123,
+          "min": 0.801317
+        }
+      }
+    },
+    "03aa35a1-f370-c4c2-e1a4-c554ddc0fbda": {
+      "direction": {
+        "horizon_1": {
+          "3.0": -0.704353
+        },
+        "horizon_2": {
+          "3.0": -0.704353
+        },
+        "horizon_3": {
+          "3.0": -0.704353
+        },
+        "overall": {
+          "max": -0.704353,
+          "mean": -0.704353,
+          "min": -0.704353
+        }
+      },
+      "driver_name": "Energy - United States of America",
+      "importance": {
+        "horizon_1": {
+          "3.0": 0.0
+        },
+        "horizon_2": {
+          "3.0": 0.0
+        },
+        "horizon_3": {
+          "3.0": 0.0
+        },
+        "overall": {
+          "max": 0.0,
+          "mean": 0.0,
+          "min": 0.0
+        }
+      },
+      "pearson_correlation": {
+        "lag_1": -0.691516,
+        "lag_2": -0.705828,
+        "lag_3": -0.704353,
+        "overall": {
+          "max": -0.691516,
+          "mean": -0.700566,
+          "min": -0.705828
+        }
+      }
+    },
+    "04b4e7f7-5451-0408-565d-e46f9c279715": {
+      "direction": {
+        "horizon_0": {
+          "0.0": 0.49053
+        },
+        "horizon_1": {
+          "6.0": 0.539322
+        },
+        "horizon_2": {
+          "6.0": 0.539322
+        },
+        "horizon_3": {
+          "6.0": 0.539322
+        },
+        "overall": {
+          "max": 0.539322,
+          "mean": 0.514926,
+          "min": 0.49053
+        }
+      },
+      "driver_name": "Population - Kazakhstan",
+      "importance": {
+        "horizon_1": {
+          "0.0": 0.0,
+          "6.0": 94.140378
+        },
+        "horizon_2": {
+          "0.0": 0.0,
+          "6.0": 94.140378
+        },
+        "horizon_3": {
+          "0.0": 0.0,
+          "6.0": 94.140378
+        },
+        "overall": {
+          "max": 94.140378,
+          "mean": 47.070189,
+          "min": 0.0
+        }
+      },
+      "pearson_correlation": {
+        "lag_1": 0.606858,
+        "lag_2": 0.639856,
+        "lag_3": 0.609998,
+        "overall": {
+          "max": 0.639856,
+          "mean": 0.618904,
+          "min": 0.606858
+        }
+      }
+    },
+    "0f4c442c-53cd-e69a-8e4c-3e3e2274305f": {
+      "direction": {
+        "horizon_1": {
+          "3.0": -0.22978
+        },
+        "horizon_2": {
+          "3.0": -0.22978
+        },
+        "horizon_3": {
+          "3.0": -0.22978
+        },
+        "overall": {
+          "max": -0.22978,
+          "mean": -0.22978,
+          "min": -0.22978
+        }
+      },
+      "driver_name": "Services - Denmark",
+      "importance": {
+        "horizon_1": {
+          "3.0": 19.132502
+        },
+        "horizon_2": {
+          "3.0": 19.132502
+        },
+        "horizon_3": {
+          "3.0": 19.132502
+        },
+        "overall": {
+          "max": 19.132502,
+          "mean": 19.132502,
+          "min": 19.132502
+        }
+      },
+      "pearson_correlation": {
+        "lag_1": -0.073192,
+        "lag_2": -0.143315,
+        "lag_3": -0.22978,
+        "overall": {
+          "max": -0.073192,
+          "mean": -0.148762,
+          "min": -0.22978
+        }
+      }
+    },
+    "0fb8268e-ca4c-4e58-47d3-796d8d3b5621": {
+      "direction": {
+        "horizon_1": {
+          "1.0": -0.650205
+        },
+        "horizon_2": {
+          "1.0": -0.650205
+        },
+        "horizon_3": {
+          "1.0": -0.650205
+        },
+        "overall": {
+          "max": -0.650205,
+          "mean": -0.650205,
+          "min": -0.650205
+        }
+      },
+      "driver_name": "Commodities - World",
+      "importance": {
+        "horizon_1": {
+          "1.0": 0.0
+        },
+        "horizon_2": {
+          "1.0": 0.0
+        },
+        "horizon_3": {
+          "1.0": 0.0
+        },
+        "overall": {
+          "max": 0.0,
+          "mean": 0.0,
+          "min": 0.0
+        }
+      },
+      "pearson_correlation": {
+        "lag_1": -0.653679,
+        "lag_2": -0.745474,
+        "lag_3": -0.791442,
+        "overall": {
+          "max": -0.653679,
+          "mean": -0.730198,
+          "min": -0.791442
+        }
+      }
+    },
+    "172ca4b9-80fe-fcdd-4314-123b5506ddc8": {
+      "direction": {
+        "horizon_1": {
+          "3.0": -0.767886
+        },
+        "horizon_2": {
+          "3.0": -0.767886
+        },
+        "horizon_3": {
+          "3.0": -0.767886
+        },
+        "overall": {
+          "max": -0.767886,
+          "mean": -0.767886,
+          "min": -0.767886
+        }
+      },
+      "driver_name": "Population - Rwanda",
+      "importance": {
+        "horizon_1": {
+          "3.0": 0.0
+        },
+        "horizon_2": {
+          "3.0": 0.0
+        },
+        "horizon_3": {
+          "3.0": 0.0
+        },
+        "overall": {
+          "max": 0.0,
+          "mean": 0.0,
+          "min": 0.0
+        }
+      },
+      "pearson_correlation": {
+        "lag_1": -0.729219,
+        "lag_2": -0.734121,
+        "lag_3": -0.767886,
+        "overall": {
+          "max": -0.729219,
+          "mean": -0.743742,
+          "min": -0.767886
+        }
+      }
+    },
+    "20cea716-0d82-b56d-2ea2-a232a773a030": {
+      "direction": {
+        "horizon_0": {
+          "0.0": 0.160584
+        },
+        "overall": {
+          "max": 0.160584,
+          "mean": 0.160584,
+          "min": 0.160584
+        }
+      },
+      "driver_name": "Global risk - World",
+      "importance": {
+        "horizon_1": {
+          "0.0": 0.0
+        },
+        "horizon_2": {
+          "0.0": 0.0
+        },
+        "horizon_3": {
+          "0.0": 0.0
+        },
+        "overall": {
+          "max": 0.0,
+          "mean": 0.0,
+          "min": 0.0
+        }
+      },
+      "pearson_correlation": {
+        "lag_1": 0.194716,
+        "lag_2": 0.206637,
+        "lag_3": 0.132178,
+        "overall": {
+          "max": 0.206637,
+          "mean": 0.177844,
+          "min": 0.132178
+        }
+      }
+    },
+    "21fb0366-0ee0-d6c2-efc0-ecae62536a00": {
+      "direction": {
+        "horizon_0": {
+          "0.0": 0.112338
+        },
+        "overall": {
+          "max": 0.112338,
+          "mean": 0.112338,
+          "min": 0.112338
+        }
+      },
+      "driver_name": "Labour market - Slovakia",
+      "importance": {
+        "horizon_1": {
+          "0.0": 0.0
+        },
+        "horizon_2": {
+          "0.0": 0.0
+        },
+        "horizon_3": {
+          "0.0": 0.0
+        },
+        "overall": {
+          "max": 0.0,
+          "mean": 0.0,
+          "min": 0.0
+        }
+      },
+      "pearson_correlation": {
+        "lag_1": 0.281614,
+        "lag_2": 0.375896,
+        "lag_3": 0.46085,
+        "overall": {
+          "max": 0.46085,
+          "mean": 0.372787,
+          "min": 0.281614
+        }
+      }
+    },
+    "227f971e-7543-984c-2df8-146c810d596e": {
+      "direction": {
+        "horizon_0": {
+          "0.0": 0.424121
+        },
+        "horizon_1": {
+          "3.0": 0.167855
+        },
+        "horizon_2": {
+          "3.0": 0.167855
+        },
+        "horizon_3": {
+          "3.0": 0.167855
+        },
+        "overall": {
+          "max": 0.424121,
+          "mean": 0.295988,
+          "min": 0.167855
+        }
+      },
+      "driver_name": "Agriculture and forestry, fisheries and meat - United States of America",
+      "importance": {
+        "horizon_1": {
+          "0.0": 0.0,
+          "3.0": 88.031664
+        },
+        "horizon_2": {
+          "0.0": 0.0,
+          "3.0": 88.031664
+        },
+        "horizon_3": {
+          "0.0": 0.0,
+          "3.0": 88.031664
+        },
+        "overall": {
+          "max": 88.031664,
+          "mean": 44.015832,
+          "min": 0.0
+        }
+      },
+      "pearson_correlation": {
+        "lag_1": 0.343363,
+        "lag_2": 0.257615,
+        "lag_3": 0.167855,
+        "overall": {
+          "max": 0.343363,
+          "mean": 0.256278,
+          "min": 0.167855
+        }
+      }
+    },
+    "28b729df-5c8a-3474-70b9-0de613801b8b": {
+      "direction": {
+        "horizon_0": {
+          "0.0": -0.194737
+        },
+        "horizon_1": {
+          "1.0": -0.243698,
+          "3.0": -0.34152
+        },
+        "horizon_2": {
+          "1.0": -0.243698,
+          "3.0": -0.34152
+        },
+        "horizon_3": {
+          "1.0": -0.243698,
+          "3.0": -0.34152
+        },
+        "overall": {
+          "max": -0.194737,
+          "mean": -0.259985,
+          "min": -0.34152
+        }
+      },
+      "driver_name": "Global risk - World",
+      "importance": {
+        "horizon_1": {
+          "0.0": 89.406562,
+          "1.0": 51.215039,
+          "3.0": 0.0
+        },
+        "horizon_2": {
+          "0.0": 89.406562,
+          "1.0": 51.215039,
+          "3.0": 0.0
+        },
+        "horizon_3": {
+          "0.0": 89.406562,
+          "1.0": 51.215039,
+          "3.0": 0.0
+        },
+        "overall": {
+          "max": 89.406562,
+          "mean": 46.873867,
+          "min": 0.0
+        }
+      },
+      "pearson_correlation": {
+        "lag_1": -0.243698,
+        "lag_2": -0.24487,
+        "lag_3": -0.34152,
+        "overall": {
+          "max": -0.243698,
+          "mean": -0.276696,
+          "min": -0.34152
+        }
+      }
+    },
+    "2aa3254a-51af-491a-1c3f-f22ac3430d8d": {
+      "direction": {
+        "horizon_1": {
+          "1.0": 0.526222
+        },
+        "horizon_2": {
+          "1.0": 0.526222
+        },
+        "horizon_3": {
+          "1.0": 0.526222
+        },
+        "overall": {
+          "max": 0.526222,
+          "mean": 0.526222,
+          "min": 0.526222
+        }
+      },
+      "driver_name": "Labour market - Europe",
+      "importance": {
+        "horizon_1": {
+          "1.0": 0.0
+        },
+        "horizon_2": {
+          "1.0": 0.0
+        },
+        "horizon_3": {
+          "1.0": 0.0
+        },
+        "overall": {
+          "max": 0.0,
+          "mean": 0.0,
+          "min": 0.0
+        }
+      },
+      "pearson_correlation": {
+        "lag_1": 0.514668,
+        "lag_2": 0.563171,
+        "lag_3": 0.60484,
+        "overall": {
+          "max": 0.60484,
+          "mean": 0.560893,
+          "min": 0.514668
+        }
+      }
+    },
+    "2f03db5d-2cc8-5c62-c83e-3e4beae6167f": {
+      "direction": {
+        "horizon_1": {
+          "1.0": 0.291324
+        },
+        "horizon_2": {
+          "1.0": 0.291324
+        },
+        "horizon_3": {
+          "1.0": 0.291324
+        },
+        "overall": {
+          "max": 0.291324,
+          "mean": 0.291324,
+          "min": 0.291324
+        }
+      },
+      "driver_name": "Commodities - World",
+      "importance": {
+        "horizon_1": {
+          "1.0": 0.0
+        },
+        "horizon_2": {
+          "1.0": 0.0
+        },
+        "horizon_3": {
+          "1.0": 0.0
+        },
+        "overall": {
+          "max": 0.0,
+          "mean": 0.0,
+          "min": 0.0
+        }
+      },
+      "pearson_correlation": {
+        "lag_1": 0.299401,
+        "lag_2": 0.317597,
+        "lag_3": 0.348812,
+        "overall": {
+          "max": 0.348812,
+          "mean": 0.321937,
+          "min": 0.299401
+        }
+      }
+    },
+    "2fd5ce5c-bec2-0983-68d9-86a0ed9e6fb8": {
+      "direction": {
+        "horizon_0": {
+          "0.0": 0.698737
+        },
+        "horizon_1": {
+          "1.0": 0.851292
+        },
+        "horizon_2": {
+          "1.0": 0.851292
+        },
+        "horizon_3": {
+          "1.0": 0.851292
+        },
+        "overall": {
+          "max": 0.851292,
+          "mean": 0.775015,
+          "min": 0.698737
+        }
+      },
+      "driver_name": "Population - Rwanda",
+      "importance": {
+        "horizon_1": {
+          "0.0": 0.0,
+          "1.0": 96.089614
+        },
+        "horizon_2": {
+          "0.0": 0.0,
+          "1.0": 96.089614
+        },
+        "horizon_3": {
+          "0.0": 0.0,
+          "1.0": 96.089614
+        },
+        "overall": {
+          "max": 96.089614,
+          "mean": 48.044807,
+          "min": 0.0
+        }
+      },
+      "pearson_correlation": {
+        "lag_1": 0.851292,
+        "lag_2": 0.873061,
+        "lag_3": 0.884048,
+        "overall": {
+          "max": 0.884048,
+          "mean": 0.869467,
+          "min": 0.851292
+        }
+      }
+    },
+    "3159675d-2168-2dea-5ae3-25fa6b5f639a": {
+      "direction": {
+        "horizon_0": {
+          "0.0": 0.575036
+        },
+        "horizon_1": {
+          "6.0": 0.730785
+        },
+        "horizon_2": {
+          "6.0": 0.730785
+        },
+        "horizon_3": {
+          "6.0": 0.730785
+        },
+        "overall": {
+          "max": 0.730785,
+          "mean": 0.65291,
+          "min": 0.575036
+        }
+      },
+      "driver_name": "Market Indices - United States of America",
+      "importance": {
+        "horizon_1": {
+          "0.0": 0.0,
+          "6.0": 22.911268
+        },
+        "horizon_2": {
+          "0.0": 0.0,
+          "6.0": 22.911268
+        },
+        "horizon_3": {
+          "0.0": 0.0,
+          "6.0": 22.911268
+        },
+        "overall": {
+          "max": 22.911268,
+          "mean": 11.455634,
+          "min": 0.0
+        }
+      },
+      "pearson_correlation": {
+        "lag_1": 0.698826,
+        "lag_2": 0.722771,
+        "lag_3": 0.732025,
+        "overall": {
+          "max": 0.732025,
+          "mean": 0.717874,
+          "min": 0.698826
+        }
+      }
+    },
+    "31d7a1dd-3d78-e85c-5304-3af990ab7576": {
+      "direction": {
+        "horizon_0": {
+          "0.0": -0.588641
+        },
+        "overall": {
+          "max": -0.588641,
+          "mean": -0.588641,
+          "min": -0.588641
+        }
+      },
+      "driver_name": "Construction - Lithuania",
+      "importance": {
+        "horizon_1": {
+          "0.0": 0.0
+        },
+        "horizon_2": {
+          "0.0": 0.0
+        },
+        "horizon_3": {
+          "0.0": 0.0
+        },
+        "overall": {
+          "max": 0.0,
+          "mean": 0.0,
+          "min": 0.0
+        }
+      },
+      "pearson_correlation": {
+        "lag_1": -0.662331,
+        "lag_2": -0.699541,
+        "lag_3": -0.717227,
+        "overall": {
+          "max": -0.662331,
+          "mean": -0.693033,
+          "min": -0.717227
+        }
+      }
+    },
+    "38efdcd1-734a-1550-2bbb-0aee44f613cf": {
+      "direction": {
+        "horizon_0": {
+          "0.0": -0.625967
+        },
+        "horizon_1": {
+          "1.0": -0.745841,
+          "6.0": -0.675073
+        },
+        "horizon_2": {
+          "1.0": -0.745841,
+          "6.0": -0.675073
+        },
+        "horizon_3": {
+          "1.0": -0.745841,
+          "6.0": -0.675073
+        },
+        "overall": {
+          "max": -0.625967,
+          "mean": -0.682294,
+          "min": -0.745841
+        }
+      },
+      "driver_name": "Commodities - World",
+      "importance": {
+        "horizon_1": {
+          "0.0": 0.0,
+          "1.0": 0.0,
+          "6.0": 0.0
+        },
+        "horizon_2": {
+          "0.0": 0.0,
+          "1.0": 0.0,
+          "6.0": 0.0
+        },
+        "horizon_3": {
+          "0.0": 0.0,
+          "1.0": 0.0,
+          "6.0": 0.0
+        },
+        "overall": {
+          "max": 0.0,
+          "mean": 0.0,
+          "min": 0.0
+        }
+      },
+      "pearson_correlation": {
+        "lag_1": -0.745841,
+        "lag_2": -0.743636,
+        "lag_3": -0.734141,
+        "overall": {
+          "max": -0.734141,
+          "mean": -0.741206,
+          "min": -0.745841
+        }
+      }
+    },
+    "3ee838e5-79f0-f35e-918c-a55022c44a73": {
+      "direction": {
+        "horizon_1": {
+          "3.0": -0.835292
+        },
+        "horizon_2": {
+          "3.0": -0.835292
+        },
+        "horizon_3": {
+          "3.0": -0.835292
+        },
+        "overall": {
+          "max": -0.835292,
+          "mean": -0.835292,
+          "min": -0.835292
+        }
+      },
+      "driver_name": "Labour market - Denmark",
+      "importance": {
+        "horizon_1": {
+          "3.0": 0.0
+        },
+        "horizon_2": {
+          "3.0": 0.0
+        },
+        "horizon_3": {
+          "3.0": 0.0
+        },
+        "overall": {
+          "max": 0.0,
+          "mean": 0.0,
+          "min": 0.0
+        }
+      },
+      "pearson_correlation": {
+        "lag_1": -0.837457,
+        "lag_2": -0.841271,
+        "lag_3": -0.835292,
+        "overall": {
+          "max": -0.835292,
+          "mean": -0.838007,
+          "min": -0.841271
+        }
+      }
+    },
+    "43c9d3a0-2994-ce6c-8b1a-eab2dffb95d1": {
+      "direction": {
+        "horizon_0": {
+          "0.0": -0.074861
+        },
+        "overall": {
+          "max": -0.074861,
+          "mean": -0.074861,
+          "min": -0.074861
+        }
+      },
+      "driver_name": "Construction - Slovenia",
+      "importance": {
+        "horizon_1": {
+          "0.0": 0.0
+        },
+        "horizon_2": {
+          "0.0": 0.0
+        },
+        "horizon_3": {
+          "0.0": 0.0
+        },
+        "overall": {
+          "max": 0.0,
+          "mean": 0.0,
+          "min": 0.0
+        }
+      },
+      "pearson_correlation": {
+        "lag_1": -0.155021,
+        "lag_2": -0.198923,
+        "lag_3": -0.255458,
+        "overall": {
+          "max": -0.155021,
+          "mean": -0.203134,
+          "min": -0.255458
+        }
+      }
+    },
+    "54386e58-36a8-f58b-8676-a2abfc0a9741": {
+      "direction": {
+        "horizon_1": {
+          "1.0": -0.550718,
+          "3.0": -0.594613
+        },
+        "horizon_2": {
+          "1.0": -0.550718,
+          "3.0": -0.594613
+        },
+        "horizon_3": {
+          "1.0": -0.550718,
+          "3.0": -0.594613
+        },
+        "overall": {
+          "max": -0.550718,
+          "mean": -0.572666,
+          "min": -0.594613
+        }
+      },
+      "driver_name": "Energy - United States of America",
+      "importance": {
+        "horizon_1": {
+          "1.0": 0.0,
+          "3.0": 61.593912
+        },
+        "horizon_2": {
+          "1.0": 0.0,
+          "3.0": 61.593912
+        },
+        "horizon_3": {
+          "1.0": 0.0,
+          "3.0": 61.593912
+        },
+        "overall": {
+          "max": 61.593912,
+          "mean": 30.796956,
+          "min": 0.0
+        }
+      },
+      "pearson_correlation": {
+        "lag_1": -0.550718,
+        "lag_2": -0.568051,
+        "lag_3": -0.594613,
+        "overall": {
+          "max": -0.550718,
+          "mean": -0.571127,
+          "min": -0.594613
+        }
+      }
+    },
+    "569da0d9-c3f2-ed92-f9e7-237e307ccd19": {
+      "direction": {
+        "horizon_1": {
+          "1.0": -0.049017
+        },
+        "horizon_2": {
+          "1.0": -0.049017
+        },
+        "horizon_3": {
+          "1.0": -0.049017
+        },
+        "overall": {
+          "max": -0.049017,
+          "mean": -0.049017,
+          "min": -0.049017
+        }
+      },
+      "driver_name": "Commodities - World",
+      "importance": {
+        "horizon_1": {
+          "1.0": 0.0
+        },
+        "horizon_2": {
+          "1.0": 0.0
+        },
+        "horizon_3": {
+          "1.0": 0.0
+        },
+        "overall": {
+          "max": 0.0,
+          "mean": 0.0,
+          "min": 0.0
+        }
+      },
+      "pearson_correlation": {
+        "lag_1": -0.039376,
+        "lag_2": 0.073887,
+        "lag_3": 0.205317,
+        "overall": {
+          "max": 0.205317,
+          "mean": 0.079943,
+          "min": -0.039376
+        }
+      }
+    },
+    "59cdbbc4-f72a-2a72-0146-6aa740ea1659": {
+      "direction": {
+        "horizon_1": {
+          "1.0": -0.893186,
+          "6.0": -0.603362
+        },
+        "horizon_2": {
+          "1.0": -0.893186,
+          "6.0": -0.603362
+        },
+        "horizon_3": {
+          "1.0": -0.893186,
+          "6.0": -0.603362
+        },
+        "overall": {
+          "max": -0.603362,
+          "mean": -0.748274,
+          "min": -0.893186
+        }
+      },
+      "driver_name": "Transport - Sweden",
+      "importance": {
+        "horizon_1": {
+          "1.0": 0.0,
+          "6.0": 0.0
+        },
+        "horizon_2": {
+          "1.0": 0.0,
+          "6.0": 0.0
+        },
+        "horizon_3": {
+          "1.0": 0.0,
+          "6.0": 0.0
+        },
+        "overall": {
+          "max": 0.0,
+          "mean": 0.0,
+          "min": 0.0
+        }
+      },
+      "pearson_correlation": {
+        "lag_1": -0.893186,
+        "lag_2": -0.847686,
+        "lag_3": -0.788609,
+        "overall": {
+          "max": -0.788609,
+          "mean": -0.84316,
+          "min": -0.893186
+        }
+      }
+    },
+    "5c8a4d9b-1212-883d-8dd2-5608d7100d9a": {
+      "direction": {
+        "horizon_1": {
+          "3.0": -0.269566,
+          "6.0": -0.418041
+        },
+        "horizon_2": {
+          "3.0": -0.269566,
+          "6.0": -0.418041
+        },
+        "horizon_3": {
+          "3.0": -0.269566,
+          "6.0": -0.418041
+        },
+        "overall": {
+          "max": -0.269566,
+          "mean": -0.343803,
+          "min": -0.418041
+        }
+      },
+      "driver_name": "Energy - Colombia",
+      "importance": {
+        "horizon_1": {
+          "3.0": 0.0,
+          "6.0": 0.0
+        },
+        "horizon_2": {
+          "3.0": 0.0,
+          "6.0": 0.0
+        },
+        "horizon_3": {
+          "3.0": 0.0,
+          "6.0": 0.0
+        },
+        "overall": {
+          "max": 0.0,
+          "mean": 0.0,
+          "min": 0.0
+        }
+      },
+      "pearson_correlation": {
+        "lag_1": -0.06957,
+        "lag_2": -0.15561,
+        "lag_3": -0.269566,
+        "overall": {
+          "max": -0.06957,
+          "mean": -0.164915,
+          "min": -0.269566
+        }
+      }
+    },
+    "5d0b0797-0afb-a2d0-d753-f11fda828d60": {
+      "direction": {
+        "horizon_0": {
+          "0.0": 0.025098
+        },
+        "overall": {
+          "max": 0.025098,
+          "mean": 0.025098,
+          "min": 0.025098
+        }
+      },
+      "driver_name": "Market Indices - United States of America",
+      "importance": {
+        "horizon_1": {
+          "0.0": 58.219977
+        },
+        "horizon_2": {
+          "0.0": 58.219977
+        },
+        "horizon_3": {
+          "0.0": 58.219977
+        },
+        "overall": {
+          "max": 58.219977,
+          "mean": 58.219977,
+          "min": 58.219977
+        }
+      },
+      "pearson_correlation": {
+        "lag_1": -0.07482,
+        "lag_2": -0.156258,
+        "lag_3": -0.164596,
+        "overall": {
+          "max": -0.07482,
+          "mean": -0.131891,
+          "min": -0.164596
+        }
+      }
+    },
+    "5d43ebe2-4c7f-548e-b534-04797437f036": {
+      "direction": {
+        "horizon_1": {
+          "1.0": -0.691798,
+          "3.0": -0.849148,
+          "6.0": -0.89927
+        },
+        "horizon_2": {
+          "1.0": -0.691798,
+          "3.0": -0.849148,
+          "6.0": -0.89927
+        },
+        "horizon_3": {
+          "1.0": -0.691798,
+          "3.0": -0.849148,
+          "6.0": -0.89927
+        },
+        "overall": {
+          "max": -0.691798,
+          "mean": -0.813405,
+          "min": -0.89927
+        }
+      },
+      "driver_name": "Exchange Rates - World",
+      "importance": {
+        "horizon_1": {
+          "1.0": 0.0,
+          "3.0": 0.0,
+          "6.0": 80.377984
+        },
+        "horizon_2": {
+          "1.0": 0.0,
+          "3.0": 0.0,
+          "6.0": 80.377984
+        },
+        "horizon_3": {
+          "1.0": 0.0,
+          "3.0": 0.0,
+          "6.0": 80.377984
+        },
+        "overall": {
+          "max": 80.377984,
+          "mean": 26.792661,
+          "min": 0.0
+        }
+      },
+      "pearson_correlation": {
+        "lag_1": -0.691798,
+        "lag_2": -0.785757,
+        "lag_3": -0.849148,
+        "overall": {
+          "max": -0.691798,
+          "mean": -0.775568,
+          "min": -0.849148
+        }
+      }
+    },
+    "5f92a2aa-b118-ea49-8748-10db4e00a8e2": {
+      "direction": {
+        "horizon_0": {
+          "0.0": 0.001011
+        },
+        "overall": {
+          "max": 0.001011,
+          "mean": 0.001011,
+          "min": 0.001011
+        }
+      },
+      "driver_name": "Global risk - World",
+      "importance": {
+        "horizon_1": {
+          "0.0": 23.939511
+        },
+        "horizon_2": {
+          "0.0": 23.939511
+        },
+        "horizon_3": {
+          "0.0": 23.939511
+        },
+        "overall": {
+          "max": 23.939511,
+          "mean": 23.939511,
+          "min": 23.939511
+        }
+      },
+      "pearson_correlation": {
+        "lag_1": -0.006773,
+        "lag_2": 0.020055,
+        "lag_3": -0.072503,
+        "overall": {
+          "max": 0.020055,
+          "mean": -0.01974,
+          "min": -0.072503
+        }
+      }
+    },
+    "61d88267-d333-4ab8-00ae-d1737090c29c": {
+      "direction": {
+        "horizon_0": {
+          "0.0": 0.045612
+        },
+        "overall": {
+          "max": 0.045612,
+          "mean": 0.045612,
+          "min": 0.045612
+        }
+      },
+      "driver_name": "Processed food and consumables - United States of America",
+      "importance": {
+        "horizon_1": {
+          "0.0": 0.0
+        },
+        "horizon_2": {
+          "0.0": 0.0
+        },
+        "horizon_3": {
+          "0.0": 0.0
+        },
+        "overall": {
+          "max": 0.0,
+          "mean": 0.0,
+          "min": 0.0
+        }
+      },
+      "pearson_correlation": {
+        "lag_1": -0.158077,
+        "lag_2": -0.287267,
+        "lag_3": -0.392442,
+        "overall": {
+          "max": -0.158077,
+          "mean": -0.279262,
+          "min": -0.392442
+        }
+      }
+    },
+    "646df4d8-e83f-be3b-4c8d-9fda9b7b81a3": {
+      "direction": {
+        "horizon_1": {
+          "1.0": 0.87473
+        },
+        "horizon_2": {
+          "1.0": 0.87473
+        },
+        "horizon_3": {
+          "1.0": 0.87473
+        },
+        "overall": {
+          "max": 0.87473,
+          "mean": 0.87473,
+          "min": 0.87473
+        }
+      },
+      "driver_name": "Commodities - World",
+      "importance": {
+        "horizon_1": {
+          "1.0": 0.0
+        },
+        "horizon_2": {
+          "1.0": 0.0
+        },
+        "horizon_3": {
+          "1.0": 0.0
+        },
+        "overall": {
+          "max": 0.0,
+          "mean": 0.0,
+          "min": 0.0
+        }
+      },
+      "pearson_correlation": {
+        "lag_1": 0.87473,
+        "lag_2": 0.889236,
+        "lag_3": 0.889597,
+        "overall": {
+          "max": 0.889597,
+          "mean": 0.884521,
+          "min": 0.87473
+        }
+      }
+    },
+    "6cdf5c0c-6456-760e-aab2-7153f6b178b7": {
+      "direction": {
+        "horizon_1": {
+          "6.0": 0.688951
+        },
+        "horizon_2": {
+          "6.0": 0.688951
+        },
+        "horizon_3": {
+          "6.0": 0.688951
+        },
+        "overall": {
+          "max": 0.688951,
+          "mean": 0.688951,
+          "min": 0.688951
+        }
+      },
+      "driver_name": "Commodities - World",
+      "importance": {
+        "horizon_1": {
+          "6.0": 0.0
+        },
+        "horizon_2": {
+          "6.0": 0.0
+        },
+        "horizon_3": {
+          "6.0": 0.0
+        },
+        "overall": {
+          "max": 0.0,
+          "mean": 0.0,
+          "min": 0.0
+        }
+      },
+      "pearson_correlation": {
+        "lag_1": 0.736891,
+        "lag_2": 0.738767,
+        "lag_3": 0.7274,
+        "overall": {
+          "max": 0.738767,
+          "mean": 0.734353,
+          "min": 0.7274
+        }
+      }
+    },
+    "6d5676c8-65dd-0a73-d4f2-183ec7aba6d1": {
+      "direction": {
+        "horizon_0": {
+          "0.0": -0.790743
+        },
+        "horizon_1": {
+          "1.0": -0.893942,
+          "3.0": -0.898069
+        },
+        "horizon_2": {
+          "1.0": -0.893942,
+          "3.0": -0.898069
+        },
+        "horizon_3": {
+          "1.0": -0.893942,
+          "3.0": -0.898069
+        },
+        "overall": {
+          "max": -0.790743,
+          "mean": -0.860918,
+          "min": -0.898069
+        }
+      },
+      "driver_name": "Construction - Sweden",
+      "importance": {
+        "horizon_1": {
+          "0.0": 46.284626,
+          "1.0": 0.0,
+          "3.0": 97.96996
+        },
+        "horizon_2": {
+          "0.0": 46.284626,
+          "1.0": 0.0,
+          "3.0": 97.96996
+        },
+        "horizon_3": {
+          "0.0": 46.284626,
+          "1.0": 0.0,
+          "3.0": 97.96996
+        },
+        "overall": {
+          "max": 97.96996,
+          "mean": 48.084862,
+          "min": 0.0
+        }
+      },
+      "pearson_correlation": {
+        "lag_1": -0.893942,
+        "lag_2": -0.899409,
+        "lag_3": -0.898069,
+        "overall": {
+          "max": -0.893942,
+          "mean": -0.89714,
+          "min": -0.899409
+        }
+      }
+    },
+    "70aa8e0e-f674-a39d-f023-2b590d75a10d": {
+      "direction": {
+        "horizon_1": {
+          "3.0": 0.125967,
+          "6.0": 0.385781
+        },
+        "horizon_2": {
+          "3.0": 0.125967,
+          "6.0": 0.385781
+        },
+        "horizon_3": {
+          "3.0": 0.125967,
+          "6.0": 0.385781
+        },
+        "overall": {
+          "max": 0.385781,
+          "mean": 0.255874,
+          "min": 0.125967
+        }
+      },
+      "driver_name": "Energy - United States of America",
+      "importance": {
+        "horizon_1": {
+          "3.0": 70.731078,
+          "6.0": 89.567158
+        },
+        "horizon_2": {
+          "3.0": 70.731078,
+          "6.0": 89.567158
+        },
+        "horizon_3": {
+          "3.0": 70.731078,
+          "6.0": 89.567158
+        },
+        "overall": {
+          "max": 89.567158,
+          "mean": 80.149118,
+          "min": 70.731078
+        }
+      },
+      "pearson_correlation": {
+        "lag_1": -0.089376,
+        "lag_2": 0.019591,
+        "lag_3": 0.125967,
+        "overall": {
+          "max": 0.125967,
+          "mean": 0.018727,
+          "min": -0.089376
+        }
+      }
+    },
+    "732fe5a7-cfd8-9574-4556-6ba76a094c34": {
+      "direction": {
+        "horizon_1": {
+          "1.0": 0.660385
+        },
+        "horizon_2": {
+          "1.0": 0.660385
+        },
+        "horizon_3": {
+          "1.0": 0.660385
+        },
+        "overall": {
+          "max": 0.660385,
+          "mean": 0.660385,
+          "min": 0.660385
+        }
+      },
+      "driver_name": "Industry, manufacturing - Germany",
+      "importance": {
+        "horizon_1": {
+          "1.0": 0.0
+        },
+        "horizon_2": {
+          "1.0": 0.0
+        },
+        "horizon_3": {
+          "1.0": 0.0
+        },
+        "overall": {
+          "max": 0.0,
+          "mean": 0.0,
+          "min": 0.0
+        }
+      },
+      "pearson_correlation": {
+        "lag_1": 0.649172,
+        "lag_2": 0.584097,
+        "lag_3": 0.481104,
+        "overall": {
+          "max": 0.649172,
+          "mean": 0.571458,
+          "min": 0.481104
+        }
+      }
+    },
+    "749f125f-51f6-99a0-c717-c78704ccfa89": {
+      "direction": {
+        "horizon_0": {
+          "0.0": 0.34027
+        },
+        "horizon_1": {
+          "6.0": 0.772943
+        },
+        "horizon_2": {
+          "6.0": 0.772943
+        },
+        "horizon_3": {
+          "6.0": 0.772943
+        },
+        "overall": {
+          "max": 0.772943,
+          "mean": 0.556607,
+          "min": 0.34027
+        }
+      },
+      "driver_name": "Labour market - Spain",
+      "importance": {
+        "horizon_1": {
+          "0.0": 0.0,
+          "6.0": 0.0
+        },
+        "horizon_2": {
+          "0.0": 0.0,
+          "6.0": 0.0
+        },
+        "horizon_3": {
+          "0.0": 0.0,
+          "6.0": 0.0
+        },
+        "overall": {
+          "max": 0.0,
+          "mean": 0.0,
+          "min": 0.0
+        }
+      },
+      "pearson_correlation": {
+        "lag_1": 0.562855,
+        "lag_2": 0.632517,
+        "lag_3": 0.700012,
+        "overall": {
+          "max": 0.700012,
+          "mean": 0.631795,
+          "min": 0.562855
+        }
+      }
+    },
+    "75247f9f-0955-f12a-7856-1da8b9b7359d": {
+      "direction": {
+        "horizon_0": {
+          "0.0": -0.57736
+        },
+        "overall": {
+          "max": -0.57736,
+          "mean": -0.57736,
+          "min": -0.57736
+        }
+      },
+      "driver_name": "Sector Indices - Estonia",
+      "importance": {
+        "horizon_1": {
+          "0.0": 73.237844
+        },
+        "horizon_2": {
+          "0.0": 73.237844
+        },
+        "horizon_3": {
+          "0.0": 73.237844
+        },
+        "overall": {
+          "max": 73.237844,
+          "mean": 73.237844,
+          "min": 73.237844
+        }
+      },
+      "pearson_correlation": {
+        "lag_1": -0.754212,
+        "lag_2": -0.818082,
+        "lag_3": -0.866572,
+        "overall": {
+          "max": -0.754212,
+          "mean": -0.812955,
+          "min": -0.866572
+        }
+      }
+    },
+    "757d343e-7643-8dfe-bcba-d410990ff4b3": {
+      "direction": {
+        "horizon_1": {
+          "3.0": -0.208573
+        },
+        "horizon_2": {
+          "3.0": -0.208573
+        },
+        "horizon_3": {
+          "3.0": -0.208573
+        },
+        "overall": {
+          "max": -0.208573,
+          "mean": -0.208573,
+          "min": -0.208573
+        }
+      },
+      "driver_name": "Exchange Rates - World",
+      "importance": {
+        "horizon_1": {
+          "3.0": 0.0
+        },
+        "horizon_2": {
+          "3.0": 0.0
+        },
+        "horizon_3": {
+          "3.0": 0.0
+        },
+        "overall": {
+          "max": 0.0,
+          "mean": 0.0,
+          "min": 0.0
+        }
+      },
+      "pearson_correlation": {
+        "lag_1": -0.196194,
+        "lag_2": -0.203109,
+        "lag_3": -0.208573,
+        "overall": {
+          "max": -0.196194,
+          "mean": -0.202625,
+          "min": -0.208573
+        }
+      }
+    },
+    "7ad68fd9-b1b1-2b5d-a720-13c52ebe6c81": {
+      "direction": {
+        "horizon_1": {
+          "1.0": 0.646994,
+          "3.0": 0.774895
+        },
+        "horizon_2": {
+          "1.0": 0.646994,
+          "3.0": 0.774895
+        },
+        "horizon_3": {
+          "1.0": 0.646994,
+          "3.0": 0.774895
+        },
+        "overall": {
+          "max": 0.774895,
+          "mean": 0.710944,
+          "min": 0.646994
+        }
+      },
+      "driver_name": "Labour market - Europe",
+      "importance": {
+        "horizon_1": {
+          "1.0": 45.696826,
+          "3.0": 0.0
+        },
+        "horizon_2": {
+          "1.0": 45.696826,
+          "3.0": 0.0
+        },
+        "horizon_3": {
+          "1.0": 45.696826,
+          "3.0": 0.0
+        },
+        "overall": {
+          "max": 45.696826,
+          "mean": 22.848413,
+          "min": 0.0
+        }
+      },
+      "pearson_correlation": {
+        "lag_1": 0.646994,
+        "lag_2": 0.721709,
+        "lag_3": 0.774895,
+        "overall": {
+          "max": 0.774895,
+          "mean": 0.714533,
+          "min": 0.646994
+        }
+      }
+    },
+    "7c3fd68f-87ac-b8f3-76aa-bd015cbf3952": {
+      "direction": {
+        "horizon_1": {
+          "1.0": -0.721216,
+          "3.0": -0.661689
+        },
+        "horizon_2": {
+          "1.0": -0.721216,
+          "3.0": -0.661689
+        },
+        "horizon_3": {
+          "1.0": -0.721216,
+          "3.0": -0.661689
+        },
+        "overall": {
+          "max": -0.661689,
+          "mean": -0.691453,
+          "min": -0.721216
+        }
+      },
+      "driver_name": "Sector Indices - France",
+      "importance": {
+        "horizon_1": {
+          "1.0": 0.0,
+          "3.0": 0.0
+        },
+        "horizon_2": {
+          "1.0": 0.0,
+          "3.0": 0.0
+        },
+        "horizon_3": {
+          "1.0": 0.0,
+          "3.0": 0.0
+        },
+        "overall": {
+          "max": 0.0,
+          "mean": 0.0,
+          "min": 0.0
+        }
+      },
+      "pearson_correlation": {
+        "lag_1": -0.721216,
+        "lag_2": -0.699688,
+        "lag_3": -0.661689,
+        "overall": {
+          "max": -0.661689,
+          "mean": -0.694198,
+          "min": -0.721216
+        }
+      }
+    },
+    "7cb7bf5c-fb79-4694-31b6-b62c4043592f": {
+      "direction": {
+        "horizon_1": {
+          "3.0": -0.802005,
+          "6.0": -0.757655
+        },
+        "horizon_2": {
+          "3.0": -0.802005,
+          "6.0": -0.757655
+        },
+        "horizon_3": {
+          "3.0": -0.802005,
+          "6.0": -0.757655
+        },
+        "overall": {
+          "max": -0.757655,
+          "mean": -0.77983,
+          "min": -0.802005
+        }
+      },
+      "driver_name": "Labour market - Denmark",
+      "importance": {
+        "horizon_1": {
+          "3.0": 0.0,
+          "6.0": 0.0
+        },
+        "horizon_2": {
+          "3.0": 0.0,
+          "6.0": 0.0
+        },
+        "horizon_3": {
+          "3.0": 0.0,
+          "6.0": 0.0
+        },
+        "overall": {
+          "max": 0.0,
+          "mean": 0.0,
+          "min": 0.0
+        }
+      },
+      "pearson_correlation": {
+        "lag_1": -0.815621,
+        "lag_2": -0.813144,
+        "lag_3": -0.794558,
+        "overall": {
+          "max": -0.794558,
+          "mean": -0.807774,
+          "min": -0.815621
+        }
+      }
+    },
+    "7f11ee90-5ebd-148c-6769-284b49690def": {
+      "direction": {
+        "horizon_1": {
+          "6.0": -0.681277
+        },
+        "horizon_2": {
+          "6.0": -0.681277
+        },
+        "horizon_3": {
+          "6.0": -0.681277
+        },
+        "overall": {
+          "max": -0.681277,
+          "mean": -0.681277,
+          "min": -0.681277
+        }
+      },
+      "driver_name": "Chemicals - Greece",
+      "importance": {
+        "horizon_1": {
+          "6.0": 0.0
+        },
+        "horizon_2": {
+          "6.0": 0.0
+        },
+        "horizon_3": {
+          "6.0": 0.0
+        },
+        "overall": {
+          "max": 0.0,
+          "mean": 0.0,
+          "min": 0.0
+        }
+      },
+      "pearson_correlation": {
+        "lag_1": -0.415834,
+        "lag_2": -0.503516,
+        "lag_3": -0.575222,
+        "overall": {
+          "max": -0.415834,
+          "mean": -0.498191,
+          "min": -0.575222
+        }
+      }
+    },
+    "88a64467-48bc-be1f-85db-3f59468b55c3": {
+      "direction": {
+        "horizon_1": {
+          "3.0": -0.246048
+        },
+        "horizon_2": {
+          "3.0": -0.246048
+        },
+        "horizon_3": {
+          "3.0": -0.246048
+        },
+        "overall": {
+          "max": -0.246048,
+          "mean": -0.246048,
+          "min": -0.246048
+        }
+      },
+      "driver_name": "Commodities - World",
+      "importance": {
+        "horizon_1": {
+          "3.0": 0.0
+        },
+        "horizon_2": {
+          "3.0": 0.0
+        },
+        "horizon_3": {
+          "3.0": 0.0
+        },
+        "overall": {
+          "max": 0.0,
+          "mean": 0.0,
+          "min": 0.0
+        }
+      },
+      "pearson_correlation": {
+        "lag_1": -0.310596,
+        "lag_2": -0.294289,
+        "lag_3": -0.25745,
+        "overall": {
+          "max": -0.25745,
+          "mean": -0.287445,
+          "min": -0.310596
+        }
+      }
+    },
+    "8f5f4fb0-9f90-27ce-b618-3d4bb9ef08f5": {
+      "direction": {
+        "horizon_1": {
+          "1.0": -0.532713,
+          "3.0": -0.529636
+        },
+        "horizon_2": {
+          "1.0": -0.532713,
+          "3.0": -0.529636
+        },
+        "horizon_3": {
+          "1.0": -0.532713,
+          "3.0": -0.529636
+        },
+        "overall": {
+          "max": -0.529636,
+          "mean": -0.531174,
+          "min": -0.532713
+        }
+      },
+      "driver_name": "Labour market - Europe",
+      "importance": {
+        "horizon_1": {
+          "1.0": 0.0,
+          "3.0": 0.0
+        },
+        "horizon_2": {
+          "1.0": 0.0,
+          "3.0": 0.0
+        },
+        "horizon_3": {
+          "1.0": 0.0,
+          "3.0": 0.0
+        },
+        "overall": {
+          "max": 0.0,
+          "mean": 0.0,
+          "min": 0.0
+        }
+      },
+      "pearson_correlation": {
+        "lag_1": -0.532713,
+        "lag_2": -0.531541,
+        "lag_3": -0.529636,
+        "overall": {
+          "max": -0.529636,
+          "mean": -0.531297,
+          "min": -0.532713
+        }
+      }
+    },
+    "903152f4-1c85-e20a-6e91-84a4250e1bc6": {
+      "direction": {
+        "horizon_1": {
+          "1.0": -0.41968,
+          "3.0": -0.633958
+        },
+        "horizon_2": {
+          "1.0": -0.41968,
+          "3.0": -0.633958
+        },
+        "horizon_3": {
+          "1.0": -0.41968,
+          "3.0": -0.633958
+        },
+        "overall": {
+          "max": -0.41968,
+          "mean": -0.526819,
+          "min": -0.633958
+        }
+      },
+      "driver_name": "Minerals - United States of America",
+      "importance": {
+        "horizon_1": {
+          "1.0": 26.520688,
+          "3.0": 0.0
+        },
+        "horizon_2": {
+          "1.0": 26.520688,
+          "3.0": 0.0
+        },
+        "horizon_3": {
+          "1.0": 26.520688,
+          "3.0": 0.0
+        },
+        "overall": {
+          "max": 26.520688,
+          "mean": 13.260344,
+          "min": 0.0
+        }
+      },
+      "pearson_correlation": {
+        "lag_1": -0.41968,
+        "lag_2": -0.538427,
+        "lag_3": -0.633958,
+        "overall": {
+          "max": -0.41968,
+          "mean": -0.530688,
+          "min": -0.633958
+        }
+      }
+    },
+    "9b3b0f49-7567-90bf-f52c-257772f9a662": {
+      "direction": {
+        "horizon_1": {
+          "3.0": -0.161485
+        },
+        "horizon_2": {
+          "3.0": -0.161485
+        },
+        "horizon_3": {
+          "3.0": -0.161485
+        },
+        "overall": {
+          "max": -0.161485,
+          "mean": -0.161485,
+          "min": -0.161485
+        }
+      },
+      "driver_name": "Population - Democratic Republic of the Congo",
+      "importance": {
+        "horizon_1": {
+          "3.0": 37.33237
+        },
+        "horizon_2": {
+          "3.0": 37.33237
+        },
+        "horizon_3": {
+          "3.0": 37.33237
+        },
+        "overall": {
+          "max": 37.33237,
+          "mean": 37.33237,
+          "min": 37.33237
+        }
+      },
+      "pearson_correlation": {
+        "lag_1": -0.127528,
+        "lag_2": -0.140323,
+        "lag_3": -0.161485,
+        "overall": {
+          "max": -0.127528,
+          "mean": -0.143112,
+          "min": -0.161485
+        }
+      }
+    },
+    "9cdfa4f5-37c7-f602-a3ab-d9367069daa8": {
+      "direction": {
+        "horizon_1": {
+          "3.0": 0.537395
+        },
+        "horizon_2": {
+          "3.0": 0.537395
+        },
+        "horizon_3": {
+          "3.0": 0.537395
+        },
+        "overall": {
+          "max": 0.537395,
+          "mean": 0.537395,
+          "min": 0.537395
+        }
+      },
+      "driver_name": "Commodities - World",
+      "importance": {
+        "horizon_1": {
+          "3.0": 0.0
+        },
+        "horizon_2": {
+          "3.0": 0.0
+        },
+        "horizon_3": {
+          "3.0": 0.0
+        },
+        "overall": {
+          "max": 0.0,
+          "mean": 0.0,
+          "min": 0.0
+        }
+      },
+      "pearson_correlation": {
+        "lag_1": 0.641925,
+        "lag_2": 0.581074,
+        "lag_3": 0.521065,
+        "overall": {
+          "max": 0.641925,
+          "mean": 0.581355,
+          "min": 0.521065
+        }
+      }
+    },
+    "9e1b421b-f473-20eb-fa90-253a62bfe833": {
+      "direction": {
+        "horizon_0": {
+          "0.0": -0.251142
+        },
+        "overall": {
+          "max": -0.251142,
+          "mean": -0.251142,
+          "min": -0.251142
+        }
+      },
+      "driver_name": "Population - Jordan",
+      "importance": {
+        "horizon_1": {
+          "0.0": 0.0
+        },
+        "horizon_2": {
+          "0.0": 0.0
+        },
+        "horizon_3": {
+          "0.0": 0.0
+        },
+        "overall": {
+          "max": 0.0,
+          "mean": 0.0,
+          "min": 0.0
+        }
+      },
+      "pearson_correlation": {
+        "lag_1": -0.336944,
+        "lag_2": -0.376003,
+        "lag_3": -0.39785,
+        "overall": {
+          "max": -0.336944,
+          "mean": -0.370266,
+          "min": -0.39785
+        }
+      }
+    },
+    "a0a241c2-d795-58e1-783a-e259bcf0ba9c": {
+      "direction": {
+        "horizon_1": {
+          "1.0": -0.549007,
+          "6.0": -0.823401
+        },
+        "horizon_2": {
+          "1.0": -0.549007,
+          "6.0": -0.823401
+        },
+        "horizon_3": {
+          "1.0": -0.549007,
+          "6.0": -0.823401
+        },
+        "overall": {
+          "max": -0.549007,
+          "mean": -0.686204,
+          "min": -0.823401
+        }
+      },
+      "driver_name": "Population - Somalia",
+      "importance": {
+        "horizon_1": {
+          "1.0": 0.0,
+          "6.0": 0.0
+        },
+        "horizon_2": {
+          "1.0": 0.0,
+          "6.0": 0.0
+        },
+        "horizon_3": {
+          "1.0": 0.0,
+          "6.0": 0.0
+        },
+        "overall": {
+          "max": 0.0,
+          "mean": 0.0,
+          "min": 0.0
+        }
+      },
+      "pearson_correlation": {
+        "lag_1": -0.549007,
+        "lag_2": -0.635359,
+        "lag_3": -0.705297,
+        "overall": {
+          "max": -0.549007,
+          "mean": -0.629888,
+          "min": -0.705297
+        }
+      }
+    },
+    "a213014e-53e6-a881-7bb2-718fae1436c6": {
+      "direction": {
+        "horizon_1": {
+          "6.0": -0.252017
+        },
+        "horizon_2": {
+          "6.0": -0.252017
+        },
+        "horizon_3": {
+          "6.0": -0.252017
+        },
+        "overall": {
+          "max": -0.252017,
+          "mean": -0.252017,
+          "min": -0.252017
+        }
+      },
+      "driver_name": "Global risk - World",
+      "importance": {
+        "horizon_1": {
+          "6.0": 0.0
+        },
+        "horizon_2": {
+          "6.0": 0.0
+        },
+        "horizon_3": {
+          "6.0": 0.0
+        },
+        "overall": {
+          "max": 0.0,
+          "mean": 0.0,
+          "min": 0.0
+        }
+      },
+      "pearson_correlation": {
+        "lag_1": 0.022984,
+        "lag_2": 0.028805,
+        "lag_3": -0.09245,
+        "overall": {
+          "max": 0.028805,
+          "mean": -0.013554,
+          "min": -0.09245
+        }
+      }
+    },
+    "a4664aaa-eae1-2396-00f6-167287302b71": {
+      "direction": {
+        "horizon_1": {
+          "6.0": 0.134743
+        },
+        "horizon_2": {
+          "6.0": 0.134743
+        },
+        "horizon_3": {
+          "6.0": 0.134743
+        },
+        "overall": {
+          "max": 0.134743,
+          "mean": 0.134743,
+          "min": 0.134743
+        }
+      },
+      "driver_name": "Global risk - Russian Federation",
+      "importance": {
+        "horizon_1": {
+          "6.0": 74.793191
+        },
+        "horizon_2": {
+          "6.0": 74.793191
+        },
+        "horizon_3": {
+          "6.0": 74.793191
+        },
+        "overall": {
+          "max": 74.793191,
+          "mean": 74.793191,
+          "min": 74.793191
+        }
+      },
+      "pearson_correlation": {
+        "lag_1": 0.564247,
+        "lag_2": 0.466163,
+        "lag_3": 0.366646,
+        "overall": {
+          "max": 0.564247,
+          "mean": 0.465685,
+          "min": 0.366646
+        }
+      }
+    },
+    "ab264f23-0737-21a8-b8de-a2f806fba7a5": {
+      "direction": {
+        "horizon_0": {
+          "0.0": -0.60953
+        },
+        "overall": {
+          "max": -0.60953,
+          "mean": -0.60953,
+          "min": -0.60953
+        }
+      },
+      "driver_name": "Population - Iran",
+      "importance": {
+        "horizon_1": {
+          "0.0": 82.466583
+        },
+        "horizon_2": {
+          "0.0": 82.466583
+        },
+        "horizon_3": {
+          "0.0": 82.466583
+        },
+        "overall": {
+          "max": 82.466583,
+          "mean": 82.466583,
+          "min": 82.466583
+        }
+      },
+      "pearson_correlation": {
+        "lag_1": -0.767414,
+        "lag_2": -0.810842,
+        "lag_3": -0.847888,
+        "overall": {
+          "max": -0.767414,
+          "mean": -0.808715,
+          "min": -0.847888
+        }
+      }
+    },
+    "ad68c777-7592-cc36-b832-e3faccce81dd": {
+      "direction": {
+        "horizon_0": {
+          "0.0": -0.683334
+        },
+        "horizon_1": {
+          "6.0": -0.924927
+        },
+        "horizon_2": {
+          "6.0": -0.924927
+        },
+        "horizon_3": {
+          "6.0": -0.924927
+        },
+        "overall": {
+          "max": -0.683334,
+          "mean": -0.804131,
+          "min": -0.924927
+        }
+      },
+      "driver_name": "Exchange Rates - World",
+      "importance": {
+        "horizon_1": {
+          "0.0": 88.088021,
+          "6.0": 0.0
+        },
+        "horizon_2": {
+          "0.0": 88.088021,
+          "6.0": 0.0
+        },
+        "horizon_3": {
+          "0.0": 88.088021,
+          "6.0": 0.0
+        },
+        "overall": {
+          "max": 88.088021,
+          "mean": 44.04401,
+          "min": 0.0
+        }
+      },
+      "pearson_correlation": {
+        "lag_1": -0.851457,
+        "lag_2": -0.89891,
+        "lag_3": -0.923665,
+        "overall": {
+          "max": -0.851457,
+          "mean": -0.891344,
+          "min": -0.923665
+        }
+      }
+    },
+    "b72c9f3b-5523-e336-cd46-d04284eebad7": {
+      "direction": {
+        "horizon_0": {
+          "0.0": 0.3765
+        },
+        "horizon_1": {
+          "6.0": -0.102732
+        },
+        "horizon_2": {
+          "6.0": -0.102732
+        },
+        "horizon_3": {
+          "6.0": -0.102732
+        },
+        "overall": {
+          "max": 0.3765,
+          "mean": 0.136884,
+          "min": -0.102732
+        }
+      },
+      "driver_name": "Processed food and consumables - United States of America",
+      "importance": {
+        "horizon_1": {
+          "0.0": 88.119252,
+          "6.0": 0.0
+        },
+        "horizon_2": {
+          "0.0": 88.119252,
+          "6.0": 0.0
+        },
+        "horizon_3": {
+          "0.0": 88.119252,
+          "6.0": 0.0
+        },
+        "overall": {
+          "max": 88.119252,
+          "mean": 44.059626,
+          "min": 0.0
+        }
+      },
+      "pearson_correlation": {
+        "lag_1": 0.286849,
+        "lag_2": 0.200863,
+        "lag_3": 0.116129,
+        "overall": {
+          "max": 0.286849,
+          "mean": 0.20128,
+          "min": 0.116129
+        }
+      }
+    },
+    "b8667447-8be8-f2ab-6138-4fed634a5024": {
+      "direction": {
+        "horizon_1": {
+          "1.0": -0.210383,
+          "6.0": -0.388625
+        },
+        "horizon_2": {
+          "1.0": -0.210383,
+          "6.0": -0.388625
+        },
+        "horizon_3": {
+          "1.0": -0.210383,
+          "6.0": -0.388625
+        },
+        "overall": {
+          "max": -0.210383,
+          "mean": -0.299504,
+          "min": -0.388625
+        }
+      },
+      "driver_name": "Global risk - Saudi Arabia",
+      "importance": {
+        "horizon_1": {
+          "1.0": 78.051131,
+          "6.0": 0.0
+        },
+        "horizon_2": {
+          "1.0": 78.051131,
+          "6.0": 0.0
+        },
+        "horizon_3": {
+          "1.0": 78.051131,
+          "6.0": 0.0
+        },
+        "overall": {
+          "max": 78.051131,
+          "mean": 39.025565,
+          "min": 0.0
+        }
+      },
+      "pearson_correlation": {
+        "lag_1": -0.210383,
+        "lag_2": -0.19163,
+        "lag_3": -0.216957,
+        "overall": {
+          "max": -0.19163,
+          "mean": -0.206323,
+          "min": -0.216957
+        }
+      }
+    },
+    "b8e61d84-4fe8-65c1-8632-73299c97df5c": {
+      "direction": {
+        "horizon_0": {
+          "0.0": 0.07255
+        },
+        "horizon_1": {
+          "1.0": 0.0935
+        },
+        "horizon_2": {
+          "1.0": 0.0935
+        },
+        "horizon_3": {
+          "1.0": 0.0935
+        },
+        "overall": {
+          "max": 0.0935,
+          "mean": 0.083025,
+          "min": 0.07255
+        }
+      },
+      "driver_name": "Global risk - World",
+      "importance": {
+        "horizon_1": {
+          "0.0": 0.0,
+          "1.0": 0.0
+        },
+        "horizon_2": {
+          "0.0": 0.0,
+          "1.0": 0.0
+        },
+        "horizon_3": {
+          "0.0": 0.0,
+          "1.0": 0.0
+        },
+        "overall": {
+          "max": 0.0,
+          "mean": 0.0,
+          "min": 0.0
+        }
+      },
+      "pearson_correlation": {
+        "lag_1": 0.0935,
+        "lag_2": 0.124079,
+        "lag_3": 0.002306,
+        "overall": {
+          "max": 0.124079,
+          "mean": 0.073295,
+          "min": 0.002306
+        }
+      }
+    },
+    "bcd45f1d-2c02-010f-1f91-34a590d9410f": {
+      "direction": {
+        "horizon_1": {
+          "6.0": -0.762383
+        },
+        "horizon_2": {
+          "6.0": -0.762383
+        },
+        "horizon_3": {
+          "6.0": -0.762383
+        },
+        "overall": {
+          "max": -0.762383,
+          "mean": -0.762383,
+          "min": -0.762383
+        }
+      },
+      "driver_name": "Labour market - United States of America",
+      "importance": {
+        "horizon_1": {
+          "6.0": 82.152439
+        },
+        "horizon_2": {
+          "6.0": 82.152439
+        },
+        "horizon_3": {
+          "6.0": 82.152439
+        },
+        "overall": {
+          "max": 82.152439,
+          "mean": 82.152439,
+          "min": 82.152439
+        }
+      },
+      "pearson_correlation": {
+        "lag_1": -0.639226,
+        "lag_2": -0.686658,
+        "lag_3": -0.704426,
+        "overall": {
+          "max": -0.639226,
+          "mean": -0.67677,
+          "min": -0.704426
+        }
+      }
+    },
+    "c013a7a3-a807-10a5-ee86-38d560ad5a6e": {
+      "direction": {
+        "horizon_1": {
+          "6.0": 0.703538
+        },
+        "horizon_2": {
+          "6.0": 0.703538
+        },
+        "horizon_3": {
+          "6.0": 0.703538
+        },
+        "overall": {
+          "max": 0.703538,
+          "mean": 0.703538,
+          "min": 0.703538
+        }
+      },
+      "driver_name": "Processed food and consumables - Bulgaria",
+      "importance": {
+        "horizon_1": {
+          "6.0": 0.0
+        },
+        "horizon_2": {
+          "6.0": 0.0
+        },
+        "horizon_3": {
+          "6.0": 0.0
+        },
+        "overall": {
+          "max": 0.0,
+          "mean": 0.0,
+          "min": 0.0
+        }
+      },
+      "pearson_correlation": {
+        "lag_1": 0.625816,
+        "lag_2": 0.678949,
+        "lag_3": 0.654953,
+        "overall": {
+          "max": 0.678949,
+          "mean": 0.653239,
+          "min": 0.625816
+        }
+      }
+    },
+    "c410e843-308d-1954-4666-fc967975082e": {
+      "direction": {
+        "horizon_0": {
+          "0.0": 0.090503
+        },
+        "overall": {
+          "max": 0.090503,
+          "mean": 0.090503,
+          "min": 0.090503
+        }
+      },
+      "driver_name": "Population - Sri Lanka",
+      "importance": {
+        "horizon_1": {
+          "0.0": 0.0
+        },
+        "horizon_2": {
+          "0.0": 0.0
+        },
+        "horizon_3": {
+          "0.0": 0.0
+        },
+        "overall": {
+          "max": 0.0,
+          "mean": 0.0,
+          "min": 0.0
+        }
+      },
+      "pearson_correlation": {
+        "lag_1": 0.179171,
+        "lag_2": 0.162808,
+        "lag_3": 0.134966,
+        "overall": {
+          "max": 0.179171,
+          "mean": 0.158982,
+          "min": 0.134966
+        }
+      }
+    },
+    "cde3d616-e03c-9b47-87ba-2cbba84d0894": {
+      "direction": {
+        "horizon_0": {
+          "0.0": -0.529111
+        },
+        "overall": {
+          "max": -0.529111,
+          "mean": -0.529111,
+          "min": -0.529111
+        }
+      },
+      "driver_name": "Global risk - Israel",
+      "importance": {
+        "horizon_1": {
+          "0.0": 70.679538
+        },
+        "horizon_2": {
+          "0.0": 70.679538
+        },
+        "horizon_3": {
+          "0.0": 70.679538
+        },
+        "overall": {
+          "max": 70.679538,
+          "mean": 70.679538,
+          "min": 70.679538
+        }
+      },
+      "pearson_correlation": {
+        "lag_1": -0.552555,
+        "lag_2": -0.55076,
+        "lag_3": -0.557857,
+        "overall": {
+          "max": -0.55076,
+          "mean": -0.553724,
+          "min": -0.557857
+        }
+      }
+    },
+    "d0d23104-ab64-442a-ba63-4a0d312eb33b": {
+      "direction": {
+        "horizon_0": {
+          "0.0": -0.353996
+        },
+        "overall": {
+          "max": -0.353996,
+          "mean": -0.353996,
+          "min": -0.353996
+        }
+      },
+      "driver_name": "Exchange Rates - World",
+      "importance": {
+        "horizon_1": {
+          "0.0": 16.844171
+        },
+        "horizon_2": {
+          "0.0": 16.844171
+        },
+        "horizon_3": {
+          "0.0": 16.844171
+        },
+        "overall": {
+          "max": 16.844171,
+          "mean": 16.844171,
+          "min": 16.844171
+        }
+      },
+      "pearson_correlation": {
+        "lag_1": -0.181898,
+        "lag_2": -0.052632,
+        "lag_3": 0.058786,
+        "overall": {
+          "max": 0.058786,
+          "mean": -0.058581,
+          "min": -0.181898
+        }
+      }
+    },
+    "d10f1478-9311-47a9-da85-5fd42f954b12": {
+      "direction": {
+        "horizon_1": {
+          "6.0": 0.854004
+        },
+        "horizon_2": {
+          "6.0": 0.854004
+        },
+        "horizon_3": {
+          "6.0": 0.854004
+        },
+        "overall": {
+          "max": 0.854004,
+          "mean": 0.854004,
+          "min": 0.854004
+        }
+      },
+      "driver_name": "Exchange Rates - World",
+      "importance": {
+        "horizon_1": {
+          "6.0": 78.636384
+        },
+        "horizon_2": {
+          "6.0": 78.636384
+        },
+        "horizon_3": {
+          "6.0": 78.636384
+        },
+        "overall": {
+          "max": 78.636384,
+          "mean": 78.636384,
+          "min": 78.636384
+        }
+      },
+      "pearson_correlation": {
+        "lag_1": 0.511564,
+        "lag_2": 0.630468,
+        "lag_3": 0.736581,
+        "overall": {
+          "max": 0.736581,
+          "mean": 0.626204,
+          "min": 0.511564
+        }
+      }
+    },
+    "d2ace9f4-d4e3-81f7-c643-37490d380432": {
+      "direction": {
+        "horizon_1": {
+          "3.0": -0.848478
+        },
+        "horizon_2": {
+          "3.0": -0.848478
+        },
+        "horizon_3": {
+          "3.0": -0.848478
+        },
+        "overall": {
+          "max": -0.848478,
+          "mean": -0.848478,
+          "min": -0.848478
+        }
+      },
+      "driver_name": "Labour market - Europe",
+      "importance": {
+        "horizon_1": {
+          "3.0": 0.0
+        },
+        "horizon_2": {
+          "3.0": 0.0
+        },
+        "horizon_3": {
+          "3.0": 0.0
+        },
+        "overall": {
+          "max": 0.0,
+          "mean": 0.0,
+          "min": 0.0
+        }
+      },
+      "pearson_correlation": {
+        "lag_1": -0.829008,
+        "lag_2": -0.844998,
+        "lag_3": -0.84261,
+        "overall": {
+          "max": -0.829008,
+          "mean": -0.838872,
+          "min": -0.844998
+        }
+      }
+    },
+    "dd24c14b-10b2-9d6c-1085-3399652291ef": {
+      "direction": {
+        "horizon_1": {
+          "6.0": -0.79804
+        },
+        "horizon_2": {
+          "6.0": -0.79804
+        },
+        "horizon_3": {
+          "6.0": -0.79804
+        },
+        "overall": {
+          "max": -0.79804,
+          "mean": -0.79804,
+          "min": -0.79804
+        }
+      },
+      "driver_name": "Labour market - Europe",
+      "importance": {
+        "horizon_1": {
+          "6.0": 0.0
+        },
+        "horizon_2": {
+          "6.0": 0.0
+        },
+        "horizon_3": {
+          "6.0": 0.0
+        },
+        "overall": {
+          "max": 0.0,
+          "mean": 0.0,
+          "min": 0.0
+        }
+      },
+      "pearson_correlation": {
+        "lag_1": -0.869022,
+        "lag_2": -0.874384,
+        "lag_3": -0.862975,
+        "overall": {
+          "max": -0.862975,
+          "mean": -0.868794,
+          "min": -0.874384
+        }
+      }
+    },
+    "df7c264e-7725-9b0e-f659-c623053c28b2": {
+      "direction": {
+        "horizon_1": {
+          "1.0": 0.038824
+        },
+        "horizon_2": {
+          "1.0": 0.038824
+        },
+        "horizon_3": {
+          "1.0": 0.038824
+        },
+        "overall": {
+          "max": 0.038824,
+          "mean": 0.038824,
+          "min": 0.038824
+        }
+      },
+      "driver_name": "Global risk - World",
+      "importance": {
+        "horizon_1": {
+          "1.0": 97.718719
+        },
+        "horizon_2": {
+          "1.0": 97.718719
+        },
+        "horizon_3": {
+          "1.0": 97.718719
+        },
+        "overall": {
+          "max": 97.718719,
+          "mean": 97.718719,
+          "min": 97.718719
+        }
+      },
+      "pearson_correlation": {
+        "lag_1": 0.038824,
+        "lag_2": 0.029975,
+        "lag_3": -0.050646,
+        "overall": {
+          "max": 0.038824,
+          "mean": 0.006051,
+          "min": -0.050646
+        }
+      }
+    },
+    "dfa45961-0fe2-2da4-0a9e-656ec0b38f68": {
+      "direction": {
+        "horizon_1": {
+          "3.0": -0.457174
+        },
+        "horizon_2": {
+          "3.0": -0.457174
+        },
+        "horizon_3": {
+          "3.0": -0.457174
+        },
+        "overall": {
+          "max": -0.457174,
+          "mean": -0.457174,
+          "min": -0.457174
+        }
+      },
+      "driver_name": "Commodities - World",
+      "importance": {
+        "horizon_1": {
+          "3.0": 0.0
+        },
+        "horizon_2": {
+          "3.0": 0.0
+        },
+        "horizon_3": {
+          "3.0": 0.0
+        },
+        "overall": {
+          "max": 0.0,
+          "mean": 0.0,
+          "min": 0.0
+        }
+      },
+      "pearson_correlation": {
+        "lag_1": -0.481501,
+        "lag_2": -0.463565,
+        "lag_3": -0.457174,
+        "overall": {
+          "max": -0.457174,
+          "mean": -0.467413,
+          "min": -0.481501
+        }
+      }
+    },
+    "e7cae554-6a77-6861-9f31-b203b42489f7": {
+      "direction": {
+        "horizon_1": {
+          "3.0": 0.003978
+        },
+        "horizon_2": {
+          "3.0": 0.003978
+        },
+        "horizon_3": {
+          "3.0": 0.003978
+        },
+        "overall": {
+          "max": 0.003978,
+          "mean": 0.003978,
+          "min": 0.003978
+        }
+      },
+      "driver_name": "Global risk - Indonesia",
+      "importance": {
+        "horizon_1": {
+          "3.0": 29.97384
+        },
+        "horizon_2": {
+          "3.0": 29.97384
+        },
+        "horizon_3": {
+          "3.0": 29.97384
+        },
+        "overall": {
+          "max": 29.97384,
+          "mean": 29.97384,
+          "min": 29.97384
+        }
+      },
+      "pearson_correlation": {
+        "lag_1": 0.073235,
+        "lag_2": 0.016554,
+        "lag_3": 0.003978,
+        "overall": {
+          "max": 0.073235,
+          "mean": 0.031256,
+          "min": 0.003978
+        }
+      }
+    },
+    "ead6d488-7bdb-935b-70cb-3400d4be151b": {
+      "direction": {
+        "horizon_1": {
+          "6.0": 0.672128
+        },
+        "horizon_2": {
+          "6.0": 0.672128
+        },
+        "horizon_3": {
+          "6.0": 0.672128
+        },
+        "overall": {
+          "max": 0.672128,
+          "mean": 0.672128,
+          "min": 0.672128
+        }
+      },
+      "driver_name": "Commodities - World",
+      "importance": {
+        "horizon_1": {
+          "6.0": 0.0
+        },
+        "horizon_2": {
+          "6.0": 0.0
+        },
+        "horizon_3": {
+          "6.0": 0.0
+        },
+        "overall": {
+          "max": 0.0,
+          "mean": 0.0,
+          "min": 0.0
+        }
+      },
+      "pearson_correlation": {
+        "lag_1": 0.887978,
+        "lag_2": 0.857057,
+        "lag_3": 0.804749,
+        "overall": {
+          "max": 0.887978,
+          "mean": 0.849928,
+          "min": 0.804749
+        }
+      }
+    },
+    "ecb4ed16-fba6-70de-faeb-035a233726ff": {
+      "direction": {
+        "horizon_1": {
+          "3.0": 0.647673,
+          "6.0": 0.649538
+        },
+        "horizon_2": {
+          "3.0": 0.647673,
+          "6.0": 0.649538
+        },
+        "horizon_3": {
+          "3.0": 0.647673,
+          "6.0": 0.649538
+        },
+        "overall": {
+          "max": 0.649538,
+          "mean": 0.648605,
+          "min": 0.647673
+        }
+      },
+      "driver_name": "Labour market - Japan",
+      "importance": {
+        "horizon_1": {
+          "3.0": 100.0,
+          "6.0": 0.0
+        },
+        "horizon_2": {
+          "3.0": 100.0,
+          "6.0": 0.0
+        },
+        "horizon_3": {
+          "3.0": 100.0,
+          "6.0": 0.0
+        },
+        "overall": {
+          "max": 100.0,
+          "mean": 50.0,
+          "min": 0.0
+        }
+      },
+      "pearson_correlation": {
+        "lag_1": 0.659567,
+        "lag_2": 0.654052,
+        "lag_3": 0.647673,
+        "overall": {
+          "max": 0.659567,
+          "mean": 0.653764,
+          "min": 0.647673
+        }
+      }
+    },
+    "f0b9aa92-cba1-3b06-52f7-d85d55869a85": {
+      "direction": {
+        "horizon_1": {
+          "6.0": 0.647672
+        },
+        "horizon_2": {
+          "6.0": 0.647672
+        },
+        "horizon_3": {
+          "6.0": 0.647672
+        },
+        "overall": {
+          "max": 0.647672,
+          "mean": 0.647672,
+          "min": 0.647672
+        }
+      },
+      "driver_name": "Commodities - World",
+      "importance": {
+        "horizon_1": {
+          "6.0": 0.0
+        },
+        "horizon_2": {
+          "6.0": 0.0
+        },
+        "horizon_3": {
+          "6.0": 0.0
+        },
+        "overall": {
+          "max": 0.0,
+          "mean": 0.0,
+          "min": 0.0
+        }
+      },
+      "pearson_correlation": {
+        "lag_1": 0.606202,
+        "lag_2": 0.651685,
+        "lag_3": 0.675596,
+        "overall": {
+          "max": 0.675596,
+          "mean": 0.644494,
+          "min": 0.606202
+        }
+      }
+    },
+    "f18ea0ca-a477-ca0a-8eee-9bfc2363768d": {
+      "direction": {
+        "horizon_1": {
+          "6.0": -0.474906
+        },
+        "horizon_2": {
+          "6.0": -0.474906
+        },
+        "horizon_3": {
+          "6.0": -0.474906
+        },
+        "overall": {
+          "max": -0.474906,
+          "mean": -0.474906,
+          "min": -0.474906
+        }
+      },
+      "driver_name": "Population - Democratic Republic of the Congo",
+      "importance": {
+        "horizon_1": {
+          "6.0": 79.564326
+        },
+        "horizon_2": {
+          "6.0": 79.564326
+        },
+        "horizon_3": {
+          "6.0": 79.564326
+        },
+        "overall": {
+          "max": 79.564326,
+          "mean": 79.564326,
+          "min": 79.564326
+        }
+      },
+      "pearson_correlation": {
+        "lag_1": -0.420131,
+        "lag_2": -0.384465,
+        "lag_3": -0.425725,
+        "overall": {
+          "max": -0.384465,
+          "mean": -0.410107,
+          "min": -0.425725
+        }
+      }
+    },
+    "f2135611-3093-5c09-c35e-2d83b92fa169": {
+      "direction": {
+        "horizon_0": {
+          "0.0": 0.787471
+        },
+        "overall": {
+          "max": 0.787471,
+          "mean": 0.787471,
+          "min": 0.787471
+        }
+      },
+      "driver_name": "Education, research and culture - Norway",
+      "importance": {
+        "horizon_1": {
+          "0.0": 0.0
+        },
+        "horizon_2": {
+          "0.0": 0.0
+        },
+        "horizon_3": {
+          "0.0": 0.0
+        },
+        "overall": {
+          "max": 0.0,
+          "mean": 0.0,
+          "min": 0.0
+        }
+      },
+      "pearson_correlation": {
+        "lag_1": 0.861341,
+        "lag_2": 0.852985,
+        "lag_3": 0.821078,
+        "overall": {
+          "max": 0.861341,
+          "mean": 0.845135,
+          "min": 0.821078
+        }
+      }
+    },
+    "f289801b-a708-f3e5-c2f7-48fd32b5da27": {
+      "direction": {
+        "horizon_1": {
+          "6.0": 0.585314
+        },
+        "horizon_2": {
+          "6.0": 0.585314
+        },
+        "horizon_3": {
+          "6.0": 0.585314
+        },
+        "overall": {
+          "max": 0.585314,
+          "mean": 0.585314,
+          "min": 0.585314
+        }
+      },
+      "driver_name": "Population - Tunisia",
+      "importance": {
+        "horizon_1": {
+          "6.0": 74.270927
+        },
+        "horizon_2": {
+          "6.0": 74.270927
+        },
+        "horizon_3": {
+          "6.0": 74.270927
+        },
+        "overall": {
+          "max": 74.270927,
+          "mean": 74.270927,
+          "min": 74.270927
+        }
+      },
+      "pearson_correlation": {
+        "lag_1": 0.705894,
+        "lag_2": 0.729029,
+        "lag_3": 0.702517,
+        "overall": {
+          "max": 0.729029,
+          "mean": 0.71248,
+          "min": 0.702517
+        }
+      }
+    },
+    "f2fbed34-428b-cca9-25fb-7cf682473928": {
+      "direction": {
+        "horizon_0": {
+          "0.0": -0.12535
+        },
+        "horizon_1": {
+          "3.0": -0.112649
+        },
+        "horizon_2": {
+          "3.0": -0.112649
+        },
+        "horizon_3": {
+          "3.0": -0.112649
+        },
+        "overall": {
+          "max": -0.112649,
+          "mean": -0.121116,
+          "min": -0.12535
+        }
+      },
+      "driver_name": "Global risk - India, excluding Sikkim",
+      "importance": {
+        "horizon_1": {
+          "0.0": 73.162211,
+          "3.0": 0.0
+        },
+        "horizon_2": {
+          "0.0": 73.162211,
+          "3.0": 0.0
+        },
+        "horizon_3": {
+          "0.0": 73.162211,
+          "3.0": 0.0
+        },
+        "overall": {
+          "max": 73.162211,
+          "mean": 40.847275,
+          "min": 0.0
+        }
+      },
+      "pearson_correlation": {
+        "lag_1": -0.126249,
+        "lag_2": -0.056694,
+        "lag_3": -0.112649,
+        "overall": {
+          "max": -0.056694,
+          "mean": -0.098531,
+          "min": -0.126249
+        }
+      }
+    },
+    "f49ac4ea-f3b7-de88-52b5-4f21bc84f553": {
+      "direction": {
+        "horizon_1": {
+          "3.0": -0.216675
+        },
+        "horizon_2": {
+          "3.0": -0.216675
+        },
+        "horizon_3": {
+          "3.0": -0.216675
+        },
+        "overall": {
+          "max": -0.216675,
+          "mean": -0.216675,
+          "min": -0.216675
+        }
+      },
+      "driver_name": "Construction - Slovenia",
+      "importance": {
+        "horizon_1": {
+          "3.0": 0.0
+        },
+        "horizon_2": {
+          "3.0": 0.0
+        },
+        "horizon_3": {
+          "3.0": 0.0
+        },
+        "overall": {
+          "max": 0.0,
+          "mean": 0.0,
+          "min": 0.0
+        }
+      },
+      "pearson_correlation": {
+        "lag_1": -0.139172,
+        "lag_2": -0.167118,
+        "lag_3": -0.216675,
+        "overall": {
+          "max": -0.139172,
+          "mean": -0.174322,
+          "min": -0.216675
+        }
+      }
+    },
+    "f8ee6694-d903-64cf-e06b-8530effa4131": {
+      "direction": {
+        "horizon_1": {
+          "1.0": -0.846358,
+          "3.0": -0.866482
+        },
+        "horizon_2": {
+          "1.0": -0.846358,
+          "3.0": -0.866482
+        },
+        "horizon_3": {
+          "1.0": -0.846358,
+          "3.0": -0.866482
+        },
+        "overall": {
+          "max": -0.846358,
+          "mean": -0.85642,
+          "min": -0.866482
+        }
+      },
+      "driver_name": "Labour market - Europe",
+      "importance": {
+        "horizon_1": {
+          "1.0": 0.0,
+          "3.0": 0.0
+        },
+        "horizon_2": {
+          "1.0": 0.0,
+          "3.0": 0.0
+        },
+        "horizon_3": {
+          "1.0": 0.0,
+          "3.0": 0.0
+        },
+        "overall": {
+          "max": 0.0,
+          "mean": 0.0,
+          "min": 0.0
+        }
+      },
+      "pearson_correlation": {
+        "lag_1": -0.842058,
+        "lag_2": -0.867365,
+        "lag_3": -0.862326,
+        "overall": {
+          "max": -0.842058,
+          "mean": -0.85725,
+          "min": -0.867365
+        }
+      }
+    },
+    "f9436f3c-5eec-b1ec-fc82-e731e1965a2a": {
+      "direction": {
+        "horizon_1": {
+          "3.0": 0.06931,
+          "6.0": -0.003563
+        },
+        "horizon_2": {
+          "3.0": 0.06931,
+          "6.0": -0.003563
+        },
+        "horizon_3": {
+          "3.0": 0.06931,
+          "6.0": -0.003563
+        },
+        "overall": {
+          "max": 0.06931,
+          "mean": 0.032873,
+          "min": -0.003563
+        }
+      },
+      "driver_name": "Global risk - France",
+      "importance": {
+        "horizon_1": {
+          "3.0": 0.0,
+          "6.0": 0.0
+        },
+        "horizon_2": {
+          "3.0": 0.0,
+          "6.0": 0.0
+        },
+        "horizon_3": {
+          "3.0": 0.0,
+          "6.0": 0.0
+        },
+        "overall": {
+          "max": 0.0,
+          "mean": 0.0,
+          "min": 0.0
+        }
+      },
+      "pearson_correlation": {
+        "lag_1": 0.120558,
+        "lag_2": 0.183077,
+        "lag_3": 0.06931,
+        "overall": {
+          "max": 0.183077,
+          "mean": 0.124315,
+          "min": 0.06931
+        }
+      }
+    },
+    "fa6c2936-0291-5559-eb05-05c447fbc505": {
+      "direction": {
+        "horizon_0": {
+          "0.0": -0.032938
+        },
+        "overall": {
+          "max": -0.032938,
+          "mean": -0.032938,
+          "min": -0.032938
+        }
+      },
+      "driver_name": "Energy - United States of America",
+      "importance": {
+        "horizon_1": {
+          "0.0": 97.118608
+        },
+        "horizon_2": {
+          "0.0": 97.118608
+        },
+        "horizon_3": {
+          "0.0": 97.118608
+        },
+        "overall": {
+          "max": 97.118608,
+          "mean": 97.118608,
+          "min": 97.118608
+        }
+      },
+      "pearson_correlation": {
+        "lag_1": 0.102147,
+        "lag_2": 0.208917,
+        "lag_3": 0.308433,
+        "overall": {
+          "max": 0.308433,
+          "mean": 0.206499,
+          "min": 0.102147
+        }
+      }
+    },
+    "fab86e28-ea3b-1e41-3267-d4e7839c59b4": {
+      "direction": {
+        "horizon_0": {
+          "0.0": -0.408815
+        },
+        "horizon_1": {
+          "6.0": -0.857267
+        },
+        "horizon_2": {
+          "6.0": -0.857267
+        },
+        "horizon_3": {
+          "6.0": -0.857267
+        },
+        "overall": {
+          "max": -0.408815,
+          "mean": -0.633041,
+          "min": -0.857267
+        }
+      },
+      "driver_name": "Sector Indices - Austria",
+      "importance": {
+        "horizon_1": {
+          "0.0": 91.007692,
+          "6.0": 0.0
+        },
+        "horizon_2": {
+          "0.0": 91.007692,
+          "6.0": 0.0
+        },
+        "horizon_3": {
+          "0.0": 91.007692,
+          "6.0": 0.0
+        },
+        "overall": {
+          "max": 91.007692,
+          "mean": 45.503846,
+          "min": 0.0
+        }
+      },
+      "pearson_correlation": {
+        "lag_1": -0.62617,
+        "lag_2": -0.710996,
+        "lag_3": -0.772707,
+        "overall": {
+          "max": -0.62617,
+          "mean": -0.703291,
+          "min": -0.772707
+        }
+      }
+    },
+    "fcfa1059-a478-f65c-622e-f6b25e9f79e1": {
+      "direction": {
+        "horizon_0": {
+          "0.0": 0.026417
+        },
+        "overall": {
+          "max": 0.026417,
+          "mean": 0.026417,
+          "min": 0.026417
+        }
+      },
+      "driver_name": "Processed food and consumables - Bulgaria",
+      "importance": {
+        "horizon_1": {
+          "0.0": 0.0
+        },
+        "horizon_2": {
+          "0.0": 0.0
+        },
+        "horizon_3": {
+          "0.0": 0.0
+        },
+        "overall": {
+          "max": 0.0,
+          "mean": 0.0,
+          "min": 0.0
+        }
+      },
+      "pearson_correlation": {
+        "lag_1": 0.120857,
+        "lag_2": 0.178004,
+        "lag_3": 0.197851,
+        "overall": {
+          "max": 0.197851,
+          "mean": 0.165571,
+          "min": 0.120857
+        }
+      }
+    }
+  },
+  "version": "1.1"
+}
