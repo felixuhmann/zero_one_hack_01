@@ -1,3 +1,5 @@
+import type { ScenarioResult } from "@/types/forecast";
+
 /*
  * Mock domain data + a small, transparent decision model for the prototype.
  *
@@ -43,7 +45,7 @@ export interface ChoiceCard {
 export interface CalibrationState {
   mandate: number; // 0 = pure price stability, 100 = max employment
   risk: number; // 0 = act only on strong evidence, 100 = act preemptively
-  horizon: 3 | 6 | 12;
+  horizon: 3 | 6;
   temperament: string;
   inflationTolerance: number; // pp above 2% target the chair will tolerate
 }
@@ -562,6 +564,53 @@ export interface DecisionResult {
 
 const NATURAL_UNRATE = 4.3;
 
+export interface EvaluateDecisionOptions {
+  /** Chair-weighted ensemble scenario (from classifier); feeds tilt + reasoning. */
+  chairScenario?: ScenarioResult | null;
+}
+
+function ensemblePathContribution(chair: ScenarioResult): DriverContribution {
+  const tiltFromDelta = Math.max(-0.55, Math.min(0.55, chair.delta_3m * 1.35));
+  return {
+    label: "Chair-weighted ensemble path",
+    value: tiltFromDelta,
+    detail: chair.trigger,
+  };
+}
+
+function reconcileWithEnsembleScenario(
+  decision: Decision,
+  actTilt: number,
+  bps: number,
+  chair: ScenarioResult,
+): { decision: Decision; bps: number; headline: string } {
+  if (chair.scenario === "dovish_pivot") {
+    if (decision === "cut") return { decision, bps, headline: `Cut ${Math.abs(bps)} bps` };
+    if (decision === "hike") {
+      return { decision: "hold", bps: 0, headline: "Hold · easing bias (ensemble path)" };
+    }
+    if (decision === "hold" && (actTilt <= -0.06 || chair.delta_3m <= -0.1)) {
+      return { decision: "hold", bps: 0, headline: bpsBiasLabel(Math.min(actTilt, chair.delta_3m)) };
+    }
+  }
+  if (chair.scenario === "hawkish") {
+    if (decision === "hike") return { decision, bps, headline: `Hike ${bps} bps` };
+    if (decision === "cut") {
+      return { decision: "hold", bps: 0, headline: "Hold · tightening bias (ensemble path)" };
+    }
+    if (decision === "hold" && (actTilt >= 0.06 || chair.delta_3m >= 0.1)) {
+      return { decision: "hold", bps: 0, headline: bpsBiasLabel(Math.max(actTilt, chair.delta_3m)) };
+    }
+  }
+  const headline =
+    decision === "hold"
+      ? bpsBiasLabel(actTilt)
+      : decision === "cut"
+        ? `Cut ${Math.abs(bps)} bps`
+        : `Hike ${bps} bps`;
+  return { decision, bps, headline };
+}
+
 /**
  * Transparent, reactive policy model. Takes the chair's calibration + current
  * assumptions and returns a decision with a visible contribution breakdown.
@@ -569,6 +618,7 @@ const NATURAL_UNRATE = 4.3;
 export function evaluateDecision(
   cal: CalibrationState,
   assumptions: Assumption[],
+  options?: EvaluateDecisionOptions,
 ): DecisionResult {
   const get = (id: string) => assumptions.find((a) => a.id === id)!;
   const corepce = get("corepce").value;
@@ -613,7 +663,11 @@ export function evaluateDecision(
     },
   ];
 
-  let tilt = cInfl + cLabor + cMarket + cExp;
+  if (options?.chairScenario) {
+    contributions.push(ensemblePathContribution(options.chairScenario));
+  }
+
+  let tilt = contributions.reduce((s, c) => s + c.value, 0);
 
   // risk tolerance scales how aggressively the chair acts on a given tilt
   const riskGain = 0.7 + (cal.risk / 100) * 0.8;
@@ -645,14 +699,33 @@ export function evaluateDecision(
   const confScore = 0.55 * agreement + 0.45 * decisiveness;
   const confidence: Confidence = confScore > 0.7 ? "high" : confScore > 0.45 ? "medium" : "low";
 
-  const headline =
+  let headline =
     decision === "hold"
       ? bpsBiasLabel(actTilt)
       : decision === "cut"
         ? `Cut ${Math.abs(bps)} bps`
         : `Hike ${bps} bps`;
 
-  const rationale = buildRationale(decision, actTilt, contributions, cal, expGap);
+  if (options?.chairScenario) {
+    const reconciled = reconcileWithEnsembleScenario(
+      decision,
+      actTilt,
+      bps,
+      options.chairScenario,
+    );
+    decision = reconciled.decision;
+    bps = reconciled.bps;
+    headline = reconciled.headline;
+  }
+
+  const rationale = buildRationale(
+    decision,
+    actTilt,
+    contributions,
+    cal,
+    expGap,
+    options?.chairScenario,
+  );
   const dissent = buildDissent(decision, dovish, hawkish);
 
   return {
@@ -680,10 +753,23 @@ function buildRationale(
   contributions: DriverContribution[],
   cal: CalibrationState,
   expGap: number,
+  chairScenario?: ScenarioResult | null,
 ): string[] {
   const sorted = [...contributions].sort((a, b) => Math.abs(b.value) - Math.abs(a.value));
   const top = sorted[0];
   const lines: string[] = [];
+
+  if (chairScenario) {
+    const label =
+      chairScenario.scenario === "dovish_pivot"
+        ? "dovish pivot"
+        : chairScenario.scenario === "hawkish"
+          ? "hawkish"
+          : "hold";
+    lines.push(
+      `The **chair-weighted ensemble** (${label}, Δ3m ${chairScenario.delta_3m >= 0 ? "+" : ""}${chairScenario.delta_3m.toFixed(2)}pp) is folded into the tilt alongside macro assumptions — set on the forecast step via your reaction function.`,
+    );
+  }
 
   if (decision === "hold") {
     lines.push(

@@ -2,6 +2,8 @@ import { motion } from "motion/react";
 
 interface DecisionGaugeProps {
   tilt: number; // − dovish .. + hawkish (roughly -1.5..1.5)
+  /** Faded needle when reaction-function sliders shift the tilt. */
+  referenceTilt?: number;
 }
 
 const R = 92;
@@ -29,9 +31,11 @@ function arc(startDeg: number, endDeg: number, r: number) {
   return `M${s.x},${s.y} A${r},${r} 0 ${large} ${sweep} ${e.x},${e.y}`;
 }
 
-export function DecisionGauge({ tilt }: DecisionGaugeProps) {
+export function DecisionGauge({ tilt, referenceTilt }: DecisionGaugeProps) {
   const needle = tiltToAngle(tilt);
   const tip = polar(needle, R - 12);
+  const refAngle = referenceTilt != null ? tiltToAngle(referenceTilt) : null;
+  const refTip = refAngle != null ? polar(refAngle, R - 18) : null;
 
   return (
     <div className="flex flex-col items-center">
@@ -47,6 +51,20 @@ export function DecisionGauge({ tilt }: DecisionGaugeProps) {
           const i = polar(a, R - 24);
           return <line key={a} x1={o.x} y1={o.y} x2={i.x} y2={i.y} stroke="var(--st-line-strong)" strokeWidth="1.5" />;
         })}
+
+        {refTip && (
+          <line
+            x1={CX}
+            y1={CY}
+            x2={refTip.x}
+            y2={refTip.y}
+            stroke="var(--st-muted)"
+            strokeWidth="2"
+            strokeLinecap="round"
+            opacity={0.45}
+            strokeDasharray="3 3"
+          />
+        )}
 
         {/* needle */}
         <motion.line

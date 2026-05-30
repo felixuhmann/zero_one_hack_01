@@ -1,5 +1,15 @@
 import type { BandPoint, SeriesPoint } from '@/studio/data'
-import type { DataSourceSnapshot, SignalResult, SybilionForecast } from '@/types/forecast'
+import {
+  buildScenarioEnsemblePath,
+  scenarioLegendLabel,
+  scenarioLineColor,
+} from '@/lib/scenarioChart'
+import type {
+  DataSourceSnapshot,
+  ScenarioResult,
+  SignalResult,
+  SybilionForecast,
+} from '@/types/forecast'
 import { signalForecast } from '@/types/forecast'
 
 export interface SeriesChartView {
@@ -10,6 +20,11 @@ export interface SeriesChartView {
   history: SeriesPoint[]
   band: BandPoint[]
   backtest: { t: string; pred: number }[]
+  scenarioPath: { t: string; v: number }[]
+  scenarioLegend: string
+  scenarioColor: string
+  baselineScenarioPath: { t: string; v: number }[]
+  baselineScenarioLegend: string
   read: string
   yDomain: [number, number]
 }
@@ -47,7 +62,7 @@ function parseGroundTruth(input: Record<string, unknown> | undefined): SeriesPoi
   const ts = input?.timeseries
   if (!ts || typeof ts !== 'object') return []
   return Object.entries(ts as Record<string, number>)
-    .map(([t, v]) => ({ t, v: Number(v) }))
+    .map(([t, v]) => ({ t: t.slice(0, 10), v: Number(v) }))
     .filter((p) => Number.isFinite(p.v))
     .sort((a, b) => a.t.localeCompare(b.t))
 }
@@ -137,7 +152,7 @@ function buildForecastBand(
     const pt = raw[date]
     if (typeof pt === 'number') {
       band.push({
-        t: date,
+        t: date.slice(0, 10),
         p05: pt,
         p25: pt,
         p50: pt,
@@ -151,7 +166,7 @@ function buildForecastBand(
     const qf = pt.quantile_forecast as Record<string, number> | undefined
     const p50 = quantile(qf, '0.5', median) ?? quantile(qf, '0.50', median)
     band.push({
-      t: date,
+      t: date.slice(0, 10),
       p05: round(quantile(qf, '0.05', p50), 4),
       p25: round(quantile(qf, '0.25', p50), 4),
       p50: round(Number.isFinite(median) ? median : p50, 4),
@@ -215,12 +230,13 @@ function buildBacktestOverlay(
 function computeYDomain(
   history: SeriesPoint[],
   band: BandPoint[],
-  backtest: { t: string; pred: number }[],
+  scenarioPath: { t: string; v: number }[] = [],
 ): [number, number] {
+  // Exclude backtest p50 from the axis — held-out medians can be wild vs realised rates.
   const vals = [
     ...history.map((h) => h.v),
-    ...backtest.map((b) => b.pred),
-    ...band.flatMap((b) => [b.p05, b.p95]),
+    ...scenarioPath.map((p) => p.v),
+    ...band.flatMap((b) => [b.p05, b.p25, b.p50, b.p75, b.p95]),
   ].filter((v) => Number.isFinite(v))
 
   if (!vals.length) return [0, 1]
@@ -277,16 +293,61 @@ export function buildSeriesChartView(
     history,
     band,
     backtest,
+    scenarioPath: [],
+    scenarioLegend: '',
+    scenarioColor: '',
+    baselineScenarioPath: [],
+    baselineScenarioLegend: '',
     read: horizonRead(band, meta.decimals, meta.unit),
-    yDomain: computeYDomain(history, band, backtest),
+    yDomain: computeYDomain(history, band),
   }
+}
+
+export interface TargetEnsemblePaths {
+  pipelineEnsemble?: Record<string, number>
+  chairEnsemble?: Record<string, number>
+  chairScenario?: ScenarioResult | null
 }
 
 export function buildTargetChartView(
   signals: Record<string, SignalResult | null>,
   targetSeriesId: string | null | undefined,
   dataSources?: DataSourceSnapshot[],
+  ensembles?: TargetEnsemblePaths | null,
 ): SeriesChartView | null {
   if (!targetSeriesId) return null
-  return buildSeriesChartView(signals[targetSeriesId], targetSeriesId, dataSources)
+  const base = buildSeriesChartView(
+    signals[targetSeriesId],
+    targetSeriesId,
+    dataSources,
+  )
+  if (!base) return null
+
+  const seam = base.band[0]
+  const seamVal = seam?.history ?? seam?.p50
+  const seamPt = seam && seamVal != null ? { t: seam.t, v: seamVal } : null
+
+  const baselineScenarioPath = buildScenarioEnsemblePath(
+    ensembles?.pipelineEnsemble,
+    seamPt,
+  )
+  const scenarioPath = buildScenarioEnsemblePath(
+    ensembles?.chairEnsemble,
+    seamPt,
+  )
+  const chairScenario = ensembles?.chairScenario
+
+  return {
+    ...base,
+    baselineScenarioPath,
+    baselineScenarioLegend: 'Baseline ensemble (catalog weights)',
+    scenarioPath,
+    scenarioLegend: scenarioLegendLabel(chairScenario),
+    scenarioColor: scenarioLineColor(chairScenario),
+    yDomain: computeYDomain(
+      base.history,
+      base.band,
+      [...baselineScenarioPath, ...scenarioPath],
+    ),
+  }
 }

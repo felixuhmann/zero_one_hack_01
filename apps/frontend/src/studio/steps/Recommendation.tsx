@@ -1,7 +1,11 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { ArrowLeft, MessageCircleQuestion, RotateCcw, Sliders, Zap } from "lucide-react";
 
+import { assumptionsFromForecast } from "@/lib/forecastAssumptions";
+import { SCENARIO_DISPLAY_LABEL } from "@/lib/scenarioChart";
+import { classifyScenarioFromPipeline, scenariosDiffer } from "@/lib/scenarioClassifier";
+import type { PipelineResponse } from "@/types/forecast";
 import {
   defaultAssumptions,
   evaluateDecision,
@@ -19,6 +23,7 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 interface Props {
   calibration: CalibrationState;
+  aggregatedForecast?: PipelineResponse | null;
   onBack: () => void;
   onRestart: () => void;
 }
@@ -57,23 +62,48 @@ const CHALLENGES = [
   { id: "cautious", q: "Push back — you're too cautious.", a: "Fair challenge. If you raise the evidence threshold toward 'preemptive' in calibration, the bar to move drops and policy can front-load. Try the Labor-shock scenario to see how fast the call pivots when the data justify it." },
 ];
 
-export function Recommendation({ calibration, onBack, onRestart }: Props) {
-  const [assumptions, setAssumptions] = useState<Assumption[]>(() => defaultAssumptions());
+export function Recommendation({
+  calibration,
+  aggregatedForecast,
+  onBack,
+  onRestart,
+}: Props) {
+  const [assumptions, setAssumptions] = useState<Assumption[]>(() =>
+    assumptionsFromForecast(aggregatedForecast),
+  );
+
+  useEffect(() => {
+    setAssumptions(assumptionsFromForecast(aggregatedForecast));
+  }, [aggregatedForecast]);
+
   const [activeScenario, setActiveScenario] = useState("base");
   const [scenarioNote, setScenarioNote] = useState<string | null>(null);
   const [challenge, setChallenge] = useState<string | null>(null);
 
-  const baseline = useMemo<DecisionResult>(
-    () => evaluateDecision(calibration, defaultAssumptions()),
-    [calibration],
-  );
+  const { base: pipelineScenario, chair: chairScenario } = useMemo(() => {
+    if (!aggregatedForecast) return { base: null, chair: null };
+    return classifyScenarioFromPipeline(aggregatedForecast, calibration);
+  }, [aggregatedForecast, calibration]);
+
   const result = useMemo(
-    () => evaluateDecision(calibration, assumptions),
-    [calibration, assumptions],
+    () => evaluateDecision(calibration, assumptions, { chairScenario }),
+    [calibration, assumptions, chairScenario],
+  );
+
+  const assumptionBaseline = useMemo<DecisionResult>(
+    () => evaluateDecision(calibration, defaultAssumptions(), { chairScenario }),
+    [calibration, chairScenario],
   );
 
   const shifted = assumptions.some((a) => a.value !== a.baseline);
-  const decisionChanged = result.headline !== baseline.headline;
+  const decisionChanged = result.headline !== assumptionBaseline.headline;
+
+  const maxContrib = Math.max(...result.contributions.map((c) => Math.abs(c.value)), 0.6);
+
+  const scenarioFlipped =
+    pipelineScenario &&
+    chairScenario &&
+    scenariosDiffer(pipelineScenario, chairScenario);
 
   function setAssumption(id: string, value: number) {
     setAssumptions((prev) => prev.map((a) => (a.id === id ? { ...a, value } : a)));
@@ -84,22 +114,24 @@ export function Recommendation({ calibration, onBack, onRestart }: Props) {
   function applyScenario(id: string) {
     const s = SCENARIOS.find((x) => x.id === id);
     if (!s) return;
-    setAssumptions(s.apply(defaultAssumptions()));
+    setAssumptions(s.apply(assumptionsFromForecast(aggregatedForecast)));
     setActiveScenario(s.id);
     setScenarioNote(s.note);
   }
 
   const tone = DECISION_TONE[result.decision];
-  const maxContrib = Math.max(...result.contributions.map((c) => Math.abs(c.value)), 0.6);
 
   return (
     <div className="space-y-7">
       <div className="space-y-3">
         <Eyebrow>Step 05 · Decision</Eyebrow>
         <h1 className="st-display text-4xl text-foreground md:text-5xl">The recommendation</h1>
+        <p className="max-w-2xl text-[13px] leading-relaxed text-muted-foreground">
+          Uses your reaction function from the forecast step plus the macro assumptions below. The
+          ensemble path enters the tilt as a signed contribution from the scenario classifier.
+        </p>
       </div>
 
-      {/* decision-change banner (adaptive proof) */}
       <AnimatePresence>
         {shifted && decisionChanged && (
           <motion.div
@@ -110,12 +142,15 @@ export function Recommendation({ calibration, onBack, onRestart }: Props) {
           >
             <div
               className="flex items-center gap-3 rounded-xl px-4 py-3"
-              style={{ background: "color-mix(in oklch, var(--st-brand) 14%, var(--st-panel))", border: "1px solid var(--st-brand)" }}
+              style={{
+                background: "color-mix(in oklch, var(--st-brand) 14%, var(--st-panel))",
+                border: "1px solid var(--st-brand)",
+              }}
             >
               <Zap className="size-4 shrink-0 text-[var(--st-brand)]" />
               <span className="text-[13px] text-foreground">
-                Assumption shifted → recommendation updated from{" "}
-                <span className="st-mono text-muted-foreground">{baseline.headline}</span> to{" "}
+                Assumption shifted →{" "}
+                <span className="st-mono text-muted-foreground">{assumptionBaseline.headline}</span> to{" "}
                 <span className="st-mono text-[var(--st-brand)]">{result.headline}</span>.
               </span>
             </div>
@@ -124,56 +159,73 @@ export function Recommendation({ calibration, onBack, onRestart }: Props) {
       </AnimatePresence>
 
       <div className="grid gap-5 lg:grid-cols-[1fr_1.25fr]">
-        {/* decision card */}
         <Card className="relative gap-0 py-0">
-          <div className="st-grain pointer-events-none absolute inset-0" />
-          <CardContent className="relative p-6">
-            <div className="flex items-center justify-between">
-              <Eyebrow>Next-meeting call · June 2026</Eyebrow>
-              <Pill tone={result.confidence === "high" ? "brand" : result.confidence === "medium" ? "hold" : "neutral"}>
-                {result.confidence} confidence
-              </Pill>
-            </div>
+            <div className="st-grain pointer-events-none absolute inset-0" />
+            <CardContent className="relative p-6">
+              <div className="flex items-center justify-between">
+                <Eyebrow>Next-meeting call · June 2026</Eyebrow>
+                <Pill tone={result.confidence === "high" ? "brand" : result.confidence === "medium" ? "hold" : "neutral"}>
+                  {result.confidence} confidence
+                </Pill>
+              </div>
 
-            <div className="mt-4 flex items-end gap-3">
-              <span className="st-display text-5xl" style={{ color: `var(--st-${tone})` }}>
-                {result.decision === "hold" ? "Hold" : result.decision === "cut" ? "Cut" : "Hike"}
-              </span>
-              {result.bps !== 0 && (
-                <span className="st-mono mb-1 text-2xl" style={{ color: `var(--st-${tone})` }}>
-                  {result.bps > 0 ? "+" : ""}
-                  {result.bps} bps
+              <div className="mt-4 flex items-end gap-3">
+                <span className="st-display text-5xl" style={{ color: `var(--st-${tone})` }}>
+                  {result.decision === "hold" ? "Hold" : result.decision === "cut" ? "Cut" : "Hike"}
                 </span>
+                {result.bps !== 0 && (
+                  <span className="st-mono mb-1 text-2xl" style={{ color: `var(--st-${tone})` }}>
+                    {result.bps > 0 ? "+" : ""}
+                    {result.bps} bps
+                  </span>
+                )}
+              </div>
+              <p className="mt-1 text-[13px] text-muted-foreground">{result.headline}</p>
+
+              {chairScenario && (
+                <div className="mt-3 rounded-md border border-border bg-muted/30 px-2.5 py-2 text-[11px] leading-relaxed text-muted-foreground">
+                  <span className="font-medium text-foreground">Scenario classifier: </span>
+                  {SCENARIO_DISPLAY_LABEL[chairScenario.scenario]} · Δ3m{" "}
+                  {chairScenario.delta_3m >= 0 ? "+" : ""}
+                  {chairScenario.delta_3m}pp
+                  {pipelineScenario && scenarioFlipped && (
+                    <span>
+                      {" "}
+                      (was {SCENARIO_DISPLAY_LABEL[pipelineScenario.scenario]} on pipeline ensemble)
+                    </span>
+                  )}
+                </div>
               )}
-            </div>
-            <p className="mt-1 text-[13px] text-muted-foreground">
-              {result.headline} · target range stays anchored unless the data force a move.
-            </p>
 
-            <div className="my-5">
-              <DecisionGauge tilt={result.tilt} />
-            </div>
+              <div className="my-5">
+                <DecisionGauge tilt={result.tilt} />
+              </div>
 
-            <div className="rounded-lg bg-muted p-3">
-              <Eyebrow className="mb-1" style={{ fontSize: 9 }}>
-                anticipated dissent
-              </Eyebrow>
-              <p className="text-[12px] leading-relaxed text-foreground/80">{result.dissent}</p>
-            </div>
-          </CardContent>
-        </Card>
+              <div className="rounded-lg bg-muted p-3">
+                <Eyebrow className="mb-1" style={{ fontSize: 9 }}>
+                  anticipated dissent
+                </Eyebrow>
+                <p className="text-[12px] leading-relaxed text-foreground/80">{result.dissent}</p>
+              </div>
+            </CardContent>
+          </Card>
 
-        {/* reasoning */}
         <div className="space-y-4">
           <Card className="gap-0 py-5">
             <CardContent>
               <span className="text-sm font-medium text-foreground">Why — contribution to the tilt</span>
               <p className="mt-0.5 text-[11px] text-muted-foreground">
-                Each force is signed: dovish pulls left (cut), hawkish pulls right (hike)
+                Blue = dovish (cut), red = hawkish (hike). Bars sum to the gauge tilt.
               </p>
               <div className="mt-4 space-y-3">
                 {result.contributions.map((c) => (
-                  <ContribRow key={c.label} label={c.label} value={c.value} detail={c.detail} max={maxContrib} />
+                  <ContribRow
+                    key={c.label}
+                    label={c.label}
+                    value={c.value}
+                    detail={c.detail}
+                    max={maxContrib}
+                  />
                 ))}
               </div>
             </CardContent>
@@ -195,7 +247,6 @@ export function Recommendation({ calibration, onBack, onRestart }: Props) {
         </div>
       </div>
 
-      {/* adaptive: assumption shift */}
       <Card className="gap-0 py-5">
         <CardContent>
           <div className="flex flex-wrap items-center justify-between gap-3">
@@ -234,7 +285,6 @@ export function Recommendation({ calibration, onBack, onRestart }: Props) {
         </CardContent>
       </Card>
 
-      {/* discussion loop */}
       <Card className="gap-0 py-5">
         <CardContent>
           <div className="flex items-center gap-2">
@@ -283,9 +333,20 @@ export function Recommendation({ calibration, onBack, onRestart }: Props) {
   );
 }
 
-function ContribRow({ label, value, detail, max }: { label: string; value: number; detail: string; max: number }) {
+function ContribRow({
+  label,
+  value,
+  detail,
+  max,
+}: {
+  label: string;
+  value: number;
+  detail: string;
+  max: number;
+}) {
   const pct = (Math.abs(value) / max) * 50;
   const dovish = value < 0;
+
   return (
     <div>
       <div className="mb-1 flex items-center justify-between">
