@@ -12,6 +12,10 @@ import { Button } from "@/components/ui/button";
 import { createChatTransport } from "@/lib/chat";
 import type { ChatMessage } from "@/lib/chat-types";
 import { formatChatError, logChatError } from "@/lib/format-chat-error";
+import {
+  loadPreferredChatModel,
+  savePreferredChatModel,
+} from "@/lib/models";
 import type { Conversation as ConversationRecord } from "@/lib/conversations-store";
 import { useConversationsStore } from "@/lib/conversations-store";
 
@@ -26,6 +30,14 @@ export interface ChatViewProps {
 export function ChatView({ conversation }: ChatViewProps) {
   const persistMessages = useConversationsStore((s) => s.setMessages);
   const [input, setInput] = useState("");
+  const [model, setModel] = useState(loadPreferredChatModel);
+
+  const handleModelChange = (modelId: string) => {
+    setModel(modelId);
+    savePreferredChatModel(modelId);
+  };
+
+  const chatRequestBody = { model };
 
   const { messages, sendMessage, status, stop, regenerate, error, clearError } =
     useChat<ChatMessage>({
@@ -57,18 +69,18 @@ export function ChatView({ conversation }: ChatViewProps) {
 
   const handleSubmit = (text: string) => {
     clearError();
-    sendMessage({ text });
+    sendMessage({ text }, { body: chatRequestBody });
     setInput("");
   };
 
   const handleSuggestion = (text: string) => {
     clearError();
-    sendMessage({ text });
+    sendMessage({ text }, { body: chatRequestBody });
   };
 
   const handleRetry = () => {
     clearError();
-    regenerate();
+    regenerate({ body: chatRequestBody });
   };
 
   const isEmpty = messages.length === 0;
@@ -106,7 +118,9 @@ export function ChatView({ conversation }: ChatViewProps) {
 
         <Composer
           input={input}
+          model={model}
           onInputChange={setInput}
+          onModelChange={handleModelChange}
           onStop={stop}
           onSubmit={handleSubmit}
           status={status}

@@ -174,10 +174,12 @@ automatically and the server binds it (no `.env` file needed — see below).
 
 ```text
 apps/backend/forecasting/
-├── cli.py                 # CLI entry (python -m forecasting)
-├── fed_rate_pipeline.py   # orchestrator
+├── cli.py                 # CLI + FastAPI app (python -m forecasting)
+├── pipeline.py            # region-agnostic forecast orchestrator
+├── regions.py             # region registry (fed/ecb) + pipeline factory
 ├── api/                   # FRED + Sybilion HTTP clients
 ├── payloads/              # Sybilion request builders
+├── chat/                  # streaming chat service + agent tools
 └── analysis/              # ensemble + scenario rules
 ```
 

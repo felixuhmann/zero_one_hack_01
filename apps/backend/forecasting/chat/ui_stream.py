@@ -17,10 +17,19 @@ import math
 from typing import Any
 
 
-def _json_default(obj: Any) -> Any:
-    if isinstance(obj, float) and (math.isnan(obj) or math.isinf(obj)):
-        return None
-    return str(obj)
+def _sanitize(value: Any) -> Any:
+    """Recursively replace NaN/Inf floats with None (invalid in strict JSON).
+
+    The encoder's ``default`` hook is never invoked for floats, so out-of-range
+    values must be scrubbed *before* serialization to avoid a ``ValueError``.
+    """
+    if isinstance(value, float):
+        return None if (math.isnan(value) or math.isinf(value)) else value
+    if isinstance(value, dict):
+        return {key: _sanitize(item) for key, item in value.items()}
+    if isinstance(value, (list, tuple)):
+        return [_sanitize(item) for item in value]
+    return value
 
 # Headers every UI-message-stream response must carry.
 UI_MESSAGE_STREAM_HEADERS: dict[str, str] = {
@@ -33,19 +42,24 @@ UI_MESSAGE_STREAM_HEADERS: dict[str, str] = {
 }
 
 
+def json_dumps_safe(value: Any, *, compact: bool = False) -> str:
+    """Serialize ``value`` to JSON, coercing NaN/Inf to null (never raises).
+
+    Shared by the SSE encoder and the chat service's tool payloads so the
+    NaN/Inf handling lives in exactly one place.
+    """
+    return json.dumps(
+        _sanitize(value),
+        separators=(",", ":") if compact else None,
+        ensure_ascii=False,
+        default=str,
+        allow_nan=False,
+    )
+
+
 def encode_chunk(chunk: dict[str, Any]) -> str:
     """Serialize a single protocol chunk as one SSE event."""
-    return (
-        "data: "
-        + json.dumps(
-            chunk,
-            separators=(",", ":"),
-            ensure_ascii=False,
-            default=_json_default,
-            allow_nan=False,
-        )
-        + "\n\n"
-    )
+    return "data: " + json_dumps_safe(chunk, compact=True) + "\n\n"
 
 
 DONE = "data: [DONE]\n\n"

@@ -1,6 +1,5 @@
 import type { ChatStatus } from "ai";
 import { CheckIcon, ChevronDownIcon, PaperclipIcon, SparklesIcon } from "lucide-react";
-import { useState } from "react";
 
 import {
   DropdownMenu,
@@ -19,16 +18,13 @@ import {
   PromptInputTools,
   type PromptInputMessage,
 } from "@/components/ai-elements/prompt-input";
+import { CHAT_MODEL_OPTIONS, DEFAULT_CHAT_MODEL } from "@/lib/models";
 import { cn } from "@/lib/utils";
-
-const MODELS = [
-  { id: "claude-opus-4", name: "Claude Opus 4" },
-  { id: "claude-sonnet-4", name: "Claude Sonnet 4" },
-  { id: "claude-haiku-3-5", name: "Claude Haiku 3.5" },
-] as const;
 
 export interface ComposerProps {
   input: string;
+  model: string;
+  onModelChange: (modelId: string) => void;
   onInputChange: (value: string) => void;
   onSubmit: (text: string) => void;
   onStop: () => void;
@@ -38,16 +34,18 @@ export interface ComposerProps {
 
 export function Composer({
   input,
+  model,
+  onModelChange,
   onInputChange,
   onSubmit,
   onStop,
   status,
   className,
 }: ComposerProps) {
-  // Model selection is a non-functional stub for now; the backend will own
-  // the actual model routing in a later step.
-  const [model, setModel] = useState<string>(MODELS[1].id);
-  const selectedModel = MODELS.find((m) => m.id === model) ?? MODELS[1];
+  const selectedModel =
+    CHAT_MODEL_OPTIONS.find((m) => m.id === model) ??
+    CHAT_MODEL_OPTIONS.find((m) => m.id === DEFAULT_CHAT_MODEL) ??
+    CHAT_MODEL_OPTIONS[0];
 
   const handleSubmit = (message: PromptInputMessage) => {
     const text = message.text.trim();
@@ -91,10 +89,10 @@ export function Composer({
             <DropdownMenuContent align="start" className="w-52">
               <DropdownMenuLabel>Model</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              {MODELS.map((m) => (
+              {CHAT_MODEL_OPTIONS.map((m) => (
                 <DropdownMenuItem
                   key={m.id}
-                  onSelect={() => setModel(m.id)}
+                  onSelect={() => onModelChange(m.id)}
                 >
                   <span className="flex-1">{m.name}</span>
                   {m.id === model && <CheckIcon className="size-4" />}

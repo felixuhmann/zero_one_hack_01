@@ -12,6 +12,7 @@ Design notes:
   return an answer instantly without re-running the (slow) pipeline.
 - All executors are synchronous and may block (network + polling); the chat
   service runs them off the event loop via ``asyncio.to_thread``.
+- Region resolution and pipeline construction live in :mod:`forecasting.regions`.
 """
 
 from __future__ import annotations
@@ -21,90 +22,13 @@ import os
 import time
 from typing import Any, Callable
 
-from forecasting.analysis.ensemble_engine import EnsembleEngine
 from forecasting.analysis.forecast_series import extract_forecast_series_from_signal
-from forecasting.analysis.scenario_classifier import ScenarioClassifier
-from forecasting.api.fred_api import FREDClient
-from forecasting.api.sybilion_forecast_api import SybilionForecastApiClient
-from forecasting.fed_rate_pipeline import FedRatePipeline
-from forecasting.payloads.ecb_rate_payloads import ECB_SIGNAL_CONFIGS, ECBRatePayloadBuilder
-from forecasting.payloads.fed_rate_payloads import US_SIGNAL_CONFIGS, FedRatePayloadBuilder
-
-# Region -> pipeline configuration. Keys mirror the CLI's two pipelines.
-REGIONS: dict[str, dict[str, Any]] = {
-    "fed": {
-        "builder": FedRatePayloadBuilder,
-        "signal_configs": US_SIGNAL_CONFIGS,
-        "artifacts_dir": "artifacts/fed_rate_forecast",
-        "label": "US Federal Reserve (Fed)",
-    },
-    "ecb": {
-        "builder": ECBRatePayloadBuilder,
-        "signal_configs": ECB_SIGNAL_CONFIGS,
-        "artifacts_dir": "artifacts/ecb",
-        "label": "European Central Bank (ECB)",
-    },
-}
-
-_REGION_ALIASES = {
-    "us": "fed",
-    "usa": "fed",
-    "fed": "fed",
-    "fomc": "fed",
-    "federal reserve": "fed",
-    "united states": "fed",
-    "eu": "ecb",
-    "euro": "ecb",
-    "ecb": "ecb",
-    "eurozone": "ecb",
-    "euro area": "ecb",
-    "europe": "ecb",
-}
+from forecasting.pipeline import serialize_result
+from forecasting.regions import RegionConfig, build_pipeline, resolve_region
 
 
 class ToolError(RuntimeError):
     """Raised when a tool cannot complete; surfaced to the UI as a tool error."""
-
-
-def _resolve_region(region: str | None) -> str:
-    key = (region or "fed").strip().lower()
-    key = _REGION_ALIASES.get(key, key)
-    if key not in REGIONS:
-        raise ToolError(f"Unknown region {region!r}. Use 'fed' or 'ecb'.")
-    return key
-
-
-def _build_pipeline(region_key: str) -> FedRatePipeline:
-    fred = FREDClient()
-    cfg = REGIONS[region_key]
-    return FedRatePipeline(
-        fred_client=fred,
-        forecast_client=SybilionForecastApiClient(),
-        payload_builder=cfg["builder"](fred),
-        ensemble_engine=EnsembleEngine(),
-        scenario_classifier=ScenarioClassifier(),
-        artifacts_base_dir=cfg["artifacts_dir"],
-    )
-
-
-def _serialize_result(result: dict) -> dict:
-    """JSON-safe full view of ``pipeline.run()`` (mirrors the API serializer)."""
-    signals_out: dict = {}
-    for series_id, item in result.get("signals", {}).items():
-        if item is None:
-            signals_out[series_id] = None
-            continue
-        signals_out[series_id] = {
-            "series_id": item["series_id"],
-            "weight": item["weight"],
-            "job": item["job"],
-            "forecast": item.get("forecast"),
-        }
-    return {
-        "signals": signals_out,
-        "ensemble": result.get("ensemble"),
-        "scenario": result.get("scenario"),
-    }
 
 
 def _trim_forecast_series(
@@ -157,15 +81,15 @@ def _summarize_result(result: dict) -> dict:
     }
 
 
-def _snapshot_path(region_key: str) -> str:
-    return os.path.join(REGIONS[region_key]["artifacts_dir"], "latest.json")
+def _snapshot_path(region: RegionConfig) -> str:
+    return os.path.join(region.artifacts_dir, "latest.json")
 
 
-def _save_snapshot(region_key: str, serialized: dict) -> str:
-    path = _snapshot_path(region_key)
+def _save_snapshot(region: RegionConfig, serialized: dict) -> str:
+    path = _snapshot_path(region)
     os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
     snapshot = {
-        "region": region_key,
+        "region": region.key,
         "generated_at": int(time.time() * 1000),
         "result": serialized,
     }
@@ -185,34 +109,31 @@ def run_forecast_pipeline(region: str = "fed", **_: Any) -> dict:
     Slow (parallel Sybilion jobs + polling). Saves a ``latest.json`` snapshot so
     later ``read_latest_forecast`` calls are instant.
     """
-    region_key = _resolve_region(region)
-    cfg = REGIONS[region_key]
-    pipeline = _build_pipeline(region_key)
+    cfg = resolve_region(region)
+    pipeline = build_pipeline(cfg)
 
-    result = pipeline.run(signal_configs=cfg["signal_configs"])
-    serialized = _serialize_result(result)
-    saved_path = _save_snapshot(region_key, serialized)
+    result = pipeline.run(signal_configs=cfg.signal_configs)
+    saved_path = _save_snapshot(cfg, serialize_result(result))
 
     summary = _summarize_result(result)
-    summary["region"] = region_key
-    summary["region_label"] = cfg["label"]
+    summary["region"] = cfg.key
+    summary["region_label"] = cfg.label
     summary["saved_snapshot"] = saved_path
     return summary
 
 
 def read_latest_forecast(region: str = "fed", **_: Any) -> dict:
     """Return the most recent saved forecast snapshot for a region (instant)."""
-    region_key = _resolve_region(region)
-    cfg = REGIONS[region_key]
-    path = _snapshot_path(region_key)
+    cfg = resolve_region(region)
+    path = _snapshot_path(cfg)
 
     if not os.path.exists(path):
         return {
-            "region": region_key,
-            "region_label": cfg["label"],
+            "region": cfg.key,
+            "region_label": cfg.label,
             "available": False,
             "message": (
-                f"No saved forecast for {cfg['label']} yet. "
+                f"No saved forecast for {cfg.label} yet. "
                 "Call run_forecast_pipeline first (it can take several minutes)."
             ),
         }
@@ -221,8 +142,8 @@ def read_latest_forecast(region: str = "fed", **_: Any) -> dict:
         snapshot = json.load(f)
 
     summary = _summarize_result(snapshot.get("result") or {})
-    summary["region"] = region_key
-    summary["region_label"] = cfg["label"]
+    summary["region"] = cfg.key
+    summary["region_label"] = cfg.label
     summary["available"] = True
     summary["generated_at"] = snapshot.get("generated_at")
     return summary
@@ -235,20 +156,19 @@ def get_forecast_drivers(
     **_: Any,
 ) -> dict:
     """Fetch Sybilion drivers (key explanatory features) for a single series."""
-    region_key = _resolve_region(region)
-    cfg = REGIONS[region_key]
-    resolved_series = series_id or cfg["signal_configs"][0]["series_id"]
+    cfg = resolve_region(region)
+    resolved_series = series_id or cfg.signal_configs[0]["series_id"]
     try:
         periods_int = int(periods)
     except (TypeError, ValueError):
         periods_int = 60
 
-    pipeline = _build_pipeline(region_key)
+    pipeline = build_pipeline(cfg)
     drivers = pipeline.get_drivers(series_id=resolved_series, periods=periods_int)
 
     return {
-        "region": region_key,
-        "region_label": cfg["label"],
+        "region": cfg.key,
+        "region_label": cfg.label,
         "series_id": resolved_series,
         "periods": periods_int,
         "drivers": drivers,

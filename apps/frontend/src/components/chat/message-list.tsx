@@ -24,6 +24,7 @@ import {
 } from "@/components/ai-elements/tool";
 import { Spinner } from "@/components/ui/spinner";
 import type { ChatMessage, ChatToolPart } from "@/lib/chat-types";
+import { chatModelLabel } from "@/lib/models";
 
 interface MessageListProps {
   messages: ChatMessage[];
@@ -88,6 +89,7 @@ function AssistantMessage({
   onRegenerate: () => void;
 }) {
   const text = getMessageText(message);
+  const modelLabel = chatModelLabel(message.metadata?.model);
 
   return (
     <Message from="assistant">
@@ -115,13 +117,20 @@ function AssistantMessage({
           return <Fragment key={key} />;
         })}
 
-        {showActions && text.length > 0 && (
-          <MessageActions className="opacity-0 transition-opacity group-hover:opacity-100">
-            <CopyButton text={text} />
-            <MessageAction onClick={onRegenerate} tooltip="Regenerate">
-              <RefreshCcwIcon />
-            </MessageAction>
-          </MessageActions>
+        {(modelLabel || (showActions && text.length > 0)) && (
+          <div className="flex items-center gap-2">
+            {modelLabel && (
+              <span className="text-muted-foreground text-xs">{modelLabel}</span>
+            )}
+            {showActions && text.length > 0 && (
+              <MessageActions className="opacity-0 transition-opacity group-hover:opacity-100">
+                <CopyButton text={text} />
+                <MessageAction onClick={onRegenerate} tooltip="Regenerate">
+                  <RefreshCcwIcon />
+                </MessageAction>
+              </MessageActions>
+            )}
+          </div>
         )}
       </div>
     </Message>

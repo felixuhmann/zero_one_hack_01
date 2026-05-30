@@ -67,17 +67,3 @@ class FREDClient:
             )
 
         return result
-
-    def fetch_multiple(
-        self,
-        series_ids: list[str],
-        periods: int = 60,
-    ) -> dict[str, dict[str, float]]:
-        """
-        Holt mehrere Serien auf einmal.
-        Gibt dict {series_id: {date: value}} zurück.
-        """
-        return {
-            series_id: self.fetch_series_observations(series_id, periods)
-            for series_id in series_ids
-        }

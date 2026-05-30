@@ -246,10 +246,6 @@ class ScenarioClassifier:
         series_id = role_map.get(role)
         if not series_id:
             return {}
-        return self._extract_forecast_series(raw_forecasts, series_id)
-
-    @staticmethod
-    def _extract_forecast_series(raw_forecasts: dict, series_id: str) -> dict[str, float]:
         return extract_forecast_series_from_signal(raw_forecasts.get(series_id))
 
     def _explain(

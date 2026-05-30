@@ -13,7 +13,6 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
-import math
 import os
 import time
 import uuid
@@ -186,7 +185,9 @@ class ChatService:
                         tool_calls = payload
 
                 if step_tokens is not None:
-                    total_tokens = step_tokens
+                    # Sum across tool iterations so the finish event reports the
+                    # whole turn's cost, not just the final model step.
+                    total_tokens = (total_tokens or 0) + step_tokens
 
                 if not tool_calls:
                     break
@@ -323,17 +324,6 @@ class ChatService:
             ],
         }
 
-    @staticmethod
-    def _json_dumps_safe(value: Any) -> str:
-        """Serialize tool payloads for SSE + OpenAI tool messages (no NaN/Inf)."""
-
-        def _default(obj: Any) -> Any:
-            if isinstance(obj, float) and (math.isnan(obj) or math.isinf(obj)):
-                return None
-            return str(obj)
-
-        return json.dumps(value, ensure_ascii=False, default=_default, allow_nan=False)
-
     async def _execute_tool_call(
         self,
         call: dict[str, Any],
@@ -382,7 +372,7 @@ class ChatService:
 
             result = task.result()
             yield ui_stream.tool_output_available(call_id, result)
-            tool_content = self._json_dumps_safe(result)
+            tool_content = ui_stream.json_dumps_safe(result)
             logger.info("tool ok name=%s call_id=%s", name, call_id)
             if slow_tool:
                 yield ui_stream.data_part(
@@ -394,7 +384,7 @@ class ChatService:
             error_text = str(exc) or exc.__class__.__name__
             logger.exception("tool failed name=%s call_id=%s", name, call_id)
             yield ui_stream.tool_output_error(call_id, error_text)
-            tool_content = self._json_dumps_safe({"error": error_text})
+            tool_content = ui_stream.json_dumps_safe({"error": error_text})
             if slow_tool:
                 yield ui_stream.data_part(
                     "status",

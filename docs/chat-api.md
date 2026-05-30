@@ -32,16 +32,22 @@ POST /api/chat
 Content-Type: application/json
 ```
 
-Body (sent automatically by `DefaultChatTransport`):
+Body (sent automatically by `DefaultChatTransport`, plus client fields):
 
 ```jsonc
 {
   "id": "conversation-id",          // stable per conversation
   "messages": [/* UIMessage[] */],  // full history, v5/v6 "parts" shape
   "trigger": "submit-message",      // or "regenerate-message"
-  "messageId": "..."                // present on regenerate
+  "messageId": "...",               // present on regenerate
+  "model": "anthropic/claude-opus-4.8"  // optional; gateway "<provider>/<model>"
 }
 ```
+
+When `model` is omitted, the backend uses `LLM_MODEL` from `.env` or
+`anthropic/claude-sonnet-4.6`. The chat UI sends `model` on every submit and
+regenerate via `sendMessage` / `regenerate` `{ body: { model } }` (see
+`apps/frontend/src/lib/models.ts` for the selectable ids).
 
 Each `UIMessage` looks like:
 
@@ -49,7 +55,7 @@ Each `UIMessage` looks like:
 {
   "id": "msg_123",
   "role": "user",            // "user" | "assistant" | "system"
-  "metadata": { "model": "claude-sonnet-4", "createdAt": 1730000000000 },
+  "metadata": { "model": "anthropic/claude-sonnet-4.6", "createdAt": 1730000000000 },
   "parts": [
     { "type": "text", "text": "Hello" }
     // also: "reasoning", "tool-<name>", "dynamic-tool", "data-<name>", "file", "source-url"
@@ -57,9 +63,8 @@ Each `UIMessage` looks like:
 }
 ```
 
-To send extra context (selected model, enabled tools), include it in the
-request `body` via the transport / `sendMessage({ body })` — the backend should
-read those fields if present.
+To send extra context (enabled tools, etc.), add fields alongside `model` in
+the request `body` via `sendMessage({ body })` / `regenerate({ body })`.
 
 ## Response
 

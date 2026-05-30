@@ -64,9 +64,6 @@ class EnsembleEngine:
                 valid[sid] = data
         return valid
 
-    def _extract_forecast_series(self, data: dict) -> dict[str, float]:
-        return extract_forecast_series_from_signal(data)
-
     def _weighted_average(self, valid: dict, total_weight: float) -> dict:
         """
         Berechnet den gewichteten Durchschnitt über alle Zeitpunkte.
@@ -76,14 +73,14 @@ class EnsembleEngine:
         # Alle Zeitpunkte sammeln
         all_dates: set[str] = set()
         for data in valid.values():
-            all_dates.update(self._extract_forecast_series(data).keys())
+            all_dates.update(extract_forecast_series_from_signal(data).keys())
 
         ensemble: dict[str, float] = {}
         for date in sorted(all_dates):
             weighted_sum = 0.0
             active_weight = 0.0
             for sid, data in valid.items():
-                series = self._extract_forecast_series(data)
+                series = extract_forecast_series_from_signal(data)
                 if date in series:
                     w = data["weight"] / total_weight
                     weighted_sum += series[date] * w

@@ -14,7 +14,7 @@ import type {
  * All fields are optional so the UI degrades gracefully when absent.
  */
 export interface ChatMessageMetadata {
-  /** Model id that produced the message, e.g. "claude-sonnet-4". */
+  /** Gateway model id that produced the message, e.g. "anthropic/claude-sonnet-4.6". */
   model?: string;
   /** Unix epoch (ms) the message was created. */
   createdAt?: number;
