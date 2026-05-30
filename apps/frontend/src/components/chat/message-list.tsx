@@ -102,8 +102,8 @@ function AssistantMessage({
               </Reasoning>
             );
           }
-          if (isToolUIPart(part)) {
-            return <ToolPartView key={key} part={part} />;
+          if (isToolUIPart(part) || part.type === "dynamic-tool") {
+            return <ToolPartView key={key} part={part as ChatToolPart} />;
           }
           if (part.type === "text") {
             return (

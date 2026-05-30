@@ -33,12 +33,48 @@ export interface ChatDataParts extends UIDataTypes {
   status: { label: string; state: "pending" | "done" };
 }
 
+/** Central bank region a forecast tool operates on. */
+export type ForecastRegion = "fed" | "ecb";
+
+/** Compact result returned by the forecast snapshot/run tools. */
+export interface ForecastToolResult {
+  region?: ForecastRegion;
+  region_label?: string;
+  available?: boolean;
+  message?: string;
+  generated_at?: number;
+  saved_snapshot?: string;
+  scenario?: Record<string, unknown>;
+  ensemble?: Record<string, unknown>;
+  signals?: Record<string, unknown>;
+  [key: string]: unknown;
+}
+
 /**
- * Tools the agent can call. Empty for now (the backend owns tool execution);
- * add typed entries here as tools are introduced so tool parts become
- * strongly typed. Rendering already works via {@link ChatToolPart}.
+ * Tools the agent can call. The backend (`apps/backend/forecasting/chat/tools.py`)
+ * owns execution and streams `tool-<name>` parts; typing them here makes those
+ * parts strongly typed. Rendering also works generically via {@link ChatToolPart}.
  */
-export type ChatTools = UITools;
+export interface ChatTools extends UITools {
+  read_latest_forecast: {
+    input: { region?: ForecastRegion };
+    output: ForecastToolResult;
+  };
+  run_forecast_pipeline: {
+    input: { region?: ForecastRegion };
+    output: ForecastToolResult;
+  };
+  get_forecast_drivers: {
+    input: { region?: ForecastRegion; series_id?: string; periods?: number };
+    output: {
+      region?: ForecastRegion;
+      series_id?: string;
+      periods?: number;
+      drivers?: unknown;
+      [key: string]: unknown;
+    };
+  };
+}
 
 /**
  * The single message type shared across the chat UI. Mirrors what the

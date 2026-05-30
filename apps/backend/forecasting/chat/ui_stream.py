@@ -69,6 +69,46 @@ def reasoning_end(reasoning_id: str) -> str:
     return encode_chunk({"type": "reasoning-end", "id": reasoning_id})
 
 
+def tool_input_start(tool_call_id: str, tool_name: str) -> str:
+    return encode_chunk(
+        {"type": "tool-input-start", "toolCallId": tool_call_id, "toolName": tool_name}
+    )
+
+
+def tool_input_available(
+    tool_call_id: str, tool_name: str, tool_input: Any
+) -> str:
+    return encode_chunk(
+        {
+            "type": "tool-input-available",
+            "toolCallId": tool_call_id,
+            "toolName": tool_name,
+            "input": tool_input,
+        }
+    )
+
+
+def tool_output_available(tool_call_id: str, output: Any) -> str:
+    return encode_chunk(
+        {"type": "tool-output-available", "toolCallId": tool_call_id, "output": output}
+    )
+
+
+def tool_output_error(tool_call_id: str, error_text: str) -> str:
+    return encode_chunk(
+        {
+            "type": "tool-output-error",
+            "toolCallId": tool_call_id,
+            "errorText": error_text,
+        }
+    )
+
+
+def data_part(name: str, data: Any) -> str:
+    """Emit a custom typed data part (`data-<name>`), see `chat-types.ts`."""
+    return encode_chunk({"type": f"data-{name}", "data": data})
+
+
 def finish_step() -> str:
     return encode_chunk({"type": "finish-step"})
 
