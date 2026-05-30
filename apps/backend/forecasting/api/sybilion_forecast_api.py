@@ -13,7 +13,7 @@ def sybilion_token():
     print(token)
     if not token:
         raise EnvironmentError(
-            "Set SYBILION_API_KEY in .env.example (or .env) before calling the Sybilion API."
+            "Set SYBILION_API_KEY in .env at the repo root (see .env.example)."
         )
     return token
 

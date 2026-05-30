@@ -14,7 +14,7 @@ class FREDClient:
         self.api_key = _strip_env(os.environ.get("FRED_API_KEY"))
         if not self.api_key:
             raise EnvironmentError(
-                "Set FRED_API_KEY in .env.example (or .env) before fetching FRED data."
+                "Set FRED_API_KEY in .env at the repo root (see .env.example)."
             )
 
     def fetch_series_observations(

@@ -123,7 +123,7 @@ Copy [`.env.example`](./.env.example) to `.env` in the repo root (do not commit 
 | `FRED_API_KEY` | Fetching macro time series from FRED |
 | `SYBILION_API_KEY` | Sybilion forecast and drivers API |
 
-Export them in your shell or use a tool that loads `.env` before running Python.
+The backend loads `.env` automatically on startup (`forecasting.env.load_env`). Do not put real keys in `.env.example`.
 
 ### Build frontend for production
 

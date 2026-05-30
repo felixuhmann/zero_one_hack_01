@@ -9,6 +9,9 @@ _REPO_ROOT = Path(__file__).resolve().parents[3]
 # Sybilion requires 40+ monthly observations
 SYBILION_MIN_OBSERVATIONS = 40
 
+_ENV_FILE = _REPO_ROOT / ".env"
+_ENV_EXAMPLE = _REPO_ROOT / ".env.example"
+
 
 def _strip_env(value: str | None) -> str | None:
     if value is None:
@@ -18,24 +21,22 @@ def _strip_env(value: str | None) -> str | None:
 
 
 def load_env() -> None:
-    """Load API keys from `.env.example`, optional `.env`, then `to_hide/key`."""
-    example = _REPO_ROOT / ".env.example"
-    if example.is_file():
-        load_dotenv(example)
+    """
+    Load API keys from repo-root `.env` only.
 
-    env_file = _REPO_ROOT / ".env"
-    if env_file.is_file():
-        load_dotenv(env_file, override=True)
+    Copy `.env.example` to `.env` and set your keys there.
+    """
+    if not _ENV_FILE.is_file():
+        hint = (
+            f"Create {_ENV_FILE.name} at the repo root "
+            f"(copy from {_ENV_EXAMPLE.name}) and set FRED_API_KEY and SYBILION_API_KEY."
+        )
+        raise EnvironmentError(hint)
+
+    load_dotenv(_ENV_FILE)
 
     for name in ("FRED_API_KEY", "SYBILION_API_KEY", "SYBILION_API_TOKEN"):
         if name in os.environ:
             cleaned = _strip_env(os.environ.get(name))
             if cleaned:
                 os.environ[name] = cleaned
-
-    # Local override for Sybilion (e.g. hackathon key not committed in .env.example)
-    key_file = _REPO_ROOT / "to_hide" / "key"
-    if key_file.is_file():
-        token = _strip_env(key_file.read_text(encoding="utf-8"))
-        if token:
-            os.environ["SYBILION_API_KEY"] = token
