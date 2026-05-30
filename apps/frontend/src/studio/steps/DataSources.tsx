@@ -1,11 +1,10 @@
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { ArrowLeft, ArrowRight, Database, Plus, Sparkles } from "lucide-react";
+import { ArrowLeft, ArrowRight, Database, Plus } from "lucide-react";
 
 import { PROPOSED_SOURCES, ROLE_LABEL, type CalibrationState } from "@/studio/data";
 import { Eyebrow, Pill, StudioButton, StudioNote } from "@/studio/ui/bits";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Progress } from "@/components/ui/progress";
@@ -19,16 +18,7 @@ interface Props {
   onNext: () => void;
 }
 
-const REFINEMENTS = [
-  { id: "labor", chip: "Weight labor more", add: ["PAYEMS"], note: "Nonfarm payrolls added so labor momentum carries more weight. The 2025 benchmark revisions make this read worth tracking." },
-  { id: "sticky", chip: "Add a sticky-inflation check", add: ["CES0500000003"], note: "Average hourly earnings added as a wage-driven inflation cross-check." },
-  { id: "transmission", chip: "Watch financial conditions", add: ["NFCI"], note: "Chicago Fed conditions index included — it captures tightening that can substitute for a hike." },
-  { id: "lean", chip: "Keep it lean", remove: ["PAYEMS", "CES0500000003", "NFCI"], note: "Trimmed to four core signals: the target, inflation, the market path, and labor." },
-] as const;
-
 export function DataSources({ include, setInclude, calibration, onBack, onNext }: Props) {
-  const [note, setNote] = useState<string | null>(null);
-
   const selected = PROPOSED_SOURCES.filter((s) => include[s.seriesId]);
   const totalWeight = selected.reduce((a, s) => a + s.weight, 0) || 1;
   const enoughInputs = selected.length >= 2;
@@ -42,16 +32,6 @@ export function DataSources({ include, setInclude, calibration, onBack, onNext }
     setInclude((p) => ({ ...p, [id]: !p[id] }));
   }
 
-  function applyRefinement(r: (typeof REFINEMENTS)[number]) {
-    setInclude((p) => {
-      const next = { ...p };
-      ("add" in r ? r.add : []).forEach((id) => (next[id] = true));
-      ("remove" in r ? r.remove : []).forEach((id) => (next[id] = false));
-      return next;
-    });
-    setNote(r.note);
-  }
-
   return (
     <div className="space-y-7">
       <div className="space-y-3">
@@ -59,30 +39,13 @@ export function DataSources({ include, setInclude, calibration, onBack, onNext }
         <h1 className="st-display text-4xl text-foreground md:text-5xl">Approve the inputs</h1>
         <div className="max-w-2xl">
           <StudioNote>
-            {note ?? (
-              <>
-                For your{" "}
-                {calibration.mandate < 40 ? "price-stability lean" : calibration.mandate > 60 ? "employment lean" : "balanced stance"}
-                , these monthly series meet the minimum history requirement. Toggle any off, or use the chips below to
-                refine the set.{" "}
-                <span className="font-medium text-foreground">Keyword quality drives forecast accuracy</span> — each
-                series includes tuned keywords.
-              </>
-            )}
+            For your{" "}
+            {calibration.mandate < 40 ? "price-stability lean" : calibration.mandate > 60 ? "employment lean" : "balanced stance"}
+            , these monthly series meet the minimum history requirement. Toggle any off.{" "}
+            <span className="font-medium text-foreground">Keyword quality drives forecast accuracy</span> — each series
+            includes tuned keywords.
           </StudioNote>
         </div>
-      </div>
-
-      {/* refinement chips — the planning loop */}
-      <div className="flex flex-wrap items-center gap-2">
-        <span className="st-eyebrow mr-1 inline-flex items-center" style={{ fontSize: 9.5 }}>
-          <Sparkles className="mr-1 inline size-3" /> refine
-        </span>
-        {REFINEMENTS.map((r) => (
-          <Button key={r.id} type="button" size="sm" variant="outline" onClick={() => applyRefinement(r)}>
-            {r.chip}
-          </Button>
-        ))}
       </div>
 
       <div className="grid gap-5 lg:grid-cols-[1.7fr_1fr]">
