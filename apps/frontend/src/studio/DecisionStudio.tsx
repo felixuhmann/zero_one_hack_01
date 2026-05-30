@@ -1,0 +1,204 @@
+import { useMemo, useState } from "react";
+import { AnimatePresence, motion } from "motion/react";
+import { Check } from "lucide-react";
+
+import {
+  DEFAULT_CALIBRATION,
+  PROPOSED_SOURCES,
+  evaluateDecision,
+  defaultAssumptions,
+  type CalibrationState,
+} from "@/studio/data";
+import { AgentAvatar } from "@/studio/ui/bits";
+import { CountrySelect } from "@/studio/steps/CountrySelect";
+import { Calibration } from "@/studio/steps/Calibration";
+import { DataSources } from "@/studio/steps/DataSources";
+import { Processing } from "@/studio/steps/Processing";
+import { ForecastReview } from "@/studio/steps/ForecastReview";
+import { Recommendation } from "@/studio/steps/Recommendation";
+
+import "@/studio/studio.css";
+
+export type StepId = "country" | "calibration" | "sources" | "processing" | "forecast" | "recommendation";
+
+const STEPS: { id: StepId; label: string; hint: string }[] = [
+  { id: "country", label: "Jurisdiction", hint: "Pick a central bank" },
+  { id: "calibration", label: "Calibration", hint: "Align on your stance" },
+  { id: "sources", label: "Data sources", hint: "Approve the inputs" },
+  { id: "processing", label: "Forecasting", hint: "Sybilion runs" },
+  { id: "forecast", label: "Forecast", hint: "Read the probabilities" },
+  { id: "recommendation", label: "Decision", hint: "Act on it" },
+];
+
+export function DecisionStudio() {
+  const [step, setStep] = useState<StepId>("country");
+  const [country, setCountry] = useState<string | null>(null);
+  const [calibration, setCalibration] = useState<CalibrationState>(DEFAULT_CALIBRATION);
+  const [include, setInclude] = useState<Record<string, boolean>>(() =>
+    Object.fromEntries(PROPOSED_SOURCES.map((s) => [s.seriesId, s.recommended])),
+  );
+
+  const reached = useMemo(() => {
+    const order = STEPS.map((s) => s.id);
+    return order.indexOf(step);
+  }, [step]);
+
+  // baseline decision from calibration (forecast + recommendation share it)
+  const baseDecision = useMemo(
+    () => evaluateDecision(calibration, defaultAssumptions()),
+    [calibration],
+  );
+
+  function go(next: StepId) {
+    setStep(next);
+  }
+
+  function canVisit(id: StepId): boolean {
+    const order = STEPS.map((s) => s.id);
+    return order.indexOf(id) <= reached;
+  }
+
+  return (
+    <div className="studio-root flex h-svh min-h-svh flex-col overflow-hidden">
+      {/* top bar */}
+      <header
+        className="flex shrink-0 items-center justify-between border-b px-6 py-3"
+        style={{ borderColor: "var(--st-line)" }}
+      >
+        <div className="flex items-center gap-3">
+          <AgentAvatar size={30} />
+          <div className="leading-tight">
+            <div className="st-display text-lg" style={{ color: "var(--st-ink)" }}>
+              Policy Decision Studio
+            </div>
+            <div className="st-eyebrow" style={{ fontSize: 9 }}>
+              Sybilion · forecast-driven rate guidance
+            </div>
+          </div>
+        </div>
+        <div className="hidden items-center gap-2 md:flex">
+          <span className="st-mono text-[11px]" style={{ color: "var(--st-faint)" }}>
+            prototype · mock data
+          </span>
+        </div>
+      </header>
+
+      <div className="flex min-h-0 flex-1">
+        {/* step rail */}
+        <nav
+          className="hidden w-[230px] shrink-0 flex-col gap-1 border-r p-4 lg:flex"
+          style={{ borderColor: "var(--st-line)" }}
+        >
+          {STEPS.map((s, i) => {
+            const active = s.id === step;
+            const done = i < reached;
+            const visitable = canVisit(s.id);
+            return (
+              <button
+                key={s.id}
+                type="button"
+                disabled={!visitable}
+                onClick={() => visitable && go(s.id)}
+                className="st-focus-ring group flex items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-all disabled:cursor-not-allowed"
+                style={{ background: active ? "var(--st-panel)" : "transparent" }}
+              >
+                <span
+                  className="grid h-7 w-7 shrink-0 place-items-center rounded-full st-mono text-[11px] transition-all"
+                  style={{
+                    background: active ? "var(--st-brand)" : done ? "var(--st-brand-dim)" : "var(--st-panel-2)",
+                    color: active || done ? "var(--st-bg-deep)" : "var(--st-faint)",
+                    border: "1px solid var(--st-line)",
+                  }}
+                >
+                  {done ? <Check className="h-3.5 w-3.5" /> : i + 1}
+                </span>
+                <span className="min-w-0">
+                  <span
+                    className="block text-[13px] font-medium"
+                    style={{ color: active ? "var(--st-ink)" : visitable ? "var(--st-ink-soft)" : "var(--st-faint)" }}
+                  >
+                    {s.label}
+                  </span>
+                  <span className="block text-[11px]" style={{ color: "var(--st-faint)" }}>
+                    {s.hint}
+                  </span>
+                </span>
+              </button>
+            );
+          })}
+          <div className="mt-auto rounded-xl p-3" style={{ background: "var(--st-panel)", border: "1px solid var(--st-line)" }}>
+            <div className="st-eyebrow mb-1" style={{ fontSize: 9 }}>
+              live demo ready
+            </div>
+            <p className="text-[11px] leading-relaxed" style={{ color: "var(--st-faint)" }}>
+              The decision step accepts a mid-run assumption shift and re-derives the call in real time.
+            </p>
+          </div>
+        </nav>
+
+        {/* content */}
+        <main className="min-w-0 flex-1 overflow-y-auto">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={step}
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.3 }}
+              className="mx-auto w-full max-w-6xl px-6 py-8"
+            >
+              {step === "country" && (
+                <CountrySelect
+                  selected={country}
+                  onSelect={(c) => setCountry(c)}
+                  onNext={() => go("calibration")}
+                />
+              )}
+              {step === "calibration" && (
+                <Calibration
+                  value={calibration}
+                  onChange={setCalibration}
+                  onBack={() => go("country")}
+                  onNext={() => go("sources")}
+                />
+              )}
+              {step === "sources" && (
+                <DataSources
+                  include={include}
+                  setInclude={setInclude}
+                  calibration={calibration}
+                  onBack={() => go("calibration")}
+                  onNext={() => go("processing")}
+                />
+              )}
+              {step === "processing" && (
+                <Processing
+                  include={include}
+                  onDone={() => go("forecast")}
+                />
+              )}
+              {step === "forecast" && (
+                <ForecastReview
+                  calibration={calibration}
+                  decision={baseDecision}
+                  onBack={() => go("sources")}
+                  onNext={() => go("recommendation")}
+                />
+              )}
+              {step === "recommendation" && (
+                <Recommendation
+                  calibration={calibration}
+                  onBack={() => go("forecast")}
+                  onRestart={() => {
+                    setStep("country");
+                    setCountry(null);
+                  }}
+                />
+              )}
+            </motion.div>
+          </AnimatePresence>
+        </main>
+      </div>
+    </div>
+  );
+}

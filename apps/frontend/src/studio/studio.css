@@ -1,0 +1,140 @@
+/*
+ * Sybilion Policy Decision Studio — scoped design system.
+ * A self-contained "situation room" aesthetic: deep ink canvas, editorial
+ * serif headlines, mono figures, and a diverging dovish<->hawkish decision axis.
+ * All tokens are scoped under .studio-root so they never leak into the rest
+ * of the app (which keeps its own neutral shadcn theme).
+ */
+
+.studio-root {
+  /* surfaces (light "daylight situation room") */
+  --st-bg: oklch(0.955 0.006 240);
+  /* deep ink kept dark in both themes — it is the contrast colour that sits
+     on top of the teal brand fills (buttons, pins, active chips). */
+  --st-bg-deep: oklch(0.22 0.02 250);
+  --st-panel: oklch(0.995 0.003 240);
+  --st-panel-2: oklch(0.965 0.006 240);
+  --st-elev: oklch(1 0 0);
+  --st-line: oklch(0.2 0.02 255 / 11%);
+  --st-line-strong: oklch(0.2 0.02 255 / 20%);
+
+  /* text */
+  --st-ink: oklch(0.24 0.02 255);
+  --st-ink-soft: oklch(0.36 0.02 255);
+  --st-muted: oklch(0.5 0.018 255);
+  --st-faint: oklch(0.62 0.015 255);
+
+  /* brand — Sybilion forecast/AI signal */
+  --st-brand: oklch(0.62 0.12 192);
+  --st-brand-dim: oklch(0.7 0.1 190);
+  --st-brand-glow: oklch(0.68 0.13 190 / 26%);
+
+  /* decision axis: cut (dovish) -> hold -> hike (hawkish) */
+  --st-cut: oklch(0.54 0.16 250);
+  --st-hold: oklch(0.65 0.14 70);
+  --st-hike: oklch(0.55 0.21 27);
+  --st-cut-soft: oklch(0.54 0.16 250 / 14%);
+  --st-hold-soft: oklch(0.65 0.14 70 / 16%);
+  --st-hike-soft: oklch(0.55 0.21 27 / 14%);
+
+  --st-radius: 16px;
+  --st-font-display: "Fraunces", ui-serif, Georgia, serif;
+  --st-font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+
+  color: var(--st-ink);
+  background:
+    radial-gradient(1200px 700px at 78% -8%, oklch(0.7 0.13 190 / 10%), transparent 60%),
+    radial-gradient(900px 600px at 8% 108%, oklch(0.54 0.16 250 / 7%), transparent 55%),
+    var(--st-bg);
+  font-feature-settings: "ss01", "cv01";
+  -webkit-font-smoothing: antialiased;
+}
+
+.studio-root ::selection {
+  background: var(--st-brand-glow);
+  color: var(--st-ink);
+}
+
+.st-display {
+  font-family: var(--st-font-display);
+  font-optical-sizing: auto;
+  letter-spacing: -0.015em;
+  line-height: 1.02;
+}
+
+.st-mono {
+  font-family: var(--st-font-mono);
+  font-feature-settings: "tnum", "zero";
+}
+
+.st-eyebrow {
+  font-family: var(--st-font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+  font-size: 11px;
+  color: var(--st-muted);
+}
+
+.st-panel {
+  background: var(--st-panel);
+  border: 1px solid var(--st-line);
+  border-radius: var(--st-radius);
+  box-shadow: 0 1px 2px oklch(0.2 0.02 255 / 5%), 0 6px 20px oklch(0.2 0.02 255 / 4%);
+}
+
+.st-panel-2 {
+  background: var(--st-panel-2);
+  border: 1px solid var(--st-line);
+  border-radius: calc(var(--st-radius) - 4px);
+}
+
+.st-grain::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: radial-gradient(
+    oklch(0.2 0.02 255 / 6%) 0.5px,
+    transparent 0.5px
+  );
+  background-size: 22px 22px;
+  mask-image: radial-gradient(120% 120% at 50% 0%, #000, transparent 78%);
+  opacity: 0.5;
+}
+
+/* thin scrollbars inside the studio */
+.studio-root *::-webkit-scrollbar {
+  width: 9px;
+  height: 9px;
+}
+.studio-root *::-webkit-scrollbar-thumb {
+  background: var(--st-line-strong);
+  border-radius: 99px;
+}
+.studio-root *::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+@keyframes st-sheen {
+  0% { transform: translateX(-120%); }
+  100% { transform: translateX(220%); }
+}
+
+@keyframes st-pulse-ring {
+  0% { transform: scale(0.6); opacity: 0.7; }
+  100% { transform: scale(2.4); opacity: 0; }
+}
+
+@keyframes st-dash {
+  to { stroke-dashoffset: -1000; }
+}
+
+@keyframes st-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+.st-focus-ring:focus-visible {
+  outline: 2px solid var(--st-brand);
+  outline-offset: 2px;
+}
