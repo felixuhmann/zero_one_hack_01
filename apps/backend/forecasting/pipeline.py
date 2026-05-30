@@ -6,6 +6,8 @@ import os
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
+import requests
+
 from forecasting.analysis.ensemble_engine import EnsembleEngine
 from forecasting.analysis.forecast_series import pick_forecast_payload
 from forecasting.analysis.scenario_classifier import ScenarioClassifier
@@ -241,8 +243,24 @@ class RateForecastPipeline:
         job_id = self.forecast_client.submit_forecast(payload)
 
         deadline = time.monotonic() + timeout_s
+        status: str | None = None
         while True:
-            job = self.forecast_client.get_forecast_status(job_id)
+            try:
+                job = self.forecast_client.get_forecast_status(job_id)
+            except (requests.RequestException, RuntimeError) as exc:
+                if time.monotonic() > deadline:
+                    raise TimeoutError(
+                        f"Job {job_id} did not settle within {timeout_s}s "
+                        f"(last status={status!r})"
+                    ) from exc
+                logger.warning(
+                    "Sybilion status poll for job %s failed: %s; retrying",
+                    job_id,
+                    exc,
+                )
+                time.sleep(poll_interval_s)
+                continue
+
             status = job.get("status")
             settled = job.get("settled")
 
