@@ -11,6 +11,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { createChatTransport } from "@/lib/chat";
 import type { ChatMessage } from "@/lib/chat-types";
+import { formatChatError, logChatError } from "@/lib/format-chat-error";
 import type { Conversation as ConversationRecord } from "@/lib/conversations-store";
 import { useConversationsStore } from "@/lib/conversations-store";
 
@@ -31,6 +32,7 @@ export function ChatView({ conversation }: ChatViewProps) {
       id: conversation.id,
       messages: conversation.messages,
       transport: createChatTransport(),
+      onError: logChatError,
     });
 
   // Persist messages when a turn settles, and once more on unmount so an
@@ -94,7 +96,7 @@ export function ChatView({ conversation }: ChatViewProps) {
             <AlertCircleIcon />
             <AlertTitle>Something went wrong</AlertTitle>
             <AlertDescription className="flex items-center justify-between gap-4">
-              <span>{error.message || "Failed to reach the agent."}</span>
+              <span>{formatChatError(error)}</span>
               <Button onClick={handleRetry} size="sm" variant="outline">
                 Retry
               </Button>

@@ -1,13 +1,16 @@
 from __future__ import annotations
 
 import json
+import logging
 import os
+import time
 from pathlib import Path
 
 import uvicorn
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, StreamingResponse
+from starlette.middleware.base import BaseHTTPMiddleware
 
 from forecasting.env import load_env
 
@@ -24,11 +27,37 @@ from forecasting.fed_rate_pipeline import FedRatePipeline
 from forecasting.payloads.ecb_rate_payloads import ECBRatePayloadBuilder, ECB_SIGNAL_CONFIGS
 from forecasting.payloads.fed_rate_payloads import FedRatePayloadBuilder, US_SIGNAL_CONFIGS
 
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s %(levelname)s %(name)s: %(message)s",
+)
+_api_logger = logging.getLogger("forecasting.api")
+
+
+class RequestLogMiddleware(BaseHTTPMiddleware):
+    """Log API latency; chat streams may take many minutes to finish."""
+
+    async def dispatch(self, request: Request, call_next):
+        started = time.perf_counter()
+        response = await call_next(request)
+        elapsed_ms = (time.perf_counter() - started) * 1000
+        _api_logger.info(
+            "%s %s -> %s (%.0f ms)",
+            request.method,
+            request.url.path,
+            response.status_code,
+            elapsed_ms,
+        )
+        return response
+
+
 app = FastAPI(
     title="Fed Rate Forecast API",
     description="Runs the FRED → Sybilion → ensemble → scenario pipeline.",
     version="0.1.0",
 )
+
+app.add_middleware(RequestLogMiddleware)
 
 # Allowed CORS origins. The bundled frontend is served from the same origin in
 # production (so it needs no CORS), but the Vite dev server (5173) and any extra

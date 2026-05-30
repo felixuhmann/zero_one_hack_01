@@ -12,6 +12,8 @@ from __future__ import annotations
 
 import asyncio
 import json
+import logging
+import math
 import os
 import time
 import uuid
@@ -21,6 +23,12 @@ from openai import AsyncOpenAI
 
 from forecasting.chat import ui_stream
 from forecasting.chat import tools as chat_tools
+
+logger = logging.getLogger(__name__)
+
+# While a slow tool runs, emit SSE keepalives so Vite/nginx/browser idle timeouts
+# do not tear down the chat stream (forecast pipeline can take many minutes).
+_TOOL_KEEPALIVE_INTERVAL_S = 15.0
 
 # Vercel AI Gateway is OpenAI-compatible. Models are addressed as
 # "<provider>/<model>" (e.g. "anthropic/claude-sonnet-4.6").
@@ -143,6 +151,11 @@ class ChatService:
         model is called again until it produces a final text answer.
         """
         message_id = f"msg_{uuid.uuid4().hex}"
+        logger.info(
+            "chat stream start message_id=%s history_len=%d",
+            message_id,
+            len(ui_messages) if isinstance(ui_messages, list) else 0,
+        )
 
         yield ui_stream.start(
             message_id,
@@ -189,10 +202,13 @@ class ChatService:
                 finish_meta["totalTokens"] = total_tokens
             yield ui_stream.finish(finish_meta or None)
         except ChatConfigError as exc:
+            logger.warning("chat config error: %s", exc)
             yield ui_stream.error(str(exc))
         except Exception as exc:  # noqa: BLE001 - surface any provider error to the UI
+            logger.exception("chat stream failed")
             yield ui_stream.error(f"Upstream model error: {exc}")
         finally:
+            logger.info("chat stream end message_id=%s", message_id)
             yield ui_stream.DONE
 
     async def _run_model_step(
@@ -307,6 +323,17 @@ class ChatService:
             ],
         }
 
+    @staticmethod
+    def _json_dumps_safe(value: Any) -> str:
+        """Serialize tool payloads for SSE + OpenAI tool messages (no NaN/Inf)."""
+
+        def _default(obj: Any) -> Any:
+            if isinstance(obj, float) and (math.isnan(obj) or math.isinf(obj)):
+                return None
+            return str(obj)
+
+        return json.dumps(value, ensure_ascii=False, default=_default, allow_nan=False)
+
     async def _execute_tool_call(
         self,
         call: dict[str, Any],
@@ -322,17 +349,58 @@ class ChatService:
         except json.JSONDecodeError:
             arguments = {}
 
+        logger.info("tool start name=%s call_id=%s args=%s", name, call_id, arguments)
+
         yield ui_stream.tool_input_start(call_id, name)
         yield ui_stream.tool_input_available(call_id, name, arguments)
 
+        slow_tool = name in chat_tools.SLOW_TOOLS
+        if slow_tool:
+            yield ui_stream.data_part(
+                "status",
+                {
+                    "label": (
+                        "Running forecast pipeline (Sybilion jobs — several minutes)…"
+                    ),
+                    "state": "pending",
+                },
+                part_id=f"status_{call_id}",
+            )
+
+        task = asyncio.create_task(
+            asyncio.to_thread(chat_tools.execute_tool, name, arguments)
+        )
+        last_keepalive = time.monotonic()
         try:
-            result = await asyncio.to_thread(chat_tools.execute_tool, name, arguments)
+            while not task.done():
+                await asyncio.sleep(1.0)
+                if time.monotonic() - last_keepalive >= _TOOL_KEEPALIVE_INTERVAL_S:
+                    yield ui_stream.keepalive()
+                    last_keepalive = time.monotonic()
+                    if slow_tool:
+                        logger.info("tool keepalive name=%s call_id=%s", name, call_id)
+
+            result = task.result()
             yield ui_stream.tool_output_available(call_id, result)
-            tool_content = json.dumps(result, ensure_ascii=False)
+            tool_content = self._json_dumps_safe(result)
+            logger.info("tool ok name=%s call_id=%s", name, call_id)
+            if slow_tool:
+                yield ui_stream.data_part(
+                    "status",
+                    {"label": "Forecast pipeline finished.", "state": "done"},
+                    part_id=f"status_{call_id}",
+                )
         except Exception as exc:  # noqa: BLE001 - report failure to UI and model
             error_text = str(exc) or exc.__class__.__name__
+            logger.exception("tool failed name=%s call_id=%s", name, call_id)
             yield ui_stream.tool_output_error(call_id, error_text)
-            tool_content = json.dumps({"error": error_text})
+            tool_content = self._json_dumps_safe({"error": error_text})
+            if slow_tool:
+                yield ui_stream.data_part(
+                    "status",
+                    {"label": f"Forecast pipeline failed: {error_text}", "state": "done"},
+                    part_id=f"status_{call_id}",
+                )
 
         messages.append(
             {"role": "tool", "tool_call_id": call_id, "content": tool_content}

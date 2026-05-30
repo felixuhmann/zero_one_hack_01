@@ -20,7 +20,8 @@ When no key is configured the endpoint still returns a valid stream whose only
 content is an `error` chunk, so the UI shows an inline error + Retry.
 
 In development, Vite proxies `/api` to `http://127.0.0.1:8000`
-(`apps/frontend/vite.config.ts`). The client uses the Vercel AI SDK v6
+(`apps/frontend/vite.config.ts`, with proxy timeouts disabled for long chat
+streams). The client uses the Vercel AI SDK v6
 `DefaultChatTransport`, so the request/response shapes below are fixed by that
 transport and the AI SDK **UI message stream** protocol.
 
@@ -106,3 +107,9 @@ Metadata (model, token counts) can be attached with
 Any non-2xx response or a stream `error` event is delivered to the client via
 `useChat`'s `onError`. The UI shows an inline error with a Retry action that
 re-runs the last turn (`regenerate`).
+
+Long tool calls (especially `run_forecast_pipeline`) can take several minutes
+with no model tokens. The Python backend emits SSE comment keepalives
+(`: keepalive`) every 15s during tool execution so proxies and browsers do not
+close the connection. Backend logs use the `forecasting` logger (`INFO` on
+`forecasting.api` and `forecasting.chat.service`).

@@ -10,7 +10,6 @@ def sybilion_token():
     token = _strip_env(os.environ.get("SYBILION_API_KEY")) or _strip_env(
         os.environ.get("SYBILION_API_TOKEN")
     )
-    print(token)
     if not token:
         raise EnvironmentError(
             "Set SYBILION_API_KEY in .env at the repo root (see .env.example)."

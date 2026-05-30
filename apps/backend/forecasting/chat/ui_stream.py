@@ -13,7 +13,14 @@ docs. A custom (non-JS) backend MUST also set the response header
 from __future__ import annotations
 
 import json
+import math
 from typing import Any
+
+
+def _json_default(obj: Any) -> Any:
+    if isinstance(obj, float) and (math.isnan(obj) or math.isinf(obj)):
+        return None
+    return str(obj)
 
 # Headers every UI-message-stream response must carry.
 UI_MESSAGE_STREAM_HEADERS: dict[str, str] = {
@@ -28,10 +35,24 @@ UI_MESSAGE_STREAM_HEADERS: dict[str, str] = {
 
 def encode_chunk(chunk: dict[str, Any]) -> str:
     """Serialize a single protocol chunk as one SSE event."""
-    return f"data: {json.dumps(chunk, separators=(',', ':'), ensure_ascii=False)}\n\n"
+    return (
+        "data: "
+        + json.dumps(
+            chunk,
+            separators=(",", ":"),
+            ensure_ascii=False,
+            default=_json_default,
+            allow_nan=False,
+        )
+        + "\n\n"
+    )
 
 
 DONE = "data: [DONE]\n\n"
+
+# SSE comment line — keeps proxies/browsers from closing idle connections while a
+# long-running tool blocks the event loop (no UI message chunks during that time).
+KEEPALIVE = ": keepalive\n\n"
 
 
 def start(message_id: str, metadata: dict[str, Any] | None = None) -> str:
@@ -104,9 +125,17 @@ def tool_output_error(tool_call_id: str, error_text: str) -> str:
     )
 
 
-def data_part(name: str, data: Any) -> str:
+def data_part(name: str, data: Any, *, part_id: str | None = None) -> str:
     """Emit a custom typed data part (`data-<name>`), see `chat-types.ts`."""
-    return encode_chunk({"type": f"data-{name}", "data": data})
+    chunk: dict[str, Any] = {"type": f"data-{name}", "data": data}
+    if part_id:
+        chunk["id"] = part_id
+    return encode_chunk(chunk)
+
+
+def keepalive() -> str:
+    """SSE comment ping; ignored by the AI SDK parser but resets proxy idle timers."""
+    return KEEPALIVE
 
 
 def finish_step() -> str:

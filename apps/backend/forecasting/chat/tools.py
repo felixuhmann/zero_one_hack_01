@@ -107,6 +107,20 @@ def _serialize_result(result: dict) -> dict:
     }
 
 
+def _trim_forecast_series(
+    series: dict | None, *, max_points: int = 12
+) -> dict | None:
+    """Keep tool/SSE payloads small — full paths live in latest.json on disk."""
+    if not series or not isinstance(series, dict):
+        return series
+    if len(series) <= max_points:
+        return series
+    keys = sorted(series.keys())
+    tail = {k: series[k] for k in keys[-max_points:]}
+    tail["_truncated"] = f"last {max_points} of {len(series)} points"
+    return tail
+
+
 def _summarize_result(result: dict) -> dict:
     """Compact, model-friendly summary of a (fresh or serialized) pipeline result."""
     scenario = result.get("scenario") or {}
@@ -137,7 +151,7 @@ def _summarize_result(result: dict) -> dict:
             "contributing_signals": ensemble.get("contributing_signals"),
             "normalized_weights": ensemble.get("normalized_weights"),
             "dropped_signals": ensemble.get("dropped_signals"),
-            "ensemble_forecast": ensemble.get("ensemble_forecast"),
+            "ensemble_forecast": _trim_forecast_series(ensemble.get("ensemble_forecast")),
         },
         "signals": signal_summaries,
     }

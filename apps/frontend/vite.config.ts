@@ -16,6 +16,9 @@ export default defineConfig({
       '/api': {
         target: 'http://127.0.0.1:8000',
         changeOrigin: true,
+        // Chat + forecast routes can run for many minutes with no response body bytes.
+        timeout: 0,
+        proxyTimeout: 0,
       },
     },
   },
