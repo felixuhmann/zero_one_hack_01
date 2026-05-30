@@ -145,7 +145,7 @@ export function DecisionStudio() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
               transition={{ duration: 0.3 }}
-              className="mx-auto w-full max-w-6xl px-6 py-8"
+              className={step === "country" ? "relative h-full" : "mx-auto w-full max-w-6xl px-6 py-8"}
             >
               {step === "country" && (
                 <CountrySelect

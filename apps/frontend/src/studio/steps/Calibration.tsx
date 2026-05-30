@@ -15,8 +15,9 @@ export function Calibration({ value, onChange, onBack, onNext }: Props) {
   const set = <K extends keyof CalibrationState>(k: K, v: CalibrationState[K]) =>
     onChange({ ...value, [k]: v });
 
-  const tilt = ((value.mandate - 50) / 50) * 7; // beam rotation in degrees
   const interpretation = interpret(value);
+  const priceWeight = 100 - value.mandate;
+  const tilt = ((value.mandate - 50) / 50) * 8;
 
   return (
     <div className="space-y-7">
@@ -31,7 +32,7 @@ export function Calibration({ value, onChange, onBack, onNext }: Props) {
       </div>
 
       <div className="grid gap-5 lg:grid-cols-[1.1fr_1fr]">
-        {/* dual-mandate balance beam */}
+        {/* image-backed dual-mandate console */}
         <div className="st-panel flex flex-col p-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -45,25 +46,34 @@ export function Calibration({ value, onChange, onBack, onNext }: Props) {
             </span>
           </div>
 
-          <div className="relative my-8 grid h-44 place-items-center">
-            <svg viewBox="0 0 320 170" className="w-full max-w-[340px]">
-              {/* fulcrum */}
-              <path d="M160 150 L142 168 L178 168 Z" fill="var(--st-panel-2)" stroke="var(--st-line-strong)" strokeWidth="1" />
-              <line x1="120" y1="168" x2="200" y2="168" stroke="var(--st-line-strong)" strokeWidth="2" strokeLinecap="round" />
-              <motion.g animate={{ rotate: tilt }} transition={{ type: "spring", stiffness: 80, damping: 12 }} style={{ transformBox: "view-box", transformOrigin: "160px 150px" }}>
-                {/* beam */}
-                <line x1="34" y1="150" x2="286" y2="150" stroke="var(--st-ink-soft)" strokeWidth="4" strokeLinecap="round" />
-                <circle cx="160" cy="150" r="6" fill="var(--st-brand)" />
-                {/* pans */}
-                <Pan x={34} weight={1 - value.mandate / 100} color="var(--st-hike)" />
-                <Pan x={286} weight={value.mandate / 100} color="var(--st-cut)" />
+          <div className="st-calibration-console my-6">
+            <svg
+              className="st-calibration-scale"
+              viewBox="0 0 1000 625"
+              aria-hidden="true"
+            >
+              <g className="st-scale-base">
+                <line x1="500" y1="350" x2="500" y2="462" />
+                <path d="M474 462H526L566 516H434Z" />
+                <rect x="384" y="516" width="232" height="18" rx="5" />
+                <line x1="356" y1="548" x2="644" y2="548" />
+              </g>
+              <motion.g
+                animate={{ rotate: tilt }}
+                transition={{ type: "spring", stiffness: 90, damping: 14 }}
+                style={{ transformBox: "view-box", transformOrigin: "500px 350px" }}
+              >
+                <line className="st-scale-beam-shadow" x1="186" y1="350" x2="814" y2="350" />
+                <line className="st-scale-beam" x1="186" y1="342" x2="814" y2="342" />
+                <circle className="st-scale-pivot" cx="500" cy="342" r="12" />
+                <ScalePan x={210} y={414} tone="hike" weight={priceWeight} />
+                <ScalePan x={790} y={414} tone="cut" weight={value.mandate} />
               </motion.g>
             </svg>
-          </div>
-
-          <div className="flex items-center justify-between text-[12px]">
-            <PanLabel title="Price stability" pct={100 - value.mandate} color="var(--st-hike)" />
-            <PanLabel title="Maximum employment" pct={value.mandate} color="var(--st-cut)" align="right" />
+            <div className="st-calibration-readouts">
+              <MandateReadout title="Price stability" pct={priceWeight} tone="hike" />
+              <MandateReadout title="Maximum employment" pct={value.mandate} tone="cut" align="right" />
+            </div>
           </div>
 
           <input
@@ -199,22 +209,45 @@ export function Calibration({ value, onChange, onBack, onNext }: Props) {
   );
 }
 
-function Pan({ x, weight, color }: { x: number; weight: number; color: string }) {
-  const drop = 8 + weight * 26;
+function ScalePan({
+  x,
+  y,
+  tone,
+  weight,
+}: {
+  x: number;
+  y: number;
+  tone: "cut" | "hike";
+  weight: number;
+}) {
+  const opacity = 0.16 + weight / 180;
+
   return (
-    <g>
-      <line x1={x} y1="150" x2={x} y2={150 + drop} stroke="var(--st-line-strong)" strokeWidth="1.2" />
-      <ellipse cx={x} cy={150 + drop} rx="26" ry="7" fill="none" stroke={color} strokeWidth="2" />
-      <ellipse cx={x} cy={150 + drop} rx="26" ry="7" fill={color} opacity={0.12 + weight * 0.3} />
+    <g className="st-scale-pan" data-tone={tone}>
+      <line x1={x} y1="342" x2={x - 42} y2={y - 14} />
+      <line x1={x} y1="342" x2={x + 42} y2={y - 14} />
+      <line x1={x} y1="342" x2={x} y2={y + 2} />
+      <ellipse cx={x} cy={y} rx="78" ry="13" style={{ opacity }} />
+      <path d={`M${x - 78} ${y} Q${x} ${y + 38} ${x + 78} ${y}`} />
     </g>
   );
 }
 
-function PanLabel({ title, pct, color, align }: { title: string; pct: number; color: string; align?: "right" }) {
+function MandateReadout({
+  title,
+  pct,
+  tone,
+  align,
+}: {
+  title: string;
+  pct: number;
+  tone: "cut" | "hike";
+  align?: "right";
+}) {
   return (
-    <div className={align === "right" ? "text-right" : ""}>
+    <div className={align === "right" ? "text-right" : ""} data-tone={tone}>
       <div style={{ color: "var(--st-ink-soft)" }}>{title}</div>
-      <div className="st-mono text-lg" style={{ color }}>
+      <div className="st-mono text-lg">
         {pct}%
       </div>
     </div>

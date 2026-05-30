@@ -16,19 +16,20 @@ export interface Country {
   bank: string;
   rate: string;
   status: "live" | "soon";
-  x: number; // % position on the stylized map
-  y: number;
+  iso3: string | null; // matches the world GeoJSON feature id (null = no single polygon)
+  lon: number; // marker longitude
+  lat: number; // marker latitude
 }
 
 export const COUNTRIES: Country[] = [
-  { code: "US", name: "United States", bank: "Federal Reserve", rate: "3.50–3.75%", status: "live", x: 24, y: 40 },
-  { code: "EU", name: "Euro Area", bank: "European Central Bank", rate: "2.15%", status: "soon", x: 49, y: 33 },
-  { code: "GB", name: "United Kingdom", bank: "Bank of England", rate: "4.00%", status: "soon", x: 46, y: 29 },
-  { code: "JP", name: "Japan", bank: "Bank of Japan", rate: "0.50%", status: "soon", x: 84, y: 41 },
-  { code: "CA", name: "Canada", bank: "Bank of Canada", rate: "2.75%", status: "soon", x: 22, y: 28 },
-  { code: "AU", name: "Australia", bank: "Reserve Bank of Australia", rate: "3.85%", status: "soon", x: 85, y: 74 },
-  { code: "BR", name: "Brazil", bank: "Banco Central do Brasil", rate: "13.25%", status: "soon", x: 34, y: 70 },
-  { code: "IN", name: "India", bank: "Reserve Bank of India", rate: "5.50%", status: "soon", x: 71, y: 50 },
+  { code: "US", name: "United States", bank: "Federal Reserve", rate: "3.50–3.75%", status: "live", iso3: "USA", lon: -98, lat: 39 },
+  { code: "EU", name: "Euro Area", bank: "European Central Bank", rate: "2.15%", status: "soon", iso3: null, lon: 10, lat: 50 },
+  { code: "GB", name: "United Kingdom", bank: "Bank of England", rate: "4.00%", status: "soon", iso3: "GBR", lon: -1.5, lat: 53 },
+  { code: "JP", name: "Japan", bank: "Bank of Japan", rate: "0.50%", status: "soon", iso3: "JPN", lon: 138, lat: 37 },
+  { code: "CA", name: "Canada", bank: "Bank of Canada", rate: "2.75%", status: "soon", iso3: "CAN", lon: -106, lat: 58 },
+  { code: "AU", name: "Australia", bank: "Reserve Bank of Australia", rate: "3.85%", status: "soon", iso3: "AUS", lon: 134, lat: -25 },
+  { code: "BR", name: "Brazil", bank: "Banco Central do Brasil", rate: "13.25%", status: "soon", iso3: "BRA", lon: -52, lat: -10 },
+  { code: "IN", name: "India", bank: "Reserve Bank of India", rate: "5.50%", status: "soon", iso3: "IND", lon: 79, lat: 22 },
 ];
 
 /* ----------------------------- Calibration ----------------------------- */
