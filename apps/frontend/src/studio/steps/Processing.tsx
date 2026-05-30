@@ -77,7 +77,7 @@ export function Processing({ include, onDone, onForecastReady }: Props) {
     <div className="flex min-h-[70vh] flex-col">
       <div className="space-y-2">
         <Eyebrow>Step 03 · Forecasting</Eyebrow>
-        <h1 className="st-display text-4xl text-foreground md:text-5xl">Sybilion is forecasting</h1>
+        <h1 className="st-display text-4xl text-foreground md:text-5xl">Running forecasts</h1>
         {error && <p className="text-sm text-[var(--st-cut)]">{error}</p>}
       </div>
 

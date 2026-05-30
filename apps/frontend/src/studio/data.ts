@@ -741,7 +741,7 @@ export interface JobStage {
 
 export const JOB_STAGES: JobStage[] = [
   { key: "submit", label: "Submitting payload" },
-  { key: "queue", label: "Queued on Sybilion" },
+  { key: "queue", label: "Queued" },
   { key: "forecast", label: "Probabilistic forecast" },
   { key: "drivers", label: "Scoring drivers" },
   { key: "backtest", label: "Backtest validation" },
@@ -752,7 +752,7 @@ export const PROCESSING_FACTS: string[] = [
   "Romer & Romer (2000): optimal forecasts put weight near 1.0 on staff models, ~0 on private forecasts.",
   "Wide confidence bands aren't noise — they encode when not to act.",
   "Driver importance shifts by horizon: market path dominates month one, labor by month twelve.",
-  "Sybilion returns month-by-month outcome bands, not a single point estimate.",
+  "The engine returns month-by-month outcome bands, not a single point estimate.",
   "Core PCE is the Fed's preferred gauge — broader basket, dynamic reweighting vs CPI.",
   "The dot plot is a reaction function, not a plan — it gets dated quickly.",
 ];

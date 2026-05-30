@@ -81,7 +81,7 @@ export function DriverHeatmap({ activeHorizon }: DriverHeatmapProps) {
 
       <p className="mt-3 text-[11px] leading-relaxed" style={{ color: "var(--st-faint)" }}>
         Cell = signal importance at that horizon (0–100). Notice how the market path dominates near-term
-        while the labor read grows toward the 12-month horizon — the agent re-weights as the horizon moves.
+        while the labor read grows toward the 12-month horizon — weights shift as the horizon moves.
       </p>
     </div>
   );

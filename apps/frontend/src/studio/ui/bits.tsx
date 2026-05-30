@@ -1,7 +1,5 @@
 import type { ReactNode } from "react";
-import { motion } from "motion/react";
 
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -84,53 +82,10 @@ export function StudioButton({
   );
 }
 
-export function AgentBubble({
-  children,
-  thinking,
-}: {
-  children: ReactNode;
-  thinking?: boolean;
-}) {
+/** Muted intro or helper copy for a studio step. */
+export function StudioNote({ children, className }: { children: ReactNode; className?: string }) {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="flex items-start gap-3"
-    >
-      <AgentAvatar pulse={thinking} />
-      <div className="min-w-0 flex-1 pt-0.5">
-        <div className="mb-1 flex items-center gap-2">
-          <span className="font-medium text-foreground text-[15px]">Sibyl</span>
-          <Pill tone="brand">forecast agent</Pill>
-        </div>
-        <div className="text-[14px] leading-relaxed text-muted-foreground">{children}</div>
-      </div>
-    </motion.div>
-  );
-}
-
-export function AgentAvatar({ pulse, size = 34 }: { pulse?: boolean; size?: number }) {
-  const dataSize = size <= 28 ? "sm" : size >= 40 ? "lg" : "default";
-  return (
-    <span className="relative inline-flex">
-      <Avatar size={dataSize} className="overflow-visible">
-        <AvatarFallback
-          className="text-primary-foreground"
-          style={{ background: "radial-gradient(120% 120% at 30% 20%, var(--st-brand-dim), var(--st-brand))" }}
-        >
-          <svg viewBox="0 0 24 24" width="55%" height="55%" fill="none">
-            <path d="M12 2v20M5 7l14 10M19 7L5 17" stroke="var(--st-bg-deep)" strokeWidth="1.6" strokeLinecap="round" opacity="0.85" />
-            <circle cx="12" cy="12" r="3.2" fill="var(--st-bg-deep)" />
-          </svg>
-        </AvatarFallback>
-      </Avatar>
-      {pulse && (
-        <span
-          className="pointer-events-none absolute inset-0 rounded-full"
-          style={{ border: "1.5px solid var(--st-brand)", animation: "st-pulse-ring 1.8s ease-out infinite", opacity: 0.6 }}
-        />
-      )}
-    </span>
+    <p className={cn("text-[14px] leading-relaxed text-muted-foreground", className)}>{children}</p>
   );
 }
 

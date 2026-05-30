@@ -65,7 +65,7 @@ export function CountrySelect({ selected, onSelect, onNext }: Props) {
                   </div>
                   {focus.status === "soon" && (
                     <p className="mt-4 text-[12px] leading-relaxed text-muted-foreground">
-                      Not yet onboarded — its national series still need to clear Sybilion's minimum-data thresholds.
+                      Not yet onboarded — its national series still need more monthly history.
                     </p>
                   )}
                 </motion.div>

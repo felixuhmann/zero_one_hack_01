@@ -231,12 +231,12 @@ function computeYDomain(
 }
 
 function horizonRead(band: BandPoint[], decimals: number, unit: string): string {
-  if (band.length < 2) return 'Sybilion forecast loaded.'
+  if (band.length < 2) return 'Forecast loaded.'
   const start = band[0].p50
   const end = band[band.length - 1].p50
   const delta = end - start
   const sign = delta >= 0 ? '+' : ''
-  return `Sybilion median path ${sign}${delta.toFixed(decimals)}${unit} over the published horizon (p50).`
+  return `Median path ${sign}${delta.toFixed(decimals)}${unit} over the published horizon (p50).`
 }
 
 export function buildSeriesChartView(

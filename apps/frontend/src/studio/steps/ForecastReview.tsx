@@ -5,7 +5,7 @@ import { TEMPERAMENTS, type CalibrationState } from "@/studio/data";
 import type { PipelineResponse } from "@/types/forecast";
 import { buildSeriesChartView, buildTargetChartView } from "@/lib/sybilionCharts";
 import { FanChart } from "@/studio/charts/FanChart";
-import { AgentBubble, Eyebrow, Pill, StatBlock, StudioButton } from "@/studio/ui/bits";
+import { Eyebrow, Pill, StatBlock, StudioButton, StudioNote } from "@/studio/ui/bits";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
@@ -78,7 +78,7 @@ export function ForecastReview({
       <div className="space-y-4">
         <Eyebrow>Step 04 · Forecast</Eyebrow>
         <p className="text-sm text-muted-foreground">
-          No Sybilion aggregate loaded. Go back and run the processing step with the backend online.
+          No forecast aggregate loaded. Go back and run the processing step with the backend online.
         </p>
         <StudioButton variant="ghost" onClick={onBack}>
           <ArrowLeft className="size-4" /> Back
@@ -93,7 +93,7 @@ export function ForecastReview({
         <Eyebrow>Step 04 · Forecast</Eyebrow>
         <p className="text-sm text-[var(--st-cut)]">
           Could not build a chart for {aggregatedForecast.target_series_id ?? "the target series"}.
-          Check that Sybilion returned forecast and input artifacts for that signal.
+          Check that the pipeline returned forecast and input artifacts for that signal.
         </p>
         <StudioButton variant="ghost" onClick={onBack}>
           <ArrowLeft className="size-4" /> Back
@@ -108,15 +108,15 @@ export function ForecastReview({
         <Eyebrow>Step 04 · Forecast</Eyebrow>
         <h1 className="st-display text-4xl text-foreground md:text-5xl">The probable paths</h1>
         <div className="max-w-2xl">
-          <AgentBubble>
+          <StudioNote>
             Ground truth from the submitted FRED series,{" "}
-            <span className="font-medium text-foreground">held-out backtest medians (p50)</span>, and
-            forward quantile fans from Sybilion for{" "}
+            <span className="font-medium text-foreground">held-out backtest medians (p50)</span>, and forward quantile
+            fans for{" "}
             <span className="st-mono font-medium text-foreground">
               {aggregatedForecast.included_series_ids?.join(", ")}
             </span>
             .
-          </AgentBubble>
+          </StudioNote>
         </div>
       </div>
 
@@ -125,7 +125,7 @@ export function ForecastReview({
           <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-2">
               <LineChart className="size-4 text-[var(--st-brand)]" />
-              <span className="text-sm font-medium text-foreground">Sybilion forecasts · per signal</span>
+              <span className="text-sm font-medium text-foreground">Forecasts · per signal</span>
             </div>
             {seriesList.length > 0 && (
               <ToggleGroup
@@ -178,7 +178,7 @@ export function ForecastReview({
           <CardContent>
             <div className="mb-3 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <span className="text-sm font-medium text-foreground">Policy rate · Sybilion fan</span>
+                <span className="text-sm font-medium text-foreground">Policy rate · quantile fan</span>
                 <Pill tone="brand">{aggregatedForecast.target_series_id ?? "FEDFUNDS"}</Pill>
               </div>
               <ToggleGroup
@@ -217,7 +217,7 @@ export function ForecastReview({
                 <span className="text-sm font-medium text-foreground">Your reaction function</span>
               </div>
               <p className="mt-0.5 text-[11px] text-muted-foreground">
-                Calibration for the decision step — chart shows Sybilion output as returned
+                Calibration for the decision step — chart shows forecast output as returned
               </p>
 
               <div className="mt-4 space-y-4">
