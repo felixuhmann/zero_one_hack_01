@@ -52,9 +52,9 @@ const SCENARIOS: { id: string; label: string; apply: (a: Assumption[]) => Assump
 ];
 
 const CHALLENGES = [
-  { id: "cut", q: "Why not just cut now?", a: "Cutting into above-target inflation risks un-anchoring expectations — the 2025 framework's red line. The labor data isn't yet weak enough to override that, so I hold with an easing bias rather than pre-committing." },
-  { id: "lag", q: "Aren't you ignoring policy lags?", a: "No — that's exactly why the median path already drifts lower. I'm pricing the lag into the forecast horizon; acting today would double-count it given the market has ~1.3 cuts in already." },
-  { id: "cautious", q: "Push back — you're too cautious.", a: "Fair challenge. If you raise your evidence threshold toward 'preemptive' in calibration, my bar to move drops and I'll front-load. Try the Labor-shock scenario to see how fast I pivot when the data justify it." },
+  { id: "cut", q: "Why not just cut now?", a: "Cutting into above-target inflation risks un-anchoring expectations — the 2025 framework's red line. The labor data isn't yet weak enough to override that, so the call stays on hold with an easing bias rather than pre-committing." },
+  { id: "lag", q: "Aren't you ignoring policy lags?", a: "No — that's exactly why the median path already drifts lower. The lag is priced into the forecast horizon; acting today would double-count it given the market has ~1.3 cuts in already." },
+  { id: "cautious", q: "Push back — you're too cautious.", a: "Fair challenge. If you raise the evidence threshold toward 'preemptive' in calibration, the bar to move drops and policy can front-load. Try the Labor-shock scenario to see how fast the call pivots when the data justify it." },
 ];
 
 export function Recommendation({ calibration, onBack, onRestart }: Props) {
