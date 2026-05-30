@@ -12,6 +12,7 @@ US_SIGNAL_CONFIGS = [
     {"series_id": "DGS2",     "weight": 0.25, "recency_factor": 0.85, "role": SignalRole.LEADING},
     {"series_id": "PCEPILFE", "weight": 0.25, "recency_factor": 0.70, "role": SignalRole.INFLATION},
     {"series_id": "UNRATE",   "weight": 0.20, "recency_factor": 0.60, "role": SignalRole.LABOR},
+    {"series_id": "NAPM",     "weight": 0.10, "recency_factor": 0.80, "role": SignalRole.ACTIVITY},
 ]
 
 # ------------------------------------------------------------------
@@ -73,6 +74,14 @@ _FORECAST_METADATA: dict[str, dict] = {
         "keywords": [
             "wage growth", "hourly earnings", "labor costs",
             "wage inflation", "sticky inflation", "compensation",
+        ],
+    },
+    "NAPM": {
+        "title": "NAPM / ISM Manufacturing Activity Forecast",
+        "description": "FRED manufacturing activity series NAPM, using the legacy NAPM series until 2000 and the ISM manufacturing PMI series thereafter.",
+        "keywords": [
+            "NAPM", "ISM", "manufacturing PMI", "economic activity",
+            "business survey", "leading indicator",
         ],
     },
 }
