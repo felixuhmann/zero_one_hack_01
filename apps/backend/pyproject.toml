@@ -7,12 +7,16 @@ name = "forecasting-backend"
 version = "0.1.0"
 requires-python = ">=3.11"
 dependencies = [
+    "fastapi>=0.115",
     "pandas>=2.0",
+    "python-dotenv>=1.0",
     "requests>=2.31",
+    "uvicorn[standard]>=0.32",
 ]
 
 [project.scripts]
 forecast-pipeline = "forecasting.cli:main"
+forecast-api = "forecasting.cli:serve"
 
 [tool.setuptools.packages.find]
 where = ["."]

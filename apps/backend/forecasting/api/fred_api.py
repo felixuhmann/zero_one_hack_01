@@ -4,15 +4,18 @@ import pandas as pd
 import requests
 
 from forecasting.api.http_utils import parse_json_response
+from forecasting.env import SYBILION_MIN_OBSERVATIONS, _strip_env
 
 
 class FREDClient:
     BASE_URL = "https://api.stlouisfed.org/fred"
 
     def __init__(self):
-        self.api_key = os.environ.get("FRED_API_KEY")
+        self.api_key = _strip_env(os.environ.get("FRED_API_KEY"))
         if not self.api_key:
-            raise EnvironmentError("Set FRED_API_KEY before fetching FRED data.")
+            raise EnvironmentError(
+                "Set FRED_API_KEY in .env.example (or .env) before fetching FRED data."
+            )
 
     def fetch_series_observations(
         self,
@@ -25,7 +28,9 @@ class FREDClient:
         Gibt dict {YYYY-MM-DD: float} zurück — direkt als Sybilion timeseries verwendbar.
         """
         end = pd.Timestamp.today().normalize().replace(day=1)
-        start = end - pd.DateOffset(months=periods)
+        # Request extra months so lagging/missing latest prints still yield enough points
+        window_months = periods + 4
+        start = end - pd.DateOffset(months=window_months)
 
         params = {
             "series_id": series_id,
@@ -51,15 +56,17 @@ class FREDClient:
             if obs.get("value") not in (None, ".", "")
         }
 
-        if len(timeseries) < periods:
-            raise ValueError(
-                f"FRED series {series_id} has only {len(timeseries)} valid points; "
-                f"need at least {periods}."
-            )
-
         sorted_dates = sorted(timeseries)
         trimmed_dates = sorted_dates[-periods:]
-        return {date: timeseries[date] for date in trimmed_dates}
+        result = {date: timeseries[date] for date in trimmed_dates}
+
+        if len(result) < SYBILION_MIN_OBSERVATIONS:
+            raise ValueError(
+                f"FRED series {series_id} has only {len(result)} valid points after trim; "
+                f"need at least {SYBILION_MIN_OBSERVATIONS} (Sybilion minimum)."
+            )
+
+        return result
 
     def fetch_multiple(
         self,

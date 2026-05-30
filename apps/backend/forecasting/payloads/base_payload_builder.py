@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 
-from api.fred_api import FREDClient
+from forecasting.api.fred_api import FREDClient
 
 
 class BasePayloadBuilder(ABC):

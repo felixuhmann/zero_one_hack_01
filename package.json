@@ -3,6 +3,7 @@
   "private": true,
   "scripts": {
     "dev:frontend": "npm run dev --prefix apps/frontend",
+    "dev:backend": "cd apps/backend && uvicorn forecasting.cli:app --host 127.0.0.1 --port 8000",
     "dev": "npm run dev:frontend",
     "build:frontend": "npm run build --prefix apps/frontend",
     "pipeline": "cd apps/backend && python -m forecasting"

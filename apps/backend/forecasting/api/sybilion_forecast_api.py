@@ -3,13 +3,17 @@ import os
 import requests
 
 from forecasting.api.http_utils import parse_json_response
+from forecasting.env import _strip_env
 
 
 def sybilion_token():
-    token = os.environ.get("SYBILION_API_KEY")
+    token = _strip_env(os.environ.get("SYBILION_API_KEY")) or _strip_env(
+        os.environ.get("SYBILION_API_TOKEN")
+    )
+    print(token)
     if not token:
         raise EnvironmentError(
-            "Set SYBILION_API_KEY or SYBILION_API_TOKEN before calling the Sybilion API."
+            "Set SYBILION_API_KEY in .env.example (or .env) before calling the Sybilion API."
         )
     return token
 

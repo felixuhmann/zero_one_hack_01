@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from enum import Enum
 
+from forecasting.analysis.forecast_series import extract_forecast_series_from_signal
+
 
 class Scenario(Enum):
     DOVISH_PIVOT = "dovish_pivot"   # Zinssenkung erwartet
@@ -248,15 +250,7 @@ class ScenarioClassifier:
 
     @staticmethod
     def _extract_forecast_series(raw_forecasts: dict, series_id: str) -> dict[str, float]:
-        try:
-            raw_series = raw_forecasts[series_id]["forecast"]["data"]["forecast_series"]
-            return {
-                date: point["forecast"]
-                for date, point in raw_series.items()
-                if isinstance(point, dict) and "forecast" in point
-            }
-        except (KeyError, TypeError):
-            return {}
+        return extract_forecast_series_from_signal(raw_forecasts.get(series_id))
 
     def _explain(
         self,

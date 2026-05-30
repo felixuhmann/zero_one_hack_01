@@ -2,14 +2,39 @@ from __future__ import annotations
 
 import json
 
-from api.fred_api import FREDClient
-from api.sybilion_forecast_api import SybilionForecastApiClient
-from analysis.ensemble_engine import EnsembleEngine
-from analysis.scenario_classifier import ScenarioClassifier
-from fed_rate_pipeline import FedRatePipeline
-from payloads.fed_rate_payloads import FedRatePayloadBuilder, US_SIGNAL_CONFIGS
-from payloads.ecb_rate_payloads import ECBRatePayloadBuilder, ECB_SIGNAL_CONFIGS
-# from payloads.boj_rate_payloads import BoJRatePayloadBuilder, BOJ_SIGNAL_CONFIGS
+import uvicorn
+from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+
+from forecasting.env import load_env
+
+load_env()
+
+from forecasting.analysis.ensemble_engine import EnsembleEngine
+from forecasting.analysis.forecast_series import extract_forecast_series_from_signal
+from forecasting.analysis.scenario_classifier import ScenarioClassifier
+from forecasting.api.fred_api import FREDClient
+from forecasting.api.sybilion_forecast_api import SybilionForecastApiClient
+from forecasting.fed_rate_pipeline import FedRatePipeline
+from forecasting.payloads.ecb_rate_payloads import ECBRatePayloadBuilder, ECB_SIGNAL_CONFIGS
+from forecasting.payloads.fed_rate_payloads import FedRatePayloadBuilder, US_SIGNAL_CONFIGS
+
+app = FastAPI(
+    title="Fed Rate Forecast API",
+    description="Runs the FRED → Sybilion → ensemble → scenario pipeline.",
+    version="0.1.0",
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 def build_pipeline(
@@ -28,27 +53,118 @@ def build_pipeline(
     )
 
 
+def serialize_pipeline_result(result: dict) -> dict:
+    """JSON-safe view of pipeline.run() for the frontend."""
+    signals_out: dict = {}
+    for series_id, item in result.get("signals", {}).items():
+        if item is None:
+            signals_out[series_id] = None
+            continue
+        signals_out[series_id] = {
+            "series_id": item["series_id"],
+            "weight": item["weight"],
+            "job": item["job"],
+            "forecast": item.get("forecast"),
+        }
+
+    return {
+        "signals": signals_out,
+        "ensemble": result.get("ensemble"),
+        "scenario": result.get("scenario"),
+    }
+
+
+def print_run_summary(result: dict) -> None:
+    print("\nOrchestrator results:")
+    for series_id, item in result.get("signals", {}).items():
+        if item is None:
+            print(f"- {series_id}: failed")
+            continue
+
+        status = item["job"].get("status")
+        point_count = len(extract_forecast_series_from_signal(item))
+        print(
+            f"- {series_id}: status={status}, "
+            f"weight={item['weight']}, "
+            f"forecast_points={point_count}"
+        )
+
+    if "ensemble" in result:
+        ensemble = result["ensemble"]
+        print("\nEnsemble summary:")
+        print(f"- contributing_signals: {ensemble.get('contributing_signals', [])}")
+        print(f"- normalized_weights: {ensemble.get('normalized_weights', {})}")
+        print(f"- dropped_signals: {ensemble.get('dropped_signals', [])}")
+
+    if "scenario" in result:
+        scenario = result["scenario"]
+        print("\nScenario classification:")
+        print(f"- scenario: {scenario.get('scenario')}")
+        print(f"- confidence: {scenario.get('confidence')}")
+        print(f"- trigger: {scenario.get('trigger')}")
+
+
+def _print_result(result: dict) -> None:
+    scenario = result.get("scenario", {})
+    ensemble = result.get("ensemble", {})
+
+    print(f"Szenario:   {scenario.get('scenario', 'N/A').upper()}")
+    print(f"Konfidenz:  {scenario.get('confidence', 'N/A')}")
+    print(f"Delta 3M:   {scenario.get('delta_3m', 0):+.3f} pp")
+    print(f"Delta 6M:   {scenario.get('delta_6m', 0):+.3f} pp")
+    print(f"Inflation:  {scenario.get('inflation_trend', 'N/A')}")
+    print(f"Trigger:    {scenario.get('trigger', 'N/A')}")
+    print(f"Signale:    {', '.join(ensemble.get('contributing_signals', []))}")
+    print(f"Gewichte:   {json.dumps(ensemble.get('normalized_weights', {}))}")
+    print()
+
+
+@app.get("/api/health")
+def health() -> dict[str, str]:
+    return {"status": "ok"}
+
+
+@app.post("/api/forecast/run")
+def run_forecast() -> dict:
+    """
+    Run the US Fed forecasting pipeline and return signals, ensemble, and scenario.
+
+    This can take several minutes while Sybilion jobs complete.
+    """
+    try:
+        fred = FREDClient()
+        pipeline = build_pipeline(
+            fred=fred,
+            payload_builder=FedRatePayloadBuilder(fred),
+            artifacts_dir="artifacts/fed_rate_forecast",
+        )
+        result = pipeline.run(signal_configs=US_SIGNAL_CONFIGS)
+        return serialize_pipeline_result(result)
+    except EnvironmentError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+    except RuntimeError as exc:
+        raise HTTPException(status_code=502, detail=str(exc)) from exc
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
+
+
 def main() -> None:
+    load_env()
     fred = FREDClient()
 
-    # ------------------------------------------------------------------
-    # Fed (USA)
-    # ------------------------------------------------------------------
-    # fed_pipeline = build_pipeline(
-    #     fred=fred,
-    #     payload_builder=FedRatePayloadBuilder(fred),
-    #     artifacts_dir="artifacts/fed",
-    # )
+    # Fed (USA) — default CLI path
+    fed_pipeline = build_pipeline(
+        fred=fred,
+        payload_builder=FedRatePayloadBuilder(fred),
+        artifacts_dir="artifacts/fed_rate_forecast",
+    )
+    print("=" * 50)
+    print("FED FORECAST")
+    print("=" * 50)
+    fed_result = fed_pipeline.run(signal_configs=US_SIGNAL_CONFIGS)
+    _print_result(fed_result)
 
-    # print("=" * 50)
-    # print("FED FORECAST")
-    # print("=" * 50)
-    # fed_result = fed_pipeline.run(signal_configs=US_SIGNAL_CONFIGS)
-    # _print_result(fed_result)
-
-    # ------------------------------------------------------------------
-    # ECB (Euro Area) — aktivieren sobald ECB-Builder fertig
-    # ------------------------------------------------------------------
+    # ECB (Euro Area)
     ecb_pipeline = build_pipeline(
         fred=fred,
         payload_builder=ECBRatePayloadBuilder(fred),
@@ -60,35 +176,10 @@ def main() -> None:
     ecb_result = ecb_pipeline.run(signal_configs=ECB_SIGNAL_CONFIGS)
     _print_result(ecb_result)
 
-    # ------------------------------------------------------------------
-    # BoJ (Japan) — aktivieren sobald BoJ-Builder fertig
-    # ------------------------------------------------------------------
-    # boj_pipeline = build_pipeline(
-    #     fred=fred,
-    #     payload_builder=BoJRatePayloadBuilder(fred),
-    #     artifacts_dir="artifacts/boj",
-    # )
-    # print("=" * 50)
-    # print("BOJ FORECAST")
-    # print("=" * 50)
-    # boj_result = boj_pipeline.run(signal_configs=BOJ_SIGNAL_CONFIGS)
-    # _print_result(boj_result)
 
-
-def _print_result(result: dict) -> None:
-    scenario = result.get("scenario", {})
-    ensemble = result.get("ensemble", {})
-
-    print(f"Szenario:   {scenario.get('scenario', 'N/A').upper()}")
-    print(f"Konfidenz:  {scenario.get('confidence', 'N/A')}")
-    print(f"Delta 3M:   {scenario.get('delta_3m', 0):+.3f} pp")
-    print(f"Delta 6M:   {scenario.get('delta_6m', 0):+.3f} pp")
-    print(f"PCE Trend:  {scenario.get('pce_trend', 'N/A')}")
-    print(f"Trigger:    {scenario.get('trigger', 'N/A')}")
-    print(f"Signale:    {', '.join(ensemble.get('contributing_signals', []))}")
-    print(f"Gewichte:   {json.dumps(ensemble.get('normalized_weights', {}))}")
-    print()
+def serve(host: str = "127.0.0.1", port: int = 8000) -> None:
+    uvicorn.run(app, host=host, port=port)
 
 
 if __name__ == "__main__":
-    main()
+    serve()

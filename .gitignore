@@ -32,3 +32,4 @@ artifacts/
 # Environment variables and secrets
 .env
 .venv
+to_hide/

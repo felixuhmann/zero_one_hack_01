@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from forecasting.analysis.forecast_series import extract_forecast_series_from_signal
+
 
 class EnsembleEngine:
     """
@@ -58,22 +60,12 @@ class EnsembleEngine:
         for sid, data in raw_forecasts.items():
             if not data:
                 continue
-            forecast_series = self._extract_forecast_series(data)
-            if forecast_series:
+            if extract_forecast_series_from_signal(data):
                 valid[sid] = data
         return valid
 
-    def _extract_forecast_series(self, data: dict) -> dict:
-        """Extrahiert die numerischen Forecast-Werte aus forecast_series."""
-        try:
-            raw_series = data["forecast"]["data"]["forecast_series"]
-            return {
-                date: point["forecast"]
-                for date, point in raw_series.items()
-                if isinstance(point, dict) and "forecast" in point
-            }
-        except (KeyError, TypeError):
-            return {}
+    def _extract_forecast_series(self, data: dict) -> dict[str, float]:
+        return extract_forecast_series_from_signal(data)
 
     def _weighted_average(self, valid: dict, total_weight: float) -> dict:
         """

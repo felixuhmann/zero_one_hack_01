@@ -5,11 +5,12 @@ import os
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
-from analysis.ensemble_engine import EnsembleEngine
-from analysis.scenario_classifier import ScenarioClassifier
-from api.fred_api import FREDClient
-from api.sybilion_forecast_api import SybilionForecastApiClient
-from payloads.fed_rate_payloads import US_SIGNAL_CONFIGS, FedRatePayloadBuilder
+from forecasting.analysis.ensemble_engine import EnsembleEngine
+from forecasting.analysis.forecast_series import pick_forecast_payload
+from forecasting.analysis.scenario_classifier import ScenarioClassifier
+from forecasting.api.fred_api import FREDClient
+from forecasting.api.sybilion_forecast_api import SybilionForecastApiClient
+from forecasting.payloads.fed_rate_payloads import FedRatePayloadBuilder
 
 
 class FedRatePipeline:
@@ -116,7 +117,7 @@ class FedRatePipeline:
         print("-> Erzeuge Ensemble Forecast...")
         return self.ensemble_engine.synthesize(signals)
 
-    def _classify_scenario(self, ensemble: dict, signals: dict, signal_configs) -> dict:
+    def _classify_scenario(self, ensemble: dict, signals: dict, signal_configs: list[dict]) -> dict:
         """Leitet das Szenario aus Ensemble + Rohsignalen ab."""
         print("-> Klassifiziere Szenario...")
         return self.scenario_classifier.classify(ensemble, signals, signal_configs)
@@ -133,7 +134,7 @@ class FedRatePipeline:
             "series_id": cfg["series_id"],
             "weight":    cfg["weight"],
             "job":       job,
-            "forecast":  artifacts.get("forecast.json"),
+            "forecast":  pick_forecast_payload(artifacts),
         }
 
     def _submit_and_poll(

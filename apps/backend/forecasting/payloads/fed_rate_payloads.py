@@ -1,16 +1,17 @@
 from __future__ import annotations
 
-from payloads.base_payload_builder import BasePayloadBuilder
+from forecasting.analysis.scenario_classifier import SignalRole
+from forecasting.payloads.base_payload_builder import BasePayloadBuilder
 
 # ------------------------------------------------------------------
 # US Signal-Konfiguration für FedForecastOrchestrator
 # ------------------------------------------------------------------
 
 US_SIGNAL_CONFIGS = [
-    {"series_id": "FEDFUNDS",       "weight": 0.30, "recency_factor": 0.75},
-    {"series_id": "DGS2",           "weight": 0.25, "recency_factor": 0.85},
-    {"series_id": "PCEPILFE",       "weight": 0.25, "recency_factor": 0.70},
-    {"series_id": "UNRATE",         "weight": 0.20, "recency_factor": 0.60},
+    {"series_id": "FEDFUNDS", "weight": 0.30, "recency_factor": 0.75, "role": SignalRole.TARGET},
+    {"series_id": "DGS2",     "weight": 0.25, "recency_factor": 0.85, "role": SignalRole.LEADING},
+    {"series_id": "PCEPILFE", "weight": 0.25, "recency_factor": 0.70, "role": SignalRole.INFLATION},
+    {"series_id": "UNRATE",   "weight": 0.20, "recency_factor": 0.60, "role": SignalRole.LABOR},
 ]
 
 # ------------------------------------------------------------------

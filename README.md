@@ -87,7 +87,13 @@ Or from `apps/frontend`:
 cd apps/frontend && npm run dev
 ```
 
-The Vite dev server proxies `/api` to `http://127.0.0.1:8000` for when a backend HTTP server is added. There is no API server yet; the UI runs standalone.
+The Vite dev server proxies `/api` to `http://127.0.0.1:8000`. Start the API in another terminal:
+
+```bash
+npm run dev:backend
+```
+
+Endpoints: `GET /api/health`, `POST /api/forecast/run` (runs the full pipeline; can take a long time).
 
 The frontend uses **Tailwind CSS v4** with **shadcn/ui** (`@tailwindcss/vite` plugin). Add components with `npx shadcn@latest add <name>` from `apps/frontend/`.
 
