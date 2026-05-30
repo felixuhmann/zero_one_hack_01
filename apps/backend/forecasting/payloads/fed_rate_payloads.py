@@ -12,7 +12,7 @@ US_SIGNAL_CONFIGS = [
     {"series_id": "DGS2",     "weight": 0.25, "recency_factor": 0.85, "role": SignalRole.LEADING},
     {"series_id": "PCEPILFE", "weight": 0.25, "recency_factor": 0.70, "role": SignalRole.INFLATION},
     {"series_id": "UNRATE",   "weight": 0.20, "recency_factor": 0.60, "role": SignalRole.LABOR},
-    {"series_id": "NAPM",     "weight": 0.10, "recency_factor": 0.80, "role": SignalRole.ACTIVITY},
+    {"series_id": "NAPM",     "weight": 0.10, "recency_factor": 0.80, "role": SignalRole.CONTEXT},
 ]
 
 # ------------------------------------------------------------------
