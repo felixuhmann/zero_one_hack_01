@@ -159,6 +159,7 @@ export function DecisionStudio() {
                 {step === "recommendation" && (
                   <Recommendation
                     calibration={calibration}
+                    aggregatedForecast={forecast}
                     onBack={() => go("forecast")}
                     onRestart={() => {
                       setStep("country");
