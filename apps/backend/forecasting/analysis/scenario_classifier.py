@@ -31,8 +31,9 @@ class SignalRole:
     LEADING   = "leading"    # Marktbasierter Vorlaufindikator (DGS2, IRLTLT01EZM156N, ...)
     INFLATION = "inflation"  # Inflationsserie (PCEPILFE, CP0000EZ19M086NEST, ...)
     LABOR     = "labor"      # Arbeitsmarkt (UNRATE, UEMPEA, ...)
-    ACTIVITY = "activity"
-    CREDIT = "credit"
+    CONTEXT   = "context"    # Ergänzende Kontextserie (Löhne, Finanzbedingungen, ...)
+    ACTIVITY  = "activity"
+    CREDIT    = "credit"
 
 
 class ScenarioClassifier:
