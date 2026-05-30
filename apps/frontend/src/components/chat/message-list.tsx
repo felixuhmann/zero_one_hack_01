@@ -102,7 +102,7 @@ function AssistantMessage({
               </Reasoning>
             );
           }
-          if (isToolUIPart(part) || part.type === "dynamic-tool") {
+          if (isToolUIPart(part) || (part.type as string) === "dynamic-tool") {
             return <ToolPartView key={key} part={part as ChatToolPart} />;
           }
           if (part.type === "text") {

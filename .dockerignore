@@ -1,0 +1,38 @@
+# Version control / tooling
+.git
+.gitignore
+.cursor
+.agents
+.claude
+
+# Secrets — never bake into the image (inject via platform env instead)
+.env
+.env.*
+!.env.example
+
+# Python
+.venv
+venv
+**/__pycache__
+**/*.pyc
+**/*.egg-info
+.pytest_cache
+.mypy_cache
+.ruff_cache
+
+# Node — installed/built inside the image
+**/node_modules
+apps/frontend/dist
+
+# Pipeline outputs / local data
+artifacts
+
+# Docs and editor cruft (not needed at runtime)
+*.md
+docs
+tracks
+submission
+judging
+.vscode
+.idea
+.DS_Store

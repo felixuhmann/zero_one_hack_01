@@ -10,7 +10,6 @@ _REPO_ROOT = Path(__file__).resolve().parents[3]
 SYBILION_MIN_OBSERVATIONS = 40
 
 _ENV_FILE = _REPO_ROOT / ".env"
-_ENV_EXAMPLE = _REPO_ROOT / ".env.example"
 
 
 def _strip_env(value: str | None) -> str | None:
@@ -22,18 +21,16 @@ def _strip_env(value: str | None) -> str | None:
 
 def load_env() -> None:
     """
-    Load API keys from repo-root `.env` only.
+    Load API keys from repo-root `.env` when present.
 
-    Copy `.env.example` to `.env` and set your keys there.
+    For local development, copy `.env.example` to `.env` and set your keys
+    there. In hosted/containerized deployments (Docker, Railway, ...) there is
+    usually no `.env` file and the variables are injected into the process
+    environment by the platform; in that case we simply skip file loading and
+    rely on whatever is already in `os.environ`.
     """
-    if not _ENV_FILE.is_file():
-        hint = (
-            f"Create {_ENV_FILE.name} at the repo root "
-            f"(copy from {_ENV_EXAMPLE.name}) and set FRED_API_KEY and SYBILION_API_KEY."
-        )
-        raise EnvironmentError(hint)
-
-    load_dotenv(_ENV_FILE)
+    if _ENV_FILE.is_file():
+        load_dotenv(_ENV_FILE)
 
     managed_vars = (
         "FRED_API_KEY",

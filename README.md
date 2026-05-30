@@ -138,6 +138,38 @@ npm run build:frontend
 
 Output: `apps/frontend/dist/`
 
+### Deploy (Docker / Railway)
+
+The app ships as a **single container**: the multi-stage [`Dockerfile`](./Dockerfile)
+builds the frontend, then the FastAPI backend serves both the API (`/api/*`) and
+the built static UI from the **same origin** (so no CORS/proxy config is needed
+in production).
+
+**Build & run locally with Docker:**
+
+```bash
+docker build -t zero-one-hack .
+docker run --rm -p 8000:8000 \
+  -e FRED_API_KEY=... \
+  -e SYBILION_API_KEY=... \
+  -e AI_GATEWAY_API_KEY=... \
+  zero-one-hack
+# open http://localhost:8000
+```
+
+**Railway:** [`railway.json`](./railway.json) tells Railway to build from the
+`Dockerfile` and health-check `/api/health`. Just connect the repo, set the env
+vars below in the service **Variables** tab, and deploy. Railway injects `$PORT`
+automatically and the server binds it (no `.env` file needed — see below).
+
+**Required env vars** (set in the platform, not a committed file): `FRED_API_KEY`,
+`SYBILION_API_KEY`, `AI_GATEWAY_API_KEY`. Optional: `LLM_MODEL`, `LLM_BASE_URL`,
+`HOST`/`PORT` (defaults `0.0.0.0` / `8000`), and `CORS_ALLOW_ORIGINS`
+(comma-separated extra origins, only needed if you host the frontend separately).
+
+> In hosted deployments there is no `.env` file; `load_env()` skips file loading
+> and reads keys straight from the process environment injected by the platform.
+
 ### Project layout (backend package)
 
 ```text

@@ -1,11 +1,13 @@
 from __future__ import annotations
 
 import json
+import os
+from pathlib import Path
 
 import uvicorn
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import StreamingResponse
+from fastapi.responses import FileResponse, StreamingResponse
 
 from forecasting.env import load_env
 
@@ -28,12 +30,22 @@ app = FastAPI(
     version="0.1.0",
 )
 
+# Allowed CORS origins. The bundled frontend is served from the same origin in
+# production (so it needs no CORS), but the Vite dev server (5173) and any extra
+# origins listed in CORS_ALLOW_ORIGINS (comma-separated) are permitted too.
+_DEFAULT_CORS_ORIGINS = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+]
+_extra_origins = [
+    origin.strip()
+    for origin in os.environ.get("CORS_ALLOW_ORIGINS", "").split(",")
+    if origin.strip()
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
-    ],
+    allow_origins=_DEFAULT_CORS_ORIGINS + _extra_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -176,6 +188,33 @@ def run_forecast() -> dict:
         raise HTTPException(status_code=500, detail=str(exc)) from exc
 
 
+# Serve the built frontend (apps/frontend/dist) from the same origin as the API
+# when it exists. API routes are registered above, so they take precedence over
+# this catch-all mount. In dev (no build) this block is simply skipped and the
+# Vite dev server serves the UI instead.
+_FRONTEND_DIST = Path(__file__).resolve().parents[2] / "frontend" / "dist"
+
+if _FRONTEND_DIST.is_dir():
+
+    @app.get("/{full_path:path}")
+    def spa_fallback(full_path: str) -> FileResponse:
+        """Serve a static asset if it exists, otherwise the SPA entrypoint.
+
+        Registered after the API routes, so `/api/*` always wins. Existing
+        files (e.g. `/assets/index-*.js`) are served directly; any other path
+        falls back to `index.html` for client-side routing.
+        """
+        candidate = (_FRONTEND_DIST / full_path).resolve()
+        # Guard against path traversal outside the dist directory.
+        if (
+            full_path
+            and _FRONTEND_DIST in candidate.parents
+            and candidate.is_file()
+        ):
+            return FileResponse(candidate)
+        return FileResponse(_FRONTEND_DIST / "index.html")
+
+
 def main() -> None:
     load_env()
     fred = FREDClient()
@@ -205,8 +244,16 @@ def main() -> None:
     _print_result(ecb_result)
 
 
-def serve(host: str = "127.0.0.1", port: int = 8000) -> None:
-    uvicorn.run(app, host=host, port=port)
+def serve(host: str | None = None, port: int | None = None) -> None:
+    """Run the API server.
+
+    Defaults are deployment-friendly: bind to all interfaces and honour the
+    `PORT` (and optional `HOST`) environment variables that hosting platforms
+    such as Railway inject. Pass explicit args to override.
+    """
+    resolved_host = host or os.environ.get("HOST", "0.0.0.0")
+    resolved_port = port or int(os.environ.get("PORT", "8000"))
+    uvicorn.run(app, host=resolved_host, port=resolved_port)
 
 
 if __name__ == "__main__":
