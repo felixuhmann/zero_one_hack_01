@@ -49,7 +49,7 @@ export function DataSources({ include, setInclude, calibration, onBack, onNext }
   return (
     <div className="space-y-7">
       <div className="space-y-3">
-        <Eyebrow>Step 03 · Data sources</Eyebrow>
+        <Eyebrow>Step 02 · Data sources</Eyebrow>
         <h1 className="st-display text-4xl md:text-5xl" style={{ color: "var(--st-ink)" }}>
           Approve the inputs
         </h1>

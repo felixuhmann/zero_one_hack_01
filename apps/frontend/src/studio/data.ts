@@ -272,6 +272,125 @@ function round(v: number): number {
   return Math.round(v * 1000) / 1000;
 }
 
+/* ------------------ Per-series Sybilion forecasts ------------------ */
+
+interface SeriesConfig {
+  unit: string;
+  decimals: number;
+  vol: number; // band sigma scale, in value units
+  terminal: number; // model median at the +12m horizon
+  history: number[]; // oldest -> newest monthly observations
+  read: string; // one-line Sybilion read on the forecast
+}
+
+// Hand-shaped recent histories + a plausible 12-month median path per signal.
+// Mirrors the funds-rate fan so every selected input gets its own probabilistic
+// forecast the user can tab through.
+const SERIES_CONFIG: Record<string, SeriesConfig> = {
+  PCEPILFE: {
+    unit: "%",
+    decimals: 1,
+    vol: 0.12,
+    terminal: 2.5,
+    history: [3.6, 3.5, 3.5, 3.4, 3.3, 3.3, 3.2, 3.2, 3.1, 3.1, 3.0, 3.0, 3.0, 3.0],
+    read: "Disinflation continues but stalls ~0.5pp above target — the last mile is sticky.",
+  },
+  DGS2: {
+    unit: "%",
+    decimals: 2,
+    vol: 0.16,
+    terminal: 3.35,
+    history: [4.6, 4.42, 4.3, 4.18, 4.05, 3.96, 3.88, 3.8, 3.74, 3.7, 3.66, 3.63, 3.62, 3.62],
+    read: "The 2Y drifts lower, pricing roughly one-and-a-third cuts over the year.",
+  },
+  UNRATE: {
+    unit: "%",
+    decimals: 1,
+    vol: 0.12,
+    terminal: 4.8,
+    history: [4.0, 4.0, 4.1, 4.1, 4.2, 4.2, 4.2, 4.3, 4.3, 4.3, 4.4, 4.4, 4.4, 4.4],
+    read: "Unemployment grinds higher toward ~4.8% — the live downside risk to the mandate.",
+  },
+  CES0500000003: {
+    unit: "%",
+    decimals: 1,
+    vol: 0.12,
+    terminal: 3.4,
+    history: [4.5, 4.4, 4.4, 4.3, 4.3, 4.2, 4.1, 4.1, 4.0, 4.0, 3.95, 3.9, 3.9, 3.9],
+    read: "Wage growth cools toward a 2%-consistent pace, easing sticky-inflation pressure.",
+  },
+  NFCI: {
+    unit: "",
+    decimals: 2,
+    vol: 0.04,
+    terminal: -0.3,
+    history: [-0.45, -0.43, -0.42, -0.41, -0.4, -0.39, -0.38, -0.37, -0.36, -0.35, -0.34, -0.35, -0.35, -0.35],
+    read: "Financial conditions stay modestly loose (negative = accommodative).",
+  },
+  PAYEMS: {
+    unit: "k",
+    decimals: 0,
+    vol: 22,
+    terminal: 90,
+    history: [256, 210, 185, 170, 150, 142, 135, 128, 120, 118, 124, 119, 121, 120],
+    read: "Payroll momentum keeps slowing toward ~90k/month — below the breakeven pace.",
+  },
+};
+
+/** A generalised probabilistic fan for any series (absolute units). */
+export function buildSeriesBand(start: number, terminal: number, vol: number): BandPoint[] {
+  const out: BandPoint[] = [];
+  const drift = terminal - start;
+  out.push({ t: monthLabel(0), p05: start, p25: start, p50: start, p75: start, p95: start, history: start });
+  for (let m = 1; m <= 12; m++) {
+    const frac = m / 12;
+    const median = start + drift * (1 - Math.pow(1 - frac, 1.7));
+    const sigma = (0.4 + Math.sqrt(frac)) * vol;
+    out.push({
+      t: monthLabel(m),
+      p05: round(median - 1.64 * sigma),
+      p25: round(median - 0.67 * sigma),
+      p50: round(median),
+      p75: round(median + 0.67 * sigma),
+      p95: round(median + 1.64 * sigma),
+    });
+  }
+  return out;
+}
+
+export interface SeriesForecast {
+  seriesId: string;
+  title: string;
+  unit: string;
+  decimals: number;
+  read: string;
+  history: SeriesPoint[];
+  band: BandPoint[];
+  start: number;
+  terminal: number;
+}
+
+export function getSeriesForecast(seriesId: string): SeriesForecast | null {
+  const cfg = SERIES_CONFIG[seriesId];
+  if (!cfg) return null;
+  const src = PROPOSED_SOURCES.find((s) => s.seriesId === seriesId);
+  const n = cfg.history.length;
+  const history = cfg.history.map((v, i) => ({ t: monthLabel(-(n - 1) + i), v }));
+  const start = cfg.history[n - 1];
+  const band = buildSeriesBand(start, cfg.terminal, cfg.vol);
+  return {
+    seriesId,
+    title: src?.title ?? seriesId,
+    unit: cfg.unit,
+    decimals: cfg.decimals,
+    read: cfg.read,
+    history,
+    band,
+    start,
+    terminal: cfg.terminal,
+  };
+}
+
 /* ------------------------ Driver importance ------------------------ */
 
 export interface Driver {

@@ -7,6 +7,13 @@ interface FanChartProps {
   history: SeriesPoint[];
   band: BandPoint[];
   horizonMonths: number;
+  unit?: string;
+  decimals?: number;
+  historyLabel?: string;
+  backtest?: { t: string; pred: number }[];
+  // fixed y-axis range; when set, tweaking the forecast won't rescale the
+  // static history/backtest portion of the chart
+  yDomain?: [number, number];
 }
 
 const W = 940;
@@ -19,9 +26,19 @@ function fmtMonth(t: string): string {
   return `${names[Number(m)]} '${y.slice(2)}`;
 }
 
-export function FanChart({ history, band, horizonMonths }: FanChartProps) {
+export function FanChart({
+  history,
+  band,
+  horizonMonths,
+  unit = "%",
+  decimals = 2,
+  historyLabel = "Realised funds rate",
+  backtest,
+  yDomain,
+}: FanChartProps) {
   const wrapRef = useRef<HTMLDivElement>(null);
   const [hover, setHover] = useState<number | null>(null);
+  const tickDecimals = decimals === 0 ? 0 : 1;
 
   const model = useMemo(() => {
     // Unified timeline: history offsets then forecast offsets (seam shared).
@@ -33,8 +50,8 @@ export function FanChart({ history, band, horizonMonths }: FanChartProps) {
       ...history.map((p) => p.v),
       ...band.flatMap((b) => [b.p05, b.p95]),
     ];
-    const min = Math.min(...allVals) - 0.25;
-    const max = Math.max(...allVals) + 0.25;
+    const min = yDomain ? yDomain[0] : Math.min(...allVals) - 0.25;
+    const max = yDomain ? yDomain[1] : Math.max(...allVals) + 0.25;
 
     const innerW = W - PAD.l - PAD.r;
     const innerH = H - PAD.t - PAD.b;
@@ -72,6 +89,15 @@ export function FanChart({ history, band, horizonMonths }: FanChartProps) {
       xLabels.push({ i, label });
     }
 
+    // backtest predicted-vs-realised overlay, anchored to history timestamps
+    const btPts = (backtest ?? [])
+      .map((d) => ({ hi: history.findIndex((h) => h.t === d.t), pred: d.pred }))
+      .filter((p) => p.hi >= 0);
+    const backtestLine = btPts.length
+      ? btPts.map((p, k) => `${k === 0 ? "M" : "L"}${x(p.hi)},${y(p.pred)}`).join(" ")
+      : null;
+    const backtestDots = btPts.map((p) => ({ cx: x(p.hi), cy: y(p.pred) }));
+
     return {
       cols,
       idxOf,
@@ -88,8 +114,10 @@ export function FanChart({ history, band, horizonMonths }: FanChartProps) {
       histLen,
       min,
       max,
+      backtestLine,
+      backtestDots,
     };
-  }, [history, band]);
+  }, [history, band, backtest, yDomain]);
 
   const horizonIdx = model.fIdx(Math.min(horizonMonths, band.length - 1));
 
@@ -129,7 +157,7 @@ export function FanChart({ history, band, horizonMonths }: FanChartProps) {
           <g key={tk.v}>
             <line x1={PAD.l} y1={tk.y} x2={W - PAD.r} y2={tk.y} stroke="var(--st-line)" strokeWidth="1" />
             <text x={PAD.l - 8} y={tk.y + 3} textAnchor="end" className="st-mono" fontSize="10" fill="var(--st-faint)">
-              {tk.v.toFixed(1)}
+              {tk.v.toFixed(tickDecimals)}
             </text>
           </g>
         ))}
@@ -214,6 +242,26 @@ export function FanChart({ history, band, horizonMonths }: FanChartProps) {
           transition={{ duration: 0.9, ease: "easeInOut" }}
         />
 
+        {/* backtest: held-out predicted path over realised history */}
+        {model.backtestLine && (
+          <>
+            <motion.path
+              d={model.backtestLine}
+              fill="none"
+              stroke="var(--st-hold)"
+              strokeWidth="2"
+              strokeDasharray="2 3"
+              strokeLinecap="round"
+              initial={{ pathLength: 0 }}
+              animate={{ pathLength: 1 }}
+              transition={{ duration: 0.9, ease: "easeInOut", delay: 0.2 }}
+            />
+            {model.backtestDots.map((d, i) => (
+              <circle key={i} cx={d.cx} cy={d.cy} r="2" fill="var(--st-hold)" />
+            ))}
+          </>
+        )}
+
         {/* median forecast */}
         <motion.path
           d={model.medianLine}
@@ -245,14 +293,15 @@ export function FanChart({ history, band, horizonMonths }: FanChartProps) {
       </svg>
 
       {hover != null && hoverData && (
-        <Tooltip wrapRef={wrapRef} xFrac={model.x(hover) / W} data={hoverData} />
+        <Tooltip wrapRef={wrapRef} xFrac={model.x(hover) / W} data={hoverData} unit={unit} decimals={decimals} />
       )}
 
       <div className="mt-1 flex flex-wrap items-center gap-x-5 gap-y-1.5 px-1">
-        <Legend swatch="line" color="var(--st-ink-soft)" label="Realised funds rate" />
+        <Legend swatch="line" color="var(--st-ink-soft)" label={historyLabel} />
         <Legend swatch="dash" color="var(--st-brand)" label="Median forecast (p50)" />
         <Legend swatch="band" color="var(--st-brand)" label="50% band (p25–p75)" />
         <Legend swatch="band-faint" color="var(--st-brand)" label="90% band (p05–p95)" />
+        {model.backtestLine && <Legend swatch="dash" color="var(--st-hold)" label="Backtest (held-out prediction)" />}
       </div>
     </div>
   );
@@ -262,15 +311,20 @@ function Tooltip({
   wrapRef,
   xFrac,
   data,
+  unit,
+  decimals,
 }: {
   wrapRef: React.RefObject<HTMLDivElement | null>;
   xFrac: number;
+  unit: string;
+  decimals: number;
   data:
     | { kind: "hist"; t: string; v: number }
     | { kind: "fc"; t: string; p05: number; p25: number; p50: number; p75: number; p95: number };
 }) {
   const w = wrapRef.current?.clientWidth ?? W;
   const left = Math.min(Math.max(xFrac * w, 70), w - 70);
+  const fmt = (v: number) => `${v.toFixed(decimals)}${unit}`;
   return (
     <div
       className="st-panel-2 pointer-events-none absolute top-2 z-10 -translate-x-1/2 px-3 py-2 text-xs shadow-xl"
@@ -281,18 +335,18 @@ function Tooltip({
       </div>
       {data.kind === "hist" ? (
         <div className="st-mono text-sm" style={{ color: "var(--st-ink)" }}>
-          {data.v.toFixed(2)}%
+          {fmt(data.v)}
         </div>
       ) : (
         <div className="space-y-0.5">
           <div className="st-mono text-base" style={{ color: "var(--st-brand)" }}>
-            {data.p50.toFixed(2)}%
+            {fmt(data.p50)}
           </div>
           <div className="st-mono" style={{ color: "var(--st-muted)", fontSize: 10 }}>
-            50%: {data.p25.toFixed(2)}–{data.p75.toFixed(2)}
+            50%: {fmt(data.p25)}–{fmt(data.p75)}
           </div>
           <div className="st-mono" style={{ color: "var(--st-faint)", fontSize: 10 }}>
-            90%: {data.p05.toFixed(2)}–{data.p95.toFixed(2)}
+            90%: {fmt(data.p05)}–{fmt(data.p95)}
           </div>
         </div>
       )}

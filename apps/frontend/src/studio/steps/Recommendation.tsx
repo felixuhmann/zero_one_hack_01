@@ -89,7 +89,7 @@ export function Recommendation({ calibration, onBack, onRestart }: Props) {
   return (
     <div className="space-y-7">
       <div className="space-y-3">
-        <Eyebrow>Step 06 · Decision</Eyebrow>
+        <Eyebrow>Step 05 · Decision</Eyebrow>
         <h1 className="st-display text-4xl md:text-5xl" style={{ color: "var(--st-ink)" }}>
           The recommendation
         </h1>

@@ -5,13 +5,10 @@ import { Check } from "lucide-react";
 import {
   DEFAULT_CALIBRATION,
   PROPOSED_SOURCES,
-  evaluateDecision,
-  defaultAssumptions,
   type CalibrationState,
 } from "@/studio/data";
 import { AgentAvatar } from "@/studio/ui/bits";
 import { CountrySelect } from "@/studio/steps/CountrySelect";
-import { Calibration } from "@/studio/steps/Calibration";
 import { DataSources } from "@/studio/steps/DataSources";
 import { Processing } from "@/studio/steps/Processing";
 import { ForecastReview } from "@/studio/steps/ForecastReview";
@@ -19,15 +16,14 @@ import { Recommendation } from "@/studio/steps/Recommendation";
 
 import "@/studio/studio.css";
 
-export type StepId = "country" | "calibration" | "sources" | "processing" | "forecast" | "recommendation";
+export type StepId = "country" | "sources" | "processing" | "forecast" | "recommendation";
 
 const STEPS: { id: StepId; label: string; hint: string }[] = [
   { id: "country", label: "Jurisdiction", hint: "Pick a central bank" },
-  { id: "calibration", label: "Calibration", hint: "Align on your stance" },
   { id: "sources", label: "Data sources", hint: "Approve the inputs" },
   { id: "processing", label: "Forecasting", hint: "Sybilion runs" },
   { id: "forecast", label: "Forecast", hint: "Read the probabilities" },
-  { id: "recommendation", label: "Decision", hint: "Act on it" },
+  { id: "recommendation", label: "Decision", hint: "Tune & act on it" },
 ];
 
 export function DecisionStudio() {
@@ -42,12 +38,6 @@ export function DecisionStudio() {
     const order = STEPS.map((s) => s.id);
     return order.indexOf(step);
   }, [step]);
-
-  // baseline decision from calibration (forecast + recommendation share it)
-  const baseDecision = useMemo(
-    () => evaluateDecision(calibration, defaultAssumptions()),
-    [calibration],
-  );
 
   function go(next: StepId) {
     setStep(next);
@@ -151,14 +141,6 @@ export function DecisionStudio() {
                 <CountrySelect
                   selected={country}
                   onSelect={(c) => setCountry(c)}
-                  onNext={() => go("calibration")}
-                />
-              )}
-              {step === "calibration" && (
-                <Calibration
-                  value={calibration}
-                  onChange={setCalibration}
-                  onBack={() => go("country")}
                   onNext={() => go("sources")}
                 />
               )}
@@ -167,7 +149,7 @@ export function DecisionStudio() {
                   include={include}
                   setInclude={setInclude}
                   calibration={calibration}
-                  onBack={() => go("calibration")}
+                  onBack={() => go("country")}
                   onNext={() => go("processing")}
                 />
               )}
@@ -180,7 +162,8 @@ export function DecisionStudio() {
               {step === "forecast" && (
                 <ForecastReview
                   calibration={calibration}
-                  decision={baseDecision}
+                  onCalibrationChange={setCalibration}
+                  include={include}
                   onBack={() => go("sources")}
                   onNext={() => go("recommendation")}
                 />

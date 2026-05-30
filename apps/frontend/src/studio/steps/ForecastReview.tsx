@@ -1,57 +1,160 @@
 import { useMemo, useState } from "react";
-import { ArrowLeft, ArrowRight, TrendingDown } from "lucide-react";
+import { ArrowLeft, ArrowRight, LineChart, Scale } from "lucide-react";
 
 import {
-  BACKTEST,
   CURRENT_RATE,
+  PROPOSED_SOURCES,
+  TEMPERAMENTS,
   backtestOverlay,
   buildForecastBand,
+  defaultAssumptions,
+  evaluateDecision,
   fundsHistory,
+  getSeriesForecast,
   type CalibrationState,
-  type DecisionResult,
+  type SeriesForecast,
 } from "@/studio/data";
 import { FanChart } from "@/studio/charts/FanChart";
-import { DriverHeatmap } from "@/studio/charts/DriverHeatmap";
 import { AgentBubble, Eyebrow, Pill, StatBlock, StudioButton } from "@/studio/ui/bits";
 
 interface Props {
   calibration: CalibrationState;
-  decision: DecisionResult;
+  onCalibrationChange: (v: CalibrationState) => void;
+  include: Record<string, boolean>;
   onBack: () => void;
   onNext: () => void;
 }
 
-export function ForecastReview({ calibration, decision, onBack, onNext }: Props) {
+export function ForecastReview({ calibration, onCalibrationChange, include, onBack, onNext }: Props) {
   const [horizon, setHorizon] = useState<3 | 6 | 12>(calibration.horizon);
+  const [activeTab, setActiveTab] = useState(0);
+
+  const setCal = <K extends keyof CalibrationState>(k: K, v: CalibrationState[K]) =>
+    onCalibrationChange({ ...calibration, [k]: v });
+
+  // the funds-rate path reacts live to the calibration controls
+  const decision = useMemo(
+    () => evaluateDecision(calibration, defaultAssumptions()),
+    [calibration],
+  );
   const history = useMemo(() => fundsHistory(), []);
   const band = useMemo(() => buildForecastBand(decision.driftBps), [decision.driftBps]);
+  const backtest = useMemo(() => backtestOverlay().map((d) => ({ t: d.t, pred: d.pred })), []);
+
+  // Fixed y-axis: history + backtest are static real data; only the forecast
+  // fan should move when the reaction function changes. The domain spans the
+  // full range the forecast can ever reach (driftBps is clamped to -175..100).
+  const fundsYDomain = useMemo<[number, number]>(() => {
+    const vals = [
+      ...history.map((h) => h.v),
+      ...backtest.map((b) => b.pred),
+      ...buildForecastBand(-175).flatMap((b) => [b.p05, b.p95]),
+      ...buildForecastBand(100).flatMap((b) => [b.p05, b.p95]),
+    ];
+    return [Math.min(...vals) - 0.25, Math.max(...vals) + 0.25];
+  }, [history, backtest]);
+
+  // per-series Sybilion forecasts for every selected input (the policy target
+  // FEDFUNDS is the dynamic graph below, so it is excluded from the tabs)
+  const seriesList = useMemo(
+    () =>
+      PROPOSED_SOURCES.filter((s) => include[s.seriesId] && s.seriesId !== "FEDFUNDS")
+        .map((s) => getSeriesForecast(s.seriesId))
+        .filter((s): s is SeriesForecast => s !== null),
+    [include],
+  );
+  const active = seriesList[Math.min(activeTab, seriesList.length - 1)] ?? null;
 
   const hp = band[horizon];
   const medianDelta = hp.p50 - CURRENT_RATE;
   const rangeWidth = hp.p95 - hp.p05;
   const impliedCuts = Math.max(0, Math.round(-medianDelta / 0.25));
+  const priceWeight = 100 - calibration.mandate;
+  const evidenceLabel = calibration.risk > 60 ? "Preemptive" : calibration.risk < 35 ? "Cautious" : "Measured";
 
   return (
     <div className="space-y-7">
       <div className="space-y-3">
-        <Eyebrow>Step 05 · Forecast</Eyebrow>
+        <Eyebrow>Step 04 · Forecast</Eyebrow>
         <h1 className="st-display text-4xl md:text-5xl" style={{ color: "var(--st-ink)" }}>
           The probable paths
         </h1>
         <div className="max-w-2xl">
           <AgentBubble>
-            Here's the funds-rate fan. The <span style={{ color: "var(--st-brand)" }}>median path drifts {medianDelta >= 0 ? "+" : ""}{(medianDelta * 100).toFixed(0)} bps</span> by{" "}
-            {horizon} months, but read the band, not the line — the spread is where your optionality lives.
+            Sybilion returned a probabilistic forecast for{" "}
+            <span style={{ color: "var(--st-brand)" }}>each signal you approved</span> — tab through them
+            below. The calibrated funds-rate path then re-derives live as you tune your reaction function.
           </AgentBubble>
         </div>
       </div>
 
-      <div className="grid gap-5 lg:grid-cols-[1fr_300px]">
+      {/* per-series forecasts — tab through every selected input */}
+      <div className="st-panel p-5">
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <LineChart className="h-4 w-4" style={{ color: "var(--st-brand)" }} />
+            <span className="text-sm font-medium" style={{ color: "var(--st-ink)" }}>
+              Sybilion forecasts · per signal
+            </span>
+          </div>
+          {seriesList.length > 0 && (
+            <div className="flex flex-wrap gap-1.5">
+              {seriesList.map((s, i) => (
+                <button
+                  key={s.seriesId}
+                  type="button"
+                  onClick={() => setActiveTab(i)}
+                  className="st-focus-ring rounded-full px-3 py-1.5 st-mono text-[11px] transition-all"
+                  style={{
+                    background: i === activeTab ? "var(--st-brand)" : "var(--st-panel-2)",
+                    color: i === activeTab ? "var(--st-bg-deep)" : "var(--st-muted)",
+                    border: "1px solid var(--st-line)",
+                  }}
+                >
+                  {s.seriesId}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {active ? (
+          <>
+            <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
+              <span className="text-[15px] font-medium" style={{ color: "var(--st-ink)" }}>
+                {active.title}
+              </span>
+              <span className="st-mono text-[11px]" style={{ color: "var(--st-faint)" }}>
+                now {fmtVal(active.start, active)} → 12M median {fmtVal(active.terminal, active)}
+              </span>
+            </div>
+            <FanChart
+              key={active.seriesId}
+              history={active.history}
+              band={active.band}
+              horizonMonths={horizon}
+              unit={active.unit}
+              decimals={active.decimals}
+              historyLabel="Realised"
+            />
+            <p className="mt-2 text-[12px] leading-relaxed" style={{ color: "var(--st-muted)" }}>
+              {active.read}
+            </p>
+          </>
+        ) : (
+          <p className="py-10 text-center text-[13px]" style={{ color: "var(--st-faint)" }}>
+            No input signals selected — go back and approve at least one data source.
+          </p>
+        )}
+      </div>
+
+      {/* dynamic funds-rate path + calibration controls */}
+      <div className="grid gap-5 lg:grid-cols-[1fr_320px]">
         <div className="st-panel p-5">
           <div className="mb-3 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <span className="text-sm font-medium" style={{ color: "var(--st-ink)" }}>
-                Federal Funds Rate · probabilistic forecast
+                Federal Funds Rate · calibrated path
               </span>
               <Pill tone="brand">FEDFUNDS</Pill>
             </div>
@@ -72,60 +175,97 @@ export function ForecastReview({ calibration, decision, onBack, onNext }: Props)
               ))}
             </div>
           </div>
-          <FanChart history={history} band={band} horizonMonths={horizon} />
+          <FanChart history={history} band={band} horizonMonths={horizon} backtest={backtest} yDomain={fundsYDomain} />
         </div>
 
         <div className="space-y-4">
+          {/* reaction function — drives the path above */}
+          <div className="st-panel p-5">
+            <div className="flex items-center gap-2">
+              <Scale className="h-4 w-4" style={{ color: "var(--st-brand)" }} />
+              <span className="text-sm font-medium" style={{ color: "var(--st-ink)" }}>
+                Your reaction function
+              </span>
+            </div>
+            <p className="mt-0.5 text-[11px]" style={{ color: "var(--st-faint)" }}>
+              Tune your stance — the funds-rate path re-derives live
+            </p>
+
+            <div className="mt-4 space-y-4">
+              <CalSlider
+                label="Dual-mandate balance"
+                value="balanced"
+                min={0}
+                max={100}
+                step={1}
+                current={calibration.mandate}
+                onChange={(v) => setCal("mandate", v)}
+                left={`Price ${priceWeight}%`}
+                right={`Jobs ${calibration.mandate}%`}
+                ariaLabel="Dual-mandate balance"
+              />
+              <CalSlider
+                label="Evidence threshold"
+                value={evidenceLabel}
+                min={0}
+                max={100}
+                step={1}
+                current={calibration.risk}
+                onChange={(v) => setCal("risk", v)}
+                left="Confirm"
+                right="Preempt"
+                ariaLabel="Evidence threshold"
+              />
+              <CalSlider
+                label="Inflation tolerance"
+                value={`+${calibration.inflationTolerance.toFixed(1)}pp`}
+                min={0}
+                max={2}
+                step={0.1}
+                current={calibration.inflationTolerance}
+                onChange={(v) => setCal("inflationTolerance", v)}
+                left="At target"
+                right="+2.0pp"
+                ariaLabel="Inflation tolerance"
+              />
+              <div>
+                <div className="flex items-center justify-between">
+                  <span className="text-[12.5px]" style={{ color: "var(--st-ink-soft)" }}>
+                    Reaction temperament
+                  </span>
+                </div>
+                <div className="mt-2 grid grid-cols-3 gap-1.5">
+                  {TEMPERAMENTS.map((t) => {
+                    const on = calibration.temperament === t.id;
+                    return (
+                      <button
+                        key={t.id}
+                        type="button"
+                        onClick={() => setCal("temperament", t.id)}
+                        title={t.blurb}
+                        className="st-focus-ring rounded-lg px-1.5 py-2 text-center text-[11px] transition-all"
+                        style={{
+                          background: on ? "var(--st-brand)" : "var(--st-panel-2)",
+                          color: on ? "var(--st-bg-deep)" : "var(--st-ink-soft)",
+                          border: `1px solid ${on ? "var(--st-brand)" : "var(--st-line)"}`,
+                        }}
+                      >
+                        {t.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div className="st-panel grid grid-cols-2 gap-4 p-5">
             <StatBlock label={`Median @ ${horizon}M`} value={`${hp.p50.toFixed(2)}%`} tone="brand" sub={`${medianDelta >= 0 ? "+" : ""}${(medianDelta * 100).toFixed(0)} bps`} />
             <StatBlock label="90% band width" value={`${(rangeWidth * 100).toFixed(0)}`} sub="bps of uncertainty" />
             <StatBlock label="Implied cuts" value={impliedCuts} sub="× 25 bps priced" tone="cut" />
             <StatBlock label="p05 / p95" value={`${hp.p05.toFixed(1)}–${hp.p95.toFixed(1)}`} sub="tail outcomes" />
           </div>
-
-          <div className="st-panel p-5">
-            <div className="flex items-center gap-2">
-              <TrendingDown className="h-4 w-4" style={{ color: "var(--st-brand)" }} />
-              <span className="text-sm font-medium" style={{ color: "var(--st-ink)" }}>
-                Backtest accuracy
-              </span>
-            </div>
-            <p className="mt-1 text-[11px]" style={{ color: "var(--st-faint)" }}>
-              Held-out funds-rate path · predicted vs realised
-            </p>
-            <BacktestSpark />
-            <div className="mt-3 space-y-1.5">
-              {BACKTEST.map((b) => (
-                <div key={b.seriesId} className="flex items-center justify-between text-[11.5px]">
-                  <span style={{ color: "var(--st-ink-soft)" }}>{b.label}</span>
-                  <span className="flex items-center gap-3">
-                    <span className="st-mono" style={{ color: "var(--st-muted)" }}>
-                      MAE {b.mae.toFixed(2)}
-                    </span>
-                    <span className="st-mono" style={{ color: "var(--st-brand)" }}>
-                      +{Math.round(b.vsNaive * 100)}% vs naïve
-                    </span>
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
         </div>
-      </div>
-
-      {/* driver importance over horizon */}
-      <div className="st-panel p-5">
-        <div className="mb-4 flex items-center justify-between">
-          <div>
-            <span className="text-sm font-medium" style={{ color: "var(--st-ink)" }}>
-              Driver importance across the horizon
-            </span>
-            <p className="mt-0.5 text-[11px]" style={{ color: "var(--st-faint)" }}>
-              What's moving the forecast — and which way it pushes the rate
-            </p>
-          </div>
-        </div>
-        <DriverHeatmap activeHorizon={horizon} />
       </div>
 
       <div className="flex items-center justify-between pt-2">
@@ -140,23 +280,58 @@ export function ForecastReview({ calibration, decision, onBack, onNext }: Props)
   );
 }
 
-function BacktestSpark() {
-  const data = backtestOverlay();
-  const W = 280;
-  const H = 70;
-  const vals = data.flatMap((d) => [d.actual, d.pred]);
-  const min = Math.min(...vals) - 0.1;
-  const max = Math.max(...vals) + 0.1;
-  const x = (i: number) => (i / (data.length - 1)) * (W - 8) + 4;
-  const y = (v: number) => H - 6 - ((v - min) / (max - min)) * (H - 12);
-  const line = (key: "actual" | "pred") => data.map((d, i) => `${i === 0 ? "M" : "L"}${x(i)},${y(d[key])}`).join(" ");
+function fmtVal(v: number, s: { unit: string; decimals: number }): string {
+  return `${v.toFixed(s.decimals)}${s.unit}`;
+}
+
+function CalSlider({
+  label,
+  value,
+  min,
+  max,
+  step,
+  current,
+  onChange,
+  left,
+  right,
+  ariaLabel,
+}: {
+  label: string;
+  value: string;
+  min: number;
+  max: number;
+  step: number;
+  current: number;
+  onChange: (v: number) => void;
+  left: string;
+  right: string;
+  ariaLabel: string;
+}) {
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} className="mt-3 w-full">
-      <path d={line("actual")} fill="none" stroke="var(--st-ink-soft)" strokeWidth="2" />
-      <path d={line("pred")} fill="none" stroke="var(--st-brand)" strokeWidth="2" strokeDasharray="4 3" />
-      {data.map((d, i) => (
-        <circle key={i} cx={x(i)} cy={y(d.actual)} r="1.6" fill="var(--st-ink-soft)" />
-      ))}
-    </svg>
+    <div>
+      <div className="flex items-center justify-between">
+        <span className="text-[12.5px]" style={{ color: "var(--st-ink-soft)" }}>
+          {label}
+        </span>
+        <span className="st-mono text-[11px]" style={{ color: "var(--st-brand)" }}>
+          {value}
+        </span>
+      </div>
+      <input
+        type="range"
+        min={min}
+        max={max}
+        step={step}
+        value={current}
+        onChange={(e) => onChange(Number(e.target.value))}
+        className="mt-2 w-full"
+        style={{ accentColor: "var(--st-brand)" }}
+        aria-label={ariaLabel}
+      />
+      <div className="mt-0.5 flex justify-between text-[10.5px]" style={{ color: "var(--st-faint)" }}>
+        <span>{left}</span>
+        <span>{right}</span>
+      </div>
+    </div>
   );
 }

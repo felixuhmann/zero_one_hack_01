@@ -48,7 +48,7 @@ export function Processing({ include, onDone }: Props) {
   return (
     <div className="flex min-h-[70vh] flex-col">
       <div className="space-y-2">
-        <Eyebrow>Step 04 · Forecasting</Eyebrow>
+        <Eyebrow>Step 03 · Forecasting</Eyebrow>
         <h1 className="st-display text-4xl md:text-5xl" style={{ color: "var(--st-ink)" }}>
           Sybilion is forecasting
         </h1>

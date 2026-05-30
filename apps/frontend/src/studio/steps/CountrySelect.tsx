@@ -94,7 +94,7 @@ export function CountrySelect({ selected, onSelect, onNext }: Props) {
               <span>{COUNTRIES.filter((c) => c.status === "soon").length} on the roadmap</span>
             </div>
             <StudioButton onClick={onNext} disabled={!selected} className="w-full">
-              {selected ? "Configure the agent" : "Select a jurisdiction"}
+              {selected ? "Propose data sources" : "Select a jurisdiction"}
               <ArrowRight className="h-4 w-4" />
             </StudioButton>
           </div>

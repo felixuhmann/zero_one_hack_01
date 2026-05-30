@@ -14,17 +14,7 @@ function App() {
   if (view === 'studio') {
     return (
       <ThemeProvider defaultTheme="light">
-        <div className="relative">
-          <DecisionStudio />
-          <div className="fixed bottom-3 right-3 z-50 flex items-center gap-1.5 rounded-full border border-black/10 bg-white/70 px-2 py-1 shadow-sm backdrop-blur">
-            <Button type="button" size="sm" variant="ghost" className="h-7 text-black/60 hover:text-black" onClick={() => setView('chat')}>
-              Chat
-            </Button>
-            <Button type="button" size="sm" variant="ghost" className="h-7 text-black/60 hover:text-black" onClick={() => setView('forecast')}>
-              Pipeline
-            </Button>
-          </div>
-        </div>
+        <DecisionStudio />
       </ThemeProvider>
     )
   }
