@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 
 import { ModeToggle } from "@/components/theme/mode-toggle";
+import { Separator } from "@/components/ui/separator";
 import {
   SidebarInset,
   SidebarProvider,
@@ -12,7 +13,15 @@ import { useConversationsStore } from "@/lib/conversations-store";
 import { AppSidebar } from "./app-sidebar";
 import { ChatView } from "./chat-view";
 
-export function ChatApp() {
+export interface ChatAppProps {
+  onNavigateToStudio?: () => void;
+  onNavigateToForecast?: () => void;
+}
+
+export function ChatApp({
+  onNavigateToStudio,
+  onNavigateToForecast,
+}: ChatAppProps) {
   const conversations = useConversationsStore((s) => s.conversations);
   const activeId = useConversationsStore((s) => s.activeId);
   const ensureActive = useConversationsStore((s) => s.ensureActive);
@@ -27,10 +36,17 @@ export function ChatApp() {
   return (
     <TooltipProvider delayDuration={300}>
       <SidebarProvider>
-        <AppSidebar />
+        <AppSidebar
+          onNavigateToForecast={onNavigateToForecast}
+          onNavigateToStudio={onNavigateToStudio}
+        />
         <SidebarInset className="flex h-svh min-h-0 flex-col">
-          <header className="flex h-14 shrink-0 items-center gap-2 border-b px-3">
-            <SidebarTrigger />
+          <header className="flex h-14 shrink-0 items-center gap-2 border-b px-3 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
+            <SidebarTrigger className="-ml-1" />
+            <Separator
+              className="mr-2 data-vertical:h-4 data-vertical:self-auto"
+              orientation="vertical"
+            />
             <div className="min-w-0 flex-1">
               <h1 className="truncate font-medium text-sm">
                 {active?.title ?? "New chat"}

@@ -14,7 +14,18 @@ function App() {
   if (view === 'studio') {
     return (
       <ThemeProvider defaultTheme="system">
-        <DecisionStudio />
+        <DecisionStudio onOpenChat={() => setView('chat')} />
+      </ThemeProvider>
+    )
+  }
+
+  if (view === 'chat') {
+    return (
+      <ThemeProvider defaultTheme="system">
+        <ChatApp
+          onNavigateToForecast={() => setView('forecast')}
+          onNavigateToStudio={() => setView('studio')}
+        />
       </ThemeProvider>
     )
   }
@@ -34,7 +45,7 @@ function App() {
           <Button
             type="button"
             size="sm"
-            variant={view === 'chat' ? 'default' : 'outline'}
+            variant="outline"
             onClick={() => setView('chat')}
           >
             Chat
@@ -42,14 +53,14 @@ function App() {
           <Button
             type="button"
             size="sm"
-            variant={view === 'forecast' ? 'default' : 'outline'}
+            variant="default"
             onClick={() => setView('forecast')}
           >
             Forecast pipeline
           </Button>
         </header>
         <main className="flex-1">
-          {view === 'chat' ? <ChatApp /> : <ForecastDashboard />}
+          <ForecastDashboard />
         </main>
       </div>
     </ThemeProvider>

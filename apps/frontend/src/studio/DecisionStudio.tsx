@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { Check } from "lucide-react";
+import { Check, MessageSquareIcon } from "lucide-react";
 
 import type { PipelineResponse } from "@/types/forecast";
 import {
@@ -16,6 +16,7 @@ import { ForecastReview } from "@/studio/steps/ForecastReview";
 import { Recommendation } from "@/studio/steps/Recommendation";
 import { ModeToggle } from "@/components/theme/mode-toggle";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 
@@ -31,7 +32,11 @@ const STEPS: { id: StepId; label: string; hint: string }[] = [
   { id: "recommendation", label: "Decision", hint: "Tune & act on it" },
 ];
 
-export function DecisionStudio() {
+export interface DecisionStudioProps {
+  onOpenChat?: () => void;
+}
+
+export function DecisionStudio({ onOpenChat }: DecisionStudioProps) {
   const [step, setStep] = useState<StepId>("country");
   const [country, setCountry] = useState<string | null>(null);
   const [calibration, setCalibration] = useState<CalibrationState>(DEFAULT_CALIBRATION);
@@ -72,6 +77,12 @@ export function DecisionStudio() {
             <Badge variant="secondary" className="hidden font-mono md:inline-flex">
               prototype · mock data
             </Badge>
+            {onOpenChat && (
+              <Button onClick={onOpenChat} size="sm" variant="outline">
+                <MessageSquareIcon data-icon="inline-start" />
+                Chat
+              </Button>
+            )}
             <ModeToggle />
           </div>
         </header>
