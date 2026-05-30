@@ -3,7 +3,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { ArrowLeft, ArrowRight, Database, Plus, Sparkles } from "lucide-react";
 
 import { PROPOSED_SOURCES, ROLE_LABEL, type CalibrationState } from "@/studio/data";
-import { AgentBubble, Eyebrow, Pill, StudioButton } from "@/studio/ui/bits";
+import { Eyebrow, Pill, StudioButton, StudioNote } from "@/studio/ui/bits";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -20,10 +20,10 @@ interface Props {
 }
 
 const REFINEMENTS = [
-  { id: "labor", chip: "Weight labor more", add: ["PAYEMS"], note: "Done — I've added nonfarm payrolls so labor momentum carries more weight. The 2025 benchmark revisions make this read worth tracking." },
-  { id: "sticky", chip: "Add a sticky-inflation check", add: ["CES0500000003"], note: "Added average hourly earnings as a wage-driven inflation cross-check." },
-  { id: "transmission", chip: "Watch financial conditions", add: ["NFCI"], note: "Included the Chicago Fed conditions index — it captures tightening that can substitute for a hike." },
-  { id: "lean", chip: "Keep it lean", remove: ["PAYEMS", "CES0500000003", "NFCI"], note: "Trimmed back to the four core signals: the target, inflation, the market path, and labor." },
+  { id: "labor", chip: "Weight labor more", add: ["PAYEMS"], note: "Nonfarm payrolls added so labor momentum carries more weight. The 2025 benchmark revisions make this read worth tracking." },
+  { id: "sticky", chip: "Add a sticky-inflation check", add: ["CES0500000003"], note: "Average hourly earnings added as a wage-driven inflation cross-check." },
+  { id: "transmission", chip: "Watch financial conditions", add: ["NFCI"], note: "Chicago Fed conditions index included — it captures tightening that can substitute for a hike." },
+  { id: "lean", chip: "Keep it lean", remove: ["PAYEMS", "CES0500000003", "NFCI"], note: "Trimmed to four core signals: the target, inflation, the market path, and labor." },
 ] as const;
 
 export function DataSources({ include, setInclude, calibration, onBack, onNext }: Props) {
@@ -58,16 +58,18 @@ export function DataSources({ include, setInclude, calibration, onBack, onNext }
         <Eyebrow>Step 02 · Data sources</Eyebrow>
         <h1 className="st-display text-4xl text-foreground md:text-5xl">Approve the inputs</h1>
         <div className="max-w-2xl">
-          <AgentBubble>
+          <StudioNote>
             {note ?? (
               <>
-                Based on your {calibration.mandate < 40 ? "price-stability lean" : calibration.mandate > 60 ? "employment lean" : "balanced stance"}, I
-                selected these monthly series — each clears Sybilion's minimum-data threshold. Toggle any off, or
-                ask me to reconsider. <span className="font-medium text-foreground">Keyword quality drives forecast accuracy</span>, so I've tuned the
-                keywords per series.
+                For your{" "}
+                {calibration.mandate < 40 ? "price-stability lean" : calibration.mandate > 60 ? "employment lean" : "balanced stance"}
+                , these monthly series meet the minimum history requirement. Toggle any off, or use the chips below to
+                refine the set.{" "}
+                <span className="font-medium text-foreground">Keyword quality drives forecast accuracy</span> — each
+                series includes tuned keywords.
               </>
             )}
-          </AgentBubble>
+          </StudioNote>
         </div>
       </div>
 
@@ -184,7 +186,7 @@ export function DataSources({ include, setInclude, calibration, onBack, onNext }
             )}
 
             <StudioButton onClick={onNext} disabled={!enoughInputs} className="mt-5 w-full">
-              Run on Sybilion <ArrowRight className="size-4" />
+              Run forecast <ArrowRight className="size-4" />
             </StudioButton>
           </CardContent>
         </Card>

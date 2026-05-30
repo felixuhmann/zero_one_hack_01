@@ -11,7 +11,7 @@ import {
   type DecisionResult,
 } from "@/studio/data";
 import { DecisionGauge } from "@/studio/charts/DecisionGauge";
-import { AgentAvatar, AgentBubble, Eyebrow, Pill, StudioButton } from "@/studio/ui/bits";
+import { Eyebrow, Pill, StudioButton, StudioNote } from "@/studio/ui/bits";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
@@ -47,7 +47,7 @@ const SCENARIOS: { id: string; label: string; apply: (a: Assumption[]) => Assump
     id: "unanchor",
     label: "Expectations un-anchor",
     apply: (a) => a.map((x) => (x.id === "expectations" ? { ...x, value: 3.1 } : x)),
-    note: "Long-run expectations drift to 3.1%. Per the 2025 framework I act forcefully to re-anchor — this overrides activity data.",
+    note: "Long-run expectations drift to 3.1%. Per the 2025 framework, policy should act forcefully to re-anchor — this overrides activity data.",
   },
 ];
 
@@ -221,7 +221,7 @@ export function Recommendation({ calibration, onBack, onRestart }: Props) {
           <AnimatePresence>
             {scenarioNote && (
               <motion.div initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="mt-3">
-                <AgentBubble>{scenarioNote}</AgentBubble>
+                <StudioNote>{scenarioNote}</StudioNote>
               </motion.div>
             )}
           </AnimatePresence>
@@ -239,7 +239,7 @@ export function Recommendation({ calibration, onBack, onRestart }: Props) {
         <CardContent>
           <div className="flex items-center gap-2">
             <MessageCircleQuestion className="size-4 text-[var(--st-brand)]" />
-            <span className="text-sm font-medium text-foreground">Disagree? Challenge the agent</span>
+            <span className="text-sm font-medium text-foreground">Common pushback</span>
           </div>
           <ToggleGroup
             type="single"
@@ -257,18 +257,15 @@ export function Recommendation({ calibration, onBack, onRestart }: Props) {
           </ToggleGroup>
           <AnimatePresence mode="wait">
             {challenge && (
-              <motion.div
+              <motion.p
                 key={challenge}
                 initial={{ opacity: 0, y: 6 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -6 }}
-                className="mt-4 flex items-start gap-3"
+                className="mt-4 text-[13px] leading-relaxed text-foreground/80"
               >
-                <AgentAvatar size={30} />
-                <p className="flex-1 pt-1 text-[13px] leading-relaxed text-foreground/80">
-                  {CHALLENGES.find((c) => c.id === challenge)?.a}
-                </p>
-              </motion.div>
+                {CHALLENGES.find((c) => c.id === challenge)?.a}
+              </motion.p>
             )}
           </AnimatePresence>
         </CardContent>

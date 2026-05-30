@@ -8,7 +8,6 @@ import {
   PROPOSED_SOURCES,
   type CalibrationState,
 } from "@/studio/data";
-import { AgentAvatar } from "@/studio/ui/bits";
 import { CountrySelect } from "@/studio/steps/CountrySelect";
 import { DataSources } from "@/studio/steps/DataSources";
 import { Processing } from "@/studio/steps/Processing";
@@ -26,7 +25,7 @@ export type StepId = "country" | "sources" | "processing" | "forecast" | "recomm
 const STEPS: { id: StepId; label: string; hint: string }[] = [
   { id: "country", label: "Jurisdiction", hint: "Pick a central bank" },
   { id: "sources", label: "Data sources", hint: "Approve the inputs" },
-  { id: "processing", label: "Forecasting", hint: "Sybilion runs" },
+  { id: "processing", label: "Forecasting", hint: "Run the pipeline" },
   { id: "forecast", label: "Forecast", hint: "Read the probabilities" },
   { id: "recommendation", label: "Decision", hint: "Tune & act on it" },
 ];
@@ -59,13 +58,10 @@ export function DecisionStudio() {
       <div className="studio-root flex h-svh min-h-svh flex-col overflow-hidden bg-background text-foreground">
         {/* top bar */}
         <header className="flex shrink-0 items-center justify-between border-b px-6 py-3">
-          <div className="flex items-center gap-3">
-            <AgentAvatar size={30} />
-            <div className="leading-tight">
-              <div className="st-display text-lg text-foreground">Policy Decision Studio</div>
-              <div className="st-eyebrow" style={{ fontSize: 9 }}>
-                Sybilion · forecast-driven rate guidance
-              </div>
+          <div className="leading-tight">
+            <div className="st-display text-lg text-foreground">Policy Decision Studio</div>
+            <div className="st-eyebrow" style={{ fontSize: 9 }}>
+              Forecast-driven rate guidance
             </div>
           </div>
           <div className="flex items-center gap-3">

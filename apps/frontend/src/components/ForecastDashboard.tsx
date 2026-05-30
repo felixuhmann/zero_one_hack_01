@@ -63,8 +63,8 @@ export function ForecastDashboard() {
           Pipeline results
         </h1>
         <p className="max-w-2xl text-muted-foreground">
-          Runs the backend pipeline (FRED → Sybilion → ensemble → scenario) and
-          returns aggregated Sybilion artifacts per signal. This can take several
+          Runs the backend pipeline (FRED → forecast API → ensemble → scenario) and
+          returns aggregated artifacts per signal. This can take several
           minutes while jobs finish.
         </p>
         {data?.version && (
@@ -108,7 +108,7 @@ export function ForecastDashboard() {
 
       {loadState === 'loading' && (
         <div className="rounded-lg border border-border bg-muted/40 p-6 text-sm text-muted-foreground">
-          Waiting for Sybilion jobs to complete. Keep this tab open; the
+          Waiting for forecast jobs to complete. Keep this tab open; the
           request may run up to an hour depending on queue time.
         </div>
       )}
@@ -248,7 +248,7 @@ export function ForecastDashboard() {
 
       {data?.signals && (
         <section className="rounded-xl border border-border bg-card p-6 shadow-sm">
-          <h2 className="mb-4 text-lg font-semibold">Signals (Sybilion)</h2>
+          <h2 className="mb-4 text-lg font-semibold">Signals</h2>
           <div className="space-y-4">
             {Object.entries(data.signals).map(([seriesId, signal]) => (
               <div
