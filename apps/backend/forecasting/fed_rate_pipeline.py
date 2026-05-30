@@ -5,19 +5,11 @@ import os
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
-from forecasting.analysis.ensemble_engine import EnsembleEngine
-from forecasting.analysis.scenario_classifier import ScenarioClassifier
-from forecasting.api.fred_api import FREDClient
-from forecasting.api.sybilion_forecast_api import SybilionForecastApiClient
-from forecasting.payloads.fed_rate_payloads import FedRatePayloadBuilder
-
-
-US_SIGNAL_CONFIGS = [
-    {"series_id": "FEDFUNDS", "weight": 0.30, "recency_factor": 0.75},
-    {"series_id": "DGS2",     "weight": 0.25, "recency_factor": 0.85},
-    {"series_id": "PCEPILFE", "weight": 0.25, "recency_factor": 0.70},
-    {"series_id": "UNRATE",   "weight": 0.20, "recency_factor": 0.60},
-]
+from analysis.ensemble_engine import EnsembleEngine
+from analysis.scenario_classifier import ScenarioClassifier
+from api.fred_api import FREDClient
+from api.sybilion_forecast_api import SybilionForecastApiClient
+from payloads.fed_rate_payloads import US_SIGNAL_CONFIGS, FedRatePayloadBuilder
 
 
 class FedRatePipeline:
@@ -52,7 +44,7 @@ class FedRatePipeline:
 
     def run(
         self,
-        signal_configs: list[dict] = US_SIGNAL_CONFIGS,
+        signal_configs: list[dict],
         max_workers: int = 4,
     ) -> dict:
         """
@@ -67,7 +59,7 @@ class FedRatePipeline:
         """
         signals  = self._run_signals_parallel(signal_configs, max_workers)
         ensemble = self._synthesize_ensemble(signals)
-        scenario = self._classify_scenario(ensemble, signals)
+        scenario = self._classify_scenario(ensemble, signals, signal_configs)
 
         return {
             "signals":  signals,
@@ -124,10 +116,10 @@ class FedRatePipeline:
         print("-> Erzeuge Ensemble Forecast...")
         return self.ensemble_engine.synthesize(signals)
 
-    def _classify_scenario(self, ensemble: dict, signals: dict) -> dict:
+    def _classify_scenario(self, ensemble: dict, signals: dict, signal_configs) -> dict:
         """Leitet das Szenario aus Ensemble + Rohsignalen ab."""
         print("-> Klassifiziere Szenario...")
-        return self.scenario_classifier.classify(ensemble, signals)
+        return self.scenario_classifier.classify(ensemble, signals, signal_configs)
 
     def _run_single_signal(self, cfg: dict) -> dict:
         payload = self.payload_builder.build_forecast_payload(
