@@ -8,11 +8,12 @@ from forecasting.payloads.base_payload_builder import BasePayloadBuilder
 # ------------------------------------------------------------------
 
 US_SIGNAL_CONFIGS = [
-    {"series_id": "FEDFUNDS", "weight": 0.30, "recency_factor": 0.75, "role": SignalRole.TARGET},
-    {"series_id": "DGS2",     "weight": 0.25, "recency_factor": 0.85, "role": SignalRole.LEADING},
-    {"series_id": "PCEPILFE", "weight": 0.25, "recency_factor": 0.70, "role": SignalRole.INFLATION},
-    {"series_id": "UNRATE",   "weight": 0.20, "recency_factor": 0.60, "role": SignalRole.LABOR},
-    {"series_id": "NAPM",     "weight": 0.10, "recency_factor": 0.80, "role": SignalRole.CONTEXT},
+    {"series_id": "FEDFUNDS",    "weight": 0.25, "recency_factor": 0.75, "role": SignalRole.TARGET},
+    {"series_id": "DGS2",        "weight": 0.25, "recency_factor": 0.85, "role": SignalRole.LEADING},
+    {"series_id": "PCEPILFE",    "weight": 0.20, "recency_factor": 0.70, "role": SignalRole.INFLATION},
+    {"series_id": "UNRATE",      "weight": 0.15, "recency_factor": 0.60, "role": SignalRole.LABOR},
+    {"series_id": "INDPRO",      "weight": 0.10, "recency_factor": 0.80, "role": SignalRole.ACTIVITY},
+    {"series_id": "BAMLC0A0CM",  "weight": 0.05, "recency_factor": 0.85, "role": SignalRole.CREDIT},
 ]
 
 # ------------------------------------------------------------------
