@@ -14,6 +14,10 @@ import { DataSources } from "@/studio/steps/DataSources";
 import { Processing } from "@/studio/steps/Processing";
 import { ForecastReview } from "@/studio/steps/ForecastReview";
 import { Recommendation } from "@/studio/steps/Recommendation";
+import { ModeToggle } from "@/components/theme/mode-toggle";
+import { Badge } from "@/components/ui/badge";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { cn } from "@/lib/utils";
 
 import "@/studio/studio.css";
 
@@ -51,142 +55,141 @@ export function DecisionStudio() {
   }
 
   return (
-    <div className="studio-root flex h-svh min-h-svh flex-col overflow-hidden">
-      {/* top bar */}
-      <header
-        className="flex shrink-0 items-center justify-between border-b px-6 py-3"
-        style={{ borderColor: "var(--st-line)" }}
-      >
-        <div className="flex items-center gap-3">
-          <AgentAvatar size={30} />
-          <div className="leading-tight">
-            <div className="st-display text-lg" style={{ color: "var(--st-ink)" }}>
-              Policy Decision Studio
-            </div>
-            <div className="st-eyebrow" style={{ fontSize: 9 }}>
-              Sybilion · forecast-driven rate guidance
+    <TooltipProvider delayDuration={300}>
+      <div className="studio-root flex h-svh min-h-svh flex-col overflow-hidden bg-background text-foreground">
+        {/* top bar */}
+        <header className="flex shrink-0 items-center justify-between border-b px-6 py-3">
+          <div className="flex items-center gap-3">
+            <AgentAvatar size={30} />
+            <div className="leading-tight">
+              <div className="st-display text-lg text-foreground">Policy Decision Studio</div>
+              <div className="st-eyebrow" style={{ fontSize: 9 }}>
+                Sybilion · forecast-driven rate guidance
+              </div>
             </div>
           </div>
-        </div>
-        <div className="hidden items-center gap-2 md:flex">
-          <span className="st-mono text-[11px]" style={{ color: "var(--st-faint)" }}>
-            prototype · mock data
-          </span>
-        </div>
-      </header>
+          <div className="flex items-center gap-3">
+            <Badge variant="secondary" className="hidden font-mono md:inline-flex">
+              prototype · mock data
+            </Badge>
+            <ModeToggle />
+          </div>
+        </header>
 
-      <div className="flex min-h-0 flex-1">
-        {/* step rail */}
-        <nav
-          className="hidden w-[230px] shrink-0 flex-col gap-1 border-r p-4 lg:flex"
-          style={{ borderColor: "var(--st-line)" }}
-        >
-          {STEPS.map((s, i) => {
-            const active = s.id === step;
-            const done = i < reached;
-            const visitable = canVisit(s.id);
-            return (
-              <button
-                key={s.id}
-                type="button"
-                disabled={!visitable}
-                onClick={() => visitable && go(s.id)}
-                className="st-focus-ring group flex items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-all disabled:cursor-not-allowed"
-                style={{ background: active ? "var(--st-panel)" : "transparent" }}
-              >
-                <span
-                  className="grid h-7 w-7 shrink-0 place-items-center rounded-full st-mono text-[11px] transition-all"
-                  style={{
-                    background: active ? "var(--st-brand)" : done ? "var(--st-brand-dim)" : "var(--st-panel-2)",
-                    color: active || done ? "var(--st-bg-deep)" : "var(--st-faint)",
-                    border: "1px solid var(--st-line)",
-                  }}
+        <div className="flex min-h-0 flex-1">
+          {/* step rail */}
+          <nav className="hidden w-[230px] shrink-0 flex-col gap-1 border-r p-4 lg:flex">
+            {STEPS.map((s, i) => {
+              const active = s.id === step;
+              const done = i < reached;
+              const visitable = canVisit(s.id);
+              return (
+                <button
+                  key={s.id}
+                  type="button"
+                  disabled={!visitable}
+                  onClick={() => visitable && go(s.id)}
+                  className={cn(
+                    "st-focus-ring group flex items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-colors disabled:cursor-not-allowed",
+                    active ? "bg-muted" : "hover:bg-muted/60",
+                  )}
                 >
-                  {done ? <Check className="h-3.5 w-3.5" /> : i + 1}
-                </span>
-                <span className="min-w-0">
                   <span
-                    className="block text-[13px] font-medium"
-                    style={{ color: active ? "var(--st-ink)" : visitable ? "var(--st-ink-soft)" : "var(--st-faint)" }}
+                    className={cn(
+                      "st-mono grid size-7 shrink-0 place-items-center rounded-full border text-[11px] transition-all",
+                      active
+                        ? "border-transparent bg-[var(--st-brand)] text-[var(--st-bg-deep)]"
+                        : done
+                          ? "border-transparent bg-[var(--st-brand-dim)] text-[var(--st-bg-deep)]"
+                          : "bg-muted text-muted-foreground",
+                    )}
                   >
-                    {s.label}
+                    {done ? <Check className="size-3.5" /> : i + 1}
                   </span>
-                  <span className="block text-[11px]" style={{ color: "var(--st-faint)" }}>
-                    {s.hint}
+                  <span className="min-w-0">
+                    <span
+                      className={cn(
+                        "block text-[13px] font-medium",
+                        active ? "text-foreground" : visitable ? "text-foreground/80" : "text-muted-foreground",
+                      )}
+                    >
+                      {s.label}
+                    </span>
+                    <span className="block text-[11px] text-muted-foreground">{s.hint}</span>
                   </span>
-                </span>
-              </button>
-            );
-          })}
-          <div className="mt-auto rounded-xl p-3" style={{ background: "var(--st-panel)", border: "1px solid var(--st-line)" }}>
-            <div className="st-eyebrow mb-1" style={{ fontSize: 9 }}>
-              live demo ready
+                </button>
+              );
+            })}
+            <div className="mt-auto rounded-lg border bg-card p-3">
+              <div className="st-eyebrow mb-1" style={{ fontSize: 9 }}>
+                live demo ready
+              </div>
+              <p className="text-[11px] leading-relaxed text-muted-foreground">
+                The decision step accepts a mid-run assumption shift and re-derives the call in real time.
+              </p>
             </div>
-            <p className="text-[11px] leading-relaxed" style={{ color: "var(--st-faint)" }}>
-              The decision step accepts a mid-run assumption shift and re-derives the call in real time.
-            </p>
-          </div>
-        </nav>
+          </nav>
 
-        {/* content */}
-        <main className="min-w-0 flex-1 overflow-y-auto">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={step}
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.3 }}
-              className={step === "country" ? "relative h-full" : "mx-auto w-full max-w-6xl px-6 py-8"}
-            >
-              {step === "country" && (
-                <CountrySelect
-                  selected={country}
-                  onSelect={(c) => setCountry(c)}
-                  onNext={() => go("sources")}
-                />
-              )}
-              {step === "sources" && (
-                <DataSources
-                  include={include}
-                  setInclude={setInclude}
-                  calibration={calibration}
-                  onBack={() => go("country")}
-                  onNext={() => go("processing")}
-                />
-              )}
-              {step === "processing" && (
-                <Processing
-                  include={include}
-                  onForecastReady={setForecast}
-                  onDone={() => go("forecast")}
-                />
-              )}
-              {step === "forecast" && (
-                <ForecastReview
-                  calibration={calibration}
-                  onCalibrationChange={setCalibration}
-                  include={include}
-                  aggregatedForecast={forecast}
-                  onBack={() => go("sources")}
-                  onNext={() => go("recommendation")}
-                />
-              )}
-              {step === "recommendation" && (
-                <Recommendation
-                  calibration={calibration}
-                  onBack={() => go("forecast")}
-                  onRestart={() => {
-                    setStep("country");
-                    setCountry(null);
-                    setForecast(null);
-                  }}
-                />
-              )}
-            </motion.div>
-          </AnimatePresence>
-        </main>
+          {/* content */}
+          <main className="min-w-0 flex-1 overflow-y-auto">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={step}
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.3 }}
+                className={step === "country" ? "relative h-full" : "mx-auto w-full max-w-6xl px-6 py-8"}
+              >
+                {step === "country" && (
+                  <CountrySelect
+                    selected={country}
+                    onSelect={(c) => setCountry(c)}
+                    onNext={() => go("sources")}
+                  />
+                )}
+                {step === "sources" && (
+                  <DataSources
+                    include={include}
+                    setInclude={setInclude}
+                    calibration={calibration}
+                    onBack={() => go("country")}
+                    onNext={() => go("processing")}
+                  />
+                )}
+                {step === "processing" && (
+                  <Processing
+                    include={include}
+                    onForecastReady={setForecast}
+                    onDone={() => go("forecast")}
+                  />
+                )}
+                {step === "forecast" && (
+                  <ForecastReview
+                    calibration={calibration}
+                    onCalibrationChange={setCalibration}
+                    include={include}
+                    aggregatedForecast={forecast}
+                    onBack={() => go("sources")}
+                    onNext={() => go("recommendation")}
+                  />
+                )}
+                {step === "recommendation" && (
+                  <Recommendation
+                    calibration={calibration}
+                    onBack={() => go("forecast")}
+                    onRestart={() => {
+                      setStep("country");
+                      setCountry(null);
+                      setForecast(null);
+                    }}
+                  />
+                )}
+              </motion.div>
+            </AnimatePresence>
+          </main>
+        </div>
       </div>
-    </div>
+    </TooltipProvider>
   );
 }

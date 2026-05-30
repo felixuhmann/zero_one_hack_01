@@ -6,6 +6,7 @@ import { runForecastPipeline } from "@/api/forecast";
 import type { PipelineResponse } from "@/types/forecast";
 import { JOB_STAGES, PROCESSING_FACTS, PROPOSED_SOURCES } from "@/studio/data";
 import { Eyebrow, Pill, StudioButton } from "@/studio/ui/bits";
+import { Card, CardContent } from "@/components/ui/card";
 
 interface Props {
   include: Record<string, boolean>;
@@ -76,14 +77,8 @@ export function Processing({ include, onDone, onForecastReady }: Props) {
     <div className="flex min-h-[70vh] flex-col">
       <div className="space-y-2">
         <Eyebrow>Step 03 · Forecasting</Eyebrow>
-        <h1 className="st-display text-4xl md:text-5xl" style={{ color: "var(--st-ink)" }}>
-          Sybilion is forecasting
-        </h1>
-        {error && (
-          <p className="text-sm" style={{ color: "var(--st-cut)" }}>
-            {error}
-          </p>
-        )}
+        <h1 className="st-display text-4xl text-foreground md:text-5xl">Sybilion is forecasting</h1>
+        {error && <p className="text-sm text-[var(--st-cut)]">{error}</p>}
       </div>
 
       <div className="mt-8 grid flex-1 items-center gap-8 lg:grid-cols-[360px_1fr]">
@@ -94,11 +89,7 @@ export function Processing({ include, onDone, onForecastReady }: Props) {
               <span
                 key={r}
                 className="absolute rounded-full"
-                style={{
-                  width: 90 + r * 56,
-                  height: 90 + r * 56,
-                  border: "1px solid var(--st-line)",
-                }}
+                style={{ width: 90 + r * 56, height: 90 + r * 56, border: "1px solid var(--st-line)" }}
               />
             ))}
             <span className="absolute rounded-full" style={{ width: 244, height: 244, background: "radial-gradient(circle, var(--st-brand-glow), transparent 62%)" }} />
@@ -131,9 +122,7 @@ export function Processing({ include, onDone, onForecastReady }: Props) {
               />
             </svg>
             <div className="relative text-center">
-              <div className="st-mono text-3xl" style={{ color: "var(--st-ink)" }}>
-                {Math.round(overall * 100)}%
-              </div>
+              <div className="st-mono text-3xl text-foreground">{Math.round(overall * 100)}%</div>
               <div className="st-eyebrow mt-1" style={{ fontSize: 9 }}>
                 {allDone ? "settled" : "running"}
               </div>
@@ -147,8 +136,7 @@ export function Processing({ include, onDone, onForecastReady }: Props) {
                 initial={{ opacity: 0, y: 6 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -6 }}
-                className="text-[12px] leading-relaxed"
-                style={{ color: "var(--st-muted)" }}
+                className="text-[12px] leading-relaxed text-muted-foreground"
               >
                 {PROCESSING_FACTS[factIdx]}
               </motion.p>
@@ -163,54 +151,50 @@ export function Processing({ include, onDone, onForecastReady }: Props) {
             const stage = stageFor(p);
             const done = p >= 1;
             return (
-              <div key={s.seriesId} className="st-panel p-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className="st-mono text-[12px]" style={{ color: "var(--st-ink)" }}>
-                      {s.seriesId}
-                    </span>
-                    <span className="text-[12px]" style={{ color: "var(--st-faint)" }}>
-                      {s.title}
-                    </span>
-                  </div>
-                  {done ? (
-                    <Pill tone="brand">
-                      <Check className="h-3 w-3" /> settled
-                    </Pill>
-                  ) : (
-                    <span className="st-mono text-[11px]" style={{ color: "var(--st-brand)" }}>
-                      {JOB_STAGES[stage].label}
-                    </span>
-                  )}
-                </div>
-
-                <div className="mt-3 flex items-center gap-1.5">
-                  {JOB_STAGES.slice(0, -1).map((st, idx) => (
-                    <div key={st.key} className="flex flex-1 items-center gap-1.5">
-                      <div className="h-1.5 flex-1 overflow-hidden rounded-full" style={{ background: "var(--st-line)" }}>
-                        <div
-                          className="h-full rounded-full transition-all"
-                          style={{
-                            width: `${Math.max(0, Math.min(1, p * (JOB_STAGES.length - 1) - idx)) * 100}%`,
-                            background: idx < stage || done ? "var(--st-brand)" : "var(--st-brand-dim)",
-                          }}
-                        />
-                      </div>
+              <Card key={s.seriesId} size="sm" className="gap-0 py-0">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="st-mono text-[12px] text-foreground">{s.seriesId}</span>
+                      <span className="text-[12px] text-muted-foreground">{s.title}</span>
                     </div>
-                  ))}
-                </div>
-              </div>
+                    {done ? (
+                      <Pill tone="brand">
+                        <Check className="size-3" /> settled
+                      </Pill>
+                    ) : (
+                      <span className="st-mono text-[11px] text-[var(--st-brand)]">{JOB_STAGES[stage].label}</span>
+                    )}
+                  </div>
+
+                  <div className="mt-3 flex items-center gap-1.5">
+                    {JOB_STAGES.slice(0, -1).map((st, idx) => (
+                      <div key={st.key} className="flex flex-1 items-center gap-1.5">
+                        <div className="h-1.5 flex-1 overflow-hidden rounded-full" style={{ background: "var(--st-line)" }}>
+                          <div
+                            className="h-full rounded-full transition-all"
+                            style={{
+                              width: `${Math.max(0, Math.min(1, p * (JOB_STAGES.length - 1) - idx)) * 100}%`,
+                              background: idx < stage || done ? "var(--st-brand)" : "var(--st-brand-dim)",
+                            }}
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
             );
           })}
 
           <div className="flex justify-end pt-2">
             {allDone ? (
               <StudioButton onClick={onDone}>
-                View forecast <Check className="h-4 w-4" />
+                View forecast <Check className="size-4" />
               </StudioButton>
             ) : (
               <StudioButton variant="ghost" onClick={onDone}>
-                <FastForward className="h-3.5 w-3.5" /> Skip the queue (demo)
+                <FastForward className="size-3.5" /> Skip the queue (demo)
               </StudioButton>
             )}
           </div>

@@ -1,6 +1,9 @@
 import type { ReactNode } from "react";
 import { motion } from "motion/react";
 
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 export function Eyebrow({
@@ -19,39 +22,45 @@ export function Eyebrow({
   );
 }
 
+type Tone = "neutral" | "brand" | "cut" | "hold" | "hike";
+
+const TONE_STYLE: Record<Tone, React.CSSProperties> = {
+  neutral: {},
+  brand: {
+    background: "color-mix(in oklch, var(--st-brand) 16%, transparent)",
+    color: "var(--st-brand)",
+    borderColor: "color-mix(in oklch, var(--st-brand) 35%, transparent)",
+  },
+  cut: { background: "var(--st-cut-soft)", color: "var(--st-cut)", borderColor: "color-mix(in oklch, var(--st-cut) 35%, transparent)" },
+  hold: { background: "var(--st-hold-soft)", color: "var(--st-hold)", borderColor: "color-mix(in oklch, var(--st-hold) 35%, transparent)" },
+  hike: { background: "var(--st-hike-soft)", color: "var(--st-hike)", borderColor: "color-mix(in oklch, var(--st-hike) 35%, transparent)" },
+};
+
+/** A small status chip — shadcn <Badge> for neutral, tinted for decision tones. */
 export function Pill({
   children,
   tone = "neutral",
   className,
 }: {
   children: ReactNode;
-  tone?: "neutral" | "brand" | "cut" | "hold" | "hike";
+  tone?: Tone;
   className?: string;
 }) {
-  const bg: Record<string, string> = {
-    neutral: "var(--st-panel-2)",
-    brand: "color-mix(in oklch, var(--st-brand) 16%, transparent)",
-    cut: "var(--st-cut-soft)",
-    hold: "var(--st-hold-soft)",
-    hike: "var(--st-hike-soft)",
-  };
-  const fg: Record<string, string> = {
-    neutral: "var(--st-muted)",
-    brand: "var(--st-brand)",
-    cut: "var(--st-cut)",
-    hold: "var(--st-hold)",
-    hike: "var(--st-hike)",
-  };
+  if (tone === "neutral") {
+    return (
+      <Badge variant="secondary" className={cn("font-mono", className)}>
+        {children}
+      </Badge>
+    );
+  }
   return (
-    <span
-      className={cn("st-mono inline-flex items-center gap-1 rounded-full px-2.5 py-0.5", className)}
-      style={{ fontSize: 10.5, background: bg[tone], color: fg[tone], border: "1px solid var(--st-line)" }}
-    >
+    <Badge variant="outline" className={cn("font-mono border", className)} style={TONE_STYLE[tone]}>
       {children}
-    </span>
+    </Badge>
   );
 }
 
+/** Thin wrapper over the shadcn <Button> keeping the studio's call signature. */
 export function StudioButton({
   children,
   onClick,
@@ -67,23 +76,11 @@ export function StudioButton({
   className?: string;
   type?: "button" | "submit";
 }) {
-  const base =
-    "st-focus-ring inline-flex items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-sm font-medium transition-all disabled:cursor-not-allowed disabled:opacity-40";
-  const styles: Record<string, React.CSSProperties> = {
-    solid: { background: "var(--st-brand)", color: "var(--st-bg-deep)" },
-    outline: { background: "transparent", color: "var(--st-ink)", border: "1px solid var(--st-line-strong)" },
-    ghost: { background: "transparent", color: "var(--st-muted)" },
-  };
+  const mapped = variant === "solid" ? "default" : variant;
   return (
-    <button
-      type={type}
-      onClick={onClick}
-      disabled={disabled}
-      className={cn(base, variant === "solid" && "hover:brightness-110", variant !== "solid" && "hover:bg-black/5", className)}
-      style={styles[variant]}
-    >
+    <Button type={type} onClick={onClick} disabled={disabled} variant={mapped} className={className}>
       {children}
-    </button>
+    </Button>
   );
 }
 
@@ -103,38 +100,33 @@ export function AgentBubble({
       <AgentAvatar pulse={thinking} />
       <div className="min-w-0 flex-1 pt-0.5">
         <div className="mb-1 flex items-center gap-2">
-          <span className="st-display text-[15px]" style={{ color: "var(--st-ink)" }}>
-            Sibyl
-          </span>
+          <span className="font-medium text-foreground text-[15px]">Sibyl</span>
           <Pill tone="brand">forecast agent</Pill>
         </div>
-        <div className="text-[14px] leading-relaxed" style={{ color: "var(--st-ink-soft)" }}>
-          {children}
-        </div>
+        <div className="text-[14px] leading-relaxed text-muted-foreground">{children}</div>
       </div>
     </motion.div>
   );
 }
 
 export function AgentAvatar({ pulse, size = 34 }: { pulse?: boolean; size?: number }) {
+  const dataSize = size <= 28 ? "sm" : size >= 40 ? "lg" : "default";
   return (
-    <span
-      className="relative grid shrink-0 place-items-center rounded-xl"
-      style={{
-        width: size,
-        height: size,
-        background: "radial-gradient(120% 120% at 30% 20%, var(--st-brand-dim), var(--st-panel-2))",
-        border: "1px solid var(--st-line-strong)",
-        boxShadow: "0 0 18px var(--st-brand-glow)",
-      }}
-    >
-      <svg viewBox="0 0 24 24" width={size * 0.5} height={size * 0.5} fill="none">
-        <path d="M12 2v20M5 7l14 10M19 7L5 17" stroke="var(--st-bg-deep)" strokeWidth="1.6" strokeLinecap="round" opacity="0.85" />
-        <circle cx="12" cy="12" r="3.2" fill="var(--st-bg-deep)" />
-      </svg>
+    <span className="relative inline-flex">
+      <Avatar size={dataSize} className="overflow-visible">
+        <AvatarFallback
+          className="text-primary-foreground"
+          style={{ background: "radial-gradient(120% 120% at 30% 20%, var(--st-brand-dim), var(--st-brand))" }}
+        >
+          <svg viewBox="0 0 24 24" width="55%" height="55%" fill="none">
+            <path d="M12 2v20M5 7l14 10M19 7L5 17" stroke="var(--st-bg-deep)" strokeWidth="1.6" strokeLinecap="round" opacity="0.85" />
+            <circle cx="12" cy="12" r="3.2" fill="var(--st-bg-deep)" />
+          </svg>
+        </AvatarFallback>
+      </Avatar>
       {pulse && (
         <span
-          className="absolute inset-0 rounded-xl"
+          className="pointer-events-none absolute inset-0 rounded-full"
           style={{ border: "1.5px solid var(--st-brand)", animation: "st-pulse-ring 1.8s ease-out infinite", opacity: 0.6 }}
         />
       )}
@@ -151,9 +143,9 @@ export function StatBlock({
   label: string;
   value: ReactNode;
   sub?: ReactNode;
-  tone?: "neutral" | "brand" | "cut" | "hold" | "hike";
+  tone?: Tone;
 }) {
-  const fg: Record<string, string> = {
+  const fg: Record<Tone, string> = {
     neutral: "var(--st-ink)",
     brand: "var(--st-brand)",
     cut: "var(--st-cut)",
@@ -166,11 +158,7 @@ export function StatBlock({
       <div className="st-mono mt-1 text-2xl" style={{ color: fg[tone] }}>
         {value}
       </div>
-      {sub && (
-        <div className="mt-0.5 text-[11px]" style={{ color: "var(--st-faint)" }}>
-          {sub}
-        </div>
-      )}
+      {sub && <div className="mt-0.5 text-[11px] text-muted-foreground">{sub}</div>}
     </div>
   );
 }

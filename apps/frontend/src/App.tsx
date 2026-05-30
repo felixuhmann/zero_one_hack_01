@@ -13,7 +13,7 @@ function App() {
 
   if (view === 'studio') {
     return (
-      <ThemeProvider defaultTheme="light">
+      <ThemeProvider defaultTheme="system">
         <DecisionStudio />
       </ThemeProvider>
     )

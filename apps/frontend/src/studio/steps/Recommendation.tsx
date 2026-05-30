@@ -12,6 +12,10 @@ import {
 } from "@/studio/data";
 import { DecisionGauge } from "@/studio/charts/DecisionGauge";
 import { AgentAvatar, AgentBubble, Eyebrow, Pill, StudioButton } from "@/studio/ui/bits";
+import { Card, CardContent } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Slider } from "@/components/ui/slider";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 interface Props {
   calibration: CalibrationState;
@@ -77,7 +81,9 @@ export function Recommendation({ calibration, onBack, onRestart }: Props) {
     setScenarioNote(null);
   }
 
-  function applyScenario(s: (typeof SCENARIOS)[number]) {
+  function applyScenario(id: string) {
+    const s = SCENARIOS.find((x) => x.id === id);
+    if (!s) return;
     setAssumptions(s.apply(defaultAssumptions()));
     setActiveScenario(s.id);
     setScenarioNote(s.note);
@@ -90,9 +96,7 @@ export function Recommendation({ calibration, onBack, onRestart }: Props) {
     <div className="space-y-7">
       <div className="space-y-3">
         <Eyebrow>Step 05 · Decision</Eyebrow>
-        <h1 className="st-display text-4xl md:text-5xl" style={{ color: "var(--st-ink)" }}>
-          The recommendation
-        </h1>
+        <h1 className="st-display text-4xl text-foreground md:text-5xl">The recommendation</h1>
       </div>
 
       {/* decision-change banner (adaptive proof) */}
@@ -104,12 +108,15 @@ export function Recommendation({ calibration, onBack, onRestart }: Props) {
             exit={{ opacity: 0, height: 0 }}
             className="overflow-hidden"
           >
-            <div className="flex items-center gap-3 rounded-xl px-4 py-3" style={{ background: "color-mix(in oklch, var(--st-brand) 14%, var(--st-panel))", border: "1px solid var(--st-brand)" }}>
-              <Zap className="h-4 w-4 shrink-0" style={{ color: "var(--st-brand)" }} />
-              <span className="text-[13px]" style={{ color: "var(--st-ink)" }}>
+            <div
+              className="flex items-center gap-3 rounded-xl px-4 py-3"
+              style={{ background: "color-mix(in oklch, var(--st-brand) 14%, var(--st-panel))", border: "1px solid var(--st-brand)" }}
+            >
+              <Zap className="size-4 shrink-0 text-[var(--st-brand)]" />
+              <span className="text-[13px] text-foreground">
                 Assumption shifted → recommendation updated from{" "}
-                <span className="st-mono" style={{ color: "var(--st-muted)" }}>{baseline.headline}</span> to{" "}
-                <span className="st-mono" style={{ color: "var(--st-brand)" }}>{result.headline}</span>.
+                <span className="st-mono text-muted-foreground">{baseline.headline}</span> to{" "}
+                <span className="st-mono text-[var(--st-brand)]">{result.headline}</span>.
               </span>
             </div>
           </motion.div>
@@ -118,9 +125,9 @@ export function Recommendation({ calibration, onBack, onRestart }: Props) {
 
       <div className="grid gap-5 lg:grid-cols-[1fr_1.25fr]">
         {/* decision card */}
-        <div className="st-panel relative overflow-hidden p-6">
+        <Card className="relative gap-0 py-0">
           <div className="st-grain pointer-events-none absolute inset-0" />
-          <div className="relative">
+          <CardContent className="relative p-6">
             <div className="flex items-center justify-between">
               <Eyebrow>Next-meeting call · June 2026</Eyebrow>
               <Pill tone={result.confidence === "high" ? "brand" : result.confidence === "medium" ? "hold" : "neutral"}>
@@ -139,7 +146,7 @@ export function Recommendation({ calibration, onBack, onRestart }: Props) {
                 </span>
               )}
             </div>
-            <p className="mt-1 text-[13px]" style={{ color: "var(--st-muted)" }}>
+            <p className="mt-1 text-[13px] text-muted-foreground">
               {result.headline} · target range stays anchored unless the data force a move.
             </p>
 
@@ -147,141 +154,132 @@ export function Recommendation({ calibration, onBack, onRestart }: Props) {
               <DecisionGauge tilt={result.tilt} />
             </div>
 
-            <div className="rounded-lg p-3" style={{ background: "var(--st-panel-2)" }}>
+            <div className="rounded-lg bg-muted p-3">
               <Eyebrow className="mb-1" style={{ fontSize: 9 }}>
                 anticipated dissent
               </Eyebrow>
-              <p className="text-[12px] leading-relaxed" style={{ color: "var(--st-ink-soft)" }}>
-                {result.dissent}
-              </p>
+              <p className="text-[12px] leading-relaxed text-foreground/80">{result.dissent}</p>
             </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
 
         {/* reasoning */}
         <div className="space-y-4">
-          <div className="st-panel p-5">
-            <span className="text-sm font-medium" style={{ color: "var(--st-ink)" }}>
-              Why — contribution to the tilt
-            </span>
-            <p className="mt-0.5 text-[11px]" style={{ color: "var(--st-faint)" }}>
-              Each force is signed: dovish pulls left (cut), hawkish pulls right (hike)
-            </p>
-            <div className="mt-4 space-y-3">
-              {result.contributions.map((c) => (
-                <ContribRow key={c.label} label={c.label} value={c.value} detail={c.detail} max={maxContrib} />
-              ))}
-            </div>
-          </div>
+          <Card className="gap-0 py-5">
+            <CardContent>
+              <span className="text-sm font-medium text-foreground">Why — contribution to the tilt</span>
+              <p className="mt-0.5 text-[11px] text-muted-foreground">
+                Each force is signed: dovish pulls left (cut), hawkish pulls right (hike)
+              </p>
+              <div className="mt-4 space-y-3">
+                {result.contributions.map((c) => (
+                  <ContribRow key={c.label} label={c.label} value={c.value} detail={c.detail} max={maxContrib} />
+                ))}
+              </div>
+            </CardContent>
+          </Card>
 
-          <div className="st-panel p-5">
-            <span className="text-sm font-medium" style={{ color: "var(--st-ink)" }}>
-              Reasoning
-            </span>
-            <ul className="mt-3 space-y-2.5">
-              {result.rationale.map((r, i) => (
-                <li key={i} className="flex gap-2.5 text-[13px] leading-relaxed" style={{ color: "var(--st-ink-soft)" }}>
-                  <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full" style={{ background: "var(--st-brand)" }} />
-                  <span dangerouslySetInnerHTML={{ __html: renderEmphasis(r) }} />
-                </li>
-              ))}
-            </ul>
-          </div>
+          <Card className="gap-0 py-5">
+            <CardContent>
+              <span className="text-sm font-medium text-foreground">Reasoning</span>
+              <ul className="mt-3 space-y-2.5">
+                {result.rationale.map((r, i) => (
+                  <li key={i} className="flex gap-2.5 text-[13px] leading-relaxed text-foreground/80">
+                    <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-[var(--st-brand)]" />
+                    <span dangerouslySetInnerHTML={{ __html: renderEmphasis(r) }} />
+                  </li>
+                ))}
+              </ul>
+            </CardContent>
+          </Card>
         </div>
       </div>
 
       {/* adaptive: assumption shift */}
-      <div className="st-panel p-5">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-2">
-            <Sliders className="h-4 w-4" style={{ color: "var(--st-brand)" }} />
-            <span className="text-sm font-medium" style={{ color: "var(--st-ink)" }}>
-              Shift an assumption — watch the call adapt
-            </span>
+      <Card className="gap-0 py-5">
+        <CardContent>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <Sliders className="size-4 text-[var(--st-brand)]" />
+              <span className="text-sm font-medium text-foreground">Shift an assumption — watch the call adapt</span>
+            </div>
+            <ToggleGroup
+              type="single"
+              variant="outline"
+              size="sm"
+              value={activeScenario}
+              onValueChange={(v) => v && applyScenario(v)}
+            >
+              {SCENARIOS.map((s) => (
+                <ToggleGroupItem key={s.id} value={s.id} className="text-[12px]">
+                  {s.label}
+                </ToggleGroupItem>
+              ))}
+            </ToggleGroup>
           </div>
-          <div className="flex flex-wrap gap-1.5">
-            {SCENARIOS.map((s) => (
-              <button
-                key={s.id}
-                type="button"
-                onClick={() => applyScenario(s)}
-                className="st-focus-ring rounded-full px-3 py-1.5 text-[12px] transition-all hover:brightness-110"
-                style={{
-                  background: activeScenario === s.id ? "var(--st-brand)" : "var(--st-panel-2)",
-                  color: activeScenario === s.id ? "var(--st-bg-deep)" : "var(--st-ink-soft)",
-                  border: "1px solid var(--st-line)",
-                }}
-              >
-                {s.label}
-              </button>
+
+          <AnimatePresence>
+            {scenarioNote && (
+              <motion.div initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="mt-3">
+                <AgentBubble>{scenarioNote}</AgentBubble>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          <div className="mt-5 grid gap-x-8 gap-y-4 sm:grid-cols-2">
+            {assumptions.map((a) => (
+              <AssumptionSlider key={a.id} a={a} onChange={(v) => setAssumption(a.id, v)} />
             ))}
           </div>
-        </div>
-
-        <AnimatePresence>
-          {scenarioNote && (
-            <motion.div initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="mt-3">
-              <AgentBubble>{scenarioNote}</AgentBubble>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        <div className="mt-5 grid gap-x-8 gap-y-4 sm:grid-cols-2">
-          {assumptions.map((a) => (
-            <AssumptionSlider key={a.id} a={a} onChange={(v) => setAssumption(a.id, v)} />
-          ))}
-        </div>
-      </div>
+        </CardContent>
+      </Card>
 
       {/* discussion loop */}
-      <div className="st-panel p-5">
-        <div className="flex items-center gap-2">
-          <MessageCircleQuestion className="h-4 w-4" style={{ color: "var(--st-brand)" }} />
-          <span className="text-sm font-medium" style={{ color: "var(--st-ink)" }}>
-            Disagree? Challenge the agent
-          </span>
-        </div>
-        <div className="mt-3 flex flex-wrap gap-2">
-          {CHALLENGES.map((c) => (
-            <button
-              key={c.id}
-              type="button"
-              onClick={() => setChallenge(challenge === c.id ? null : c.id)}
-              className="st-focus-ring rounded-full px-3 py-1.5 text-[12px] transition-all"
-              style={{
-                background: challenge === c.id ? "color-mix(in oklch, var(--st-brand) 14%, var(--st-panel-2))" : "var(--st-panel-2)",
-                color: "var(--st-ink-soft)",
-                border: `1px solid ${challenge === c.id ? "var(--st-brand)" : "var(--st-line)"}`,
-              }}
-            >
-              {c.q}
-            </button>
-          ))}
-        </div>
-        <AnimatePresence mode="wait">
-          {challenge && (
-            <motion.div
-              key={challenge}
-              initial={{ opacity: 0, y: 6 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -6 }}
-              className="mt-4 flex items-start gap-3"
-            >
-              <AgentAvatar size={30} />
-              <p className="flex-1 pt-1 text-[13px] leading-relaxed" style={{ color: "var(--st-ink-soft)" }}>
-                {CHALLENGES.find((c) => c.id === challenge)?.a}
-              </p>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
+      <Card className="gap-0 py-5">
+        <CardContent>
+          <div className="flex items-center gap-2">
+            <MessageCircleQuestion className="size-4 text-[var(--st-brand)]" />
+            <span className="text-sm font-medium text-foreground">Disagree? Challenge the agent</span>
+          </div>
+          <ToggleGroup
+            type="single"
+            variant="outline"
+            size="sm"
+            value={challenge ?? ""}
+            onValueChange={(v) => setChallenge(v || null)}
+            className="mt-3 flex-wrap"
+          >
+            {CHALLENGES.map((c) => (
+              <ToggleGroupItem key={c.id} value={c.id} className="text-[12px]">
+                {c.q}
+              </ToggleGroupItem>
+            ))}
+          </ToggleGroup>
+          <AnimatePresence mode="wait">
+            {challenge && (
+              <motion.div
+                key={challenge}
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -6 }}
+                className="mt-4 flex items-start gap-3"
+              >
+                <AgentAvatar size={30} />
+                <p className="flex-1 pt-1 text-[13px] leading-relaxed text-foreground/80">
+                  {CHALLENGES.find((c) => c.id === challenge)?.a}
+                </p>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </CardContent>
+      </Card>
 
       <div className="flex items-center justify-between pt-2">
         <StudioButton variant="ghost" onClick={onBack}>
-          <ArrowLeft className="h-4 w-4" /> Back to forecast
+          <ArrowLeft className="size-4" /> Back to forecast
         </StudioButton>
         <StudioButton variant="outline" onClick={onRestart}>
-          <RotateCcw className="h-4 w-4" /> New session
+          <RotateCcw className="size-4" /> New session
         </StudioButton>
       </div>
     </div>
@@ -294,9 +292,7 @@ function ContribRow({ label, value, detail, max }: { label: string; value: numbe
   return (
     <div>
       <div className="mb-1 flex items-center justify-between">
-        <span className="text-[12.5px]" style={{ color: "var(--st-ink-soft)" }}>
-          {label}
-        </span>
+        <span className="text-[12.5px] text-foreground/80">{label}</span>
         <span className="st-mono text-[11px]" style={{ color: dovish ? "var(--st-cut)" : "var(--st-hike)" }}>
           {value >= 0 ? "+" : ""}
           {value.toFixed(2)}
@@ -317,9 +313,7 @@ function ContribRow({ label, value, detail, max }: { label: string; value: numbe
           }}
         />
       </div>
-      <p className="mt-1 text-[11px] leading-snug" style={{ color: "var(--st-faint)" }}>
-        {detail}
-      </p>
+      <p className="mt-1 text-[11px] leading-snug text-muted-foreground">{detail}</p>
     </div>
   );
 }
@@ -329,31 +323,26 @@ function AssumptionSlider({ a, onChange }: { a: Assumption; onChange: (v: number
   return (
     <div>
       <div className="flex items-center justify-between">
-        <span className="text-[12.5px]" style={{ color: "var(--st-ink-soft)" }}>
-          {a.label}
-        </span>
+        <Label className="text-[12.5px] text-foreground/80">{a.label}</Label>
         <span className="st-mono text-[12px]" style={{ color: moved ? "var(--st-brand)" : "var(--st-muted)" }}>
           {a.value > 0 && a.unit === "bps" ? "+" : ""}
           {a.value.toFixed(a.step < 1 ? 1 : 0)} {a.unit}
         </span>
       </div>
-      <input
-        type="range"
+      <Slider
+        className="mt-2"
         min={a.min}
         max={a.max}
         step={a.step}
-        value={a.value}
-        onChange={(e) => onChange(Number(e.target.value))}
-        className="mt-2 w-full"
-        style={{ accentColor: "var(--st-brand)" }}
+        value={[a.value]}
+        onValueChange={(v) => onChange(v[0])}
         aria-label={a.label}
       />
-      <p className="mt-0.5 text-[10.5px] leading-snug" style={{ color: "var(--st-faint)" }}>
-        {a.hint}
-      </p>
+      <p className="mt-0.5 text-[10.5px] leading-snug text-muted-foreground">{a.hint}</p>
     </div>
   );
 }
+
 function renderEmphasis(s: string): string {
   const escaped = s
     .replace(/&/g, "&amp;")
@@ -361,4 +350,3 @@ function renderEmphasis(s: string): string {
     .replace(/>/g, "&gt;");
   return escaped.replace(/\*\*(.+?)\*\*/g, '<strong style="color:var(--st-ink);font-weight:600">$1</strong>');
 }
-
