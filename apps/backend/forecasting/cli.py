@@ -1,24 +1,8 @@
-import json
-import os
-
-from fed_rate_pipeline import FedRatePipeline
-from analysis import EnsembleEngine, ScenarioClassifier
+from forecasting.fed_rate_pipeline import FedRatePipeline
 
 
-if __name__ == "__main__":
+def main() -> None:
     pipeline = FedRatePipeline()
-    # drivers_payload = pipeline.run()
-
-    # payload_path = "artifacts/fed_rate_forecast/drivers_payload.json"
-    # os.makedirs(os.path.dirname(payload_path), exist_ok=True)
-    # with open(payload_path, "w", encoding="utf-8") as f:
-    #     json.dump(drivers_payload, f, indent=2)
-    # print(f"Wrote {payload_path}")
-
-    # drivers_path = "artifacts/fed_rate_forecast/drivers.json"
-    # pipeline.get_drivers(output_path=drivers_path)
-    # print(f"Wrote {drivers_path}")
-
     result = pipeline.run()
 
     print("\nOrchestrator results:")

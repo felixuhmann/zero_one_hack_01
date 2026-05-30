@@ -5,11 +5,11 @@ import os
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
-from analysis.ensemble_engine import EnsembleEngine
-from analysis.scenario_classifier import ScenarioClassifier
-from api.fred_api import FREDClient
-from api.sybilion_forecast_api import SybilionForecastApiClient
-from payloads.fed_rate_payloads import FedRatePayloadBuilder
+from forecasting.analysis.ensemble_engine import EnsembleEngine
+from forecasting.analysis.scenario_classifier import ScenarioClassifier
+from forecasting.api.fred_api import FREDClient
+from forecasting.api.sybilion_forecast_api import SybilionForecastApiClient
+from forecasting.payloads.fed_rate_payloads import FedRatePayloadBuilder
 
 
 US_SIGNAL_CONFIGS = [
@@ -49,10 +49,6 @@ class FedRatePipeline:
         self.ensemble_engine     = ensemble_engine or EnsembleEngine()
         self.scenario_classifier = scenario_classifier or ScenarioClassifier()
         self.artifacts_base_dir  = artifacts_base_dir
-
-    # ------------------------------------------------------------------
-    # Public API
-    # ------------------------------------------------------------------
 
     def run(
         self,
@@ -99,10 +95,6 @@ class FedRatePipeline:
 
         return result
 
-    # ------------------------------------------------------------------
-    # Pipeline steps
-    # ------------------------------------------------------------------
-
     def _run_signals_parallel(
         self,
         signal_configs: list[dict],
@@ -137,18 +129,7 @@ class FedRatePipeline:
         print("-> Klassifiziere Szenario...")
         return self.scenario_classifier.classify(ensemble, signals)
 
-    # ------------------------------------------------------------------
-    # Single signal
-    # ------------------------------------------------------------------
-
     def _run_single_signal(self, cfg: dict) -> dict:
-        """
-        Für eine einzelne Serie:
-        - Payload bauen
-        - Job submitten
-        - Pollen bis settled
-        - Artifacts herunterladen
-        """
         payload = self.payload_builder.build_forecast_payload(
             series_id=cfg["series_id"],
             recency_factor=cfg["recency_factor"],

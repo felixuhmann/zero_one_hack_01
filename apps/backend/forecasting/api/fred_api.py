@@ -3,7 +3,7 @@ import os
 import pandas as pd
 import requests
 
-from api.http_utils import parse_json_response
+from forecasting.api.http_utils import parse_json_response
 
 
 class FREDClient:

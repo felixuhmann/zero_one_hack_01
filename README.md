@@ -26,6 +26,112 @@ Each track's full briefing, data, and starter materials live in [`/tracks/`](./t
 
 ---
 
+## Development
+
+This repo is a monorepo for the **Sybilion forecasting** track app:
+
+| Path | Purpose |
+|------|---------|
+| [`apps/frontend/`](./apps/frontend/) | React + TypeScript (Vite) UI |
+| [`apps/backend/`](./apps/backend/) | Python forecasting pipeline (FRED → Sybilion → ensemble → scenario) |
+| [`tracks/forecasting-sybilion/`](./tracks/forecasting-sybilion/) | Track briefing and reference docs |
+
+### Prerequisites
+
+- **Node.js** 20+ and npm (for the frontend)
+- **Python** 3.11+
+- API keys (see [Environment variables](#environment-variables)):
+  - [FRED API key](https://fred.stlouisfed.org/docs/api/api_key.html)
+  - Sybilion API key (from hackathon mentors / track materials)
+
+### One-time setup
+
+From the repository root:
+
+```bash
+# Python backend
+python3 -m venv .venv
+source .venv/bin/activate   # Windows: .venv\Scripts\activate
+pip install -r requirements.txt
+pip install -e apps/backend
+
+# Environment
+cp .env.example .env
+# Edit .env and set FRED_API_KEY and SYBILION_API_KEY
+
+# Frontend
+cd apps/frontend && npm install && cd ../..
+```
+
+### Run in dev mode
+
+Use **two terminals** (both from the repo root, with the venv activated in the backend terminal).
+
+**Terminal 1 — frontend** (hot reload at http://localhost:5173):
+
+```bash
+npm run dev:frontend
+```
+
+Or from `apps/frontend`:
+
+```bash
+cd apps/frontend && npm run dev
+```
+
+The Vite dev server proxies `/api` to `http://127.0.0.1:8000` for when a backend HTTP server is added. There is no API server yet; the UI runs standalone.
+
+**Terminal 2 — backend pipeline** (CLI, long-running Sybilion jobs):
+
+Run from the **repository root** so artifacts land in `artifacts/fed_rate_forecast/`:
+
+```bash
+source .venv/bin/activate
+cd apps/backend && python -m forecasting
+```
+
+Or from the root (with venv active):
+
+```bash
+npm run pipeline
+```
+
+The pipeline fetches FRED data, submits parallel Sybilion forecast jobs, builds an ensemble, and prints a scenario classification. Expect **several minutes to an hour** depending on API queue time.
+
+### Environment variables
+
+Copy [`.env.example`](./.env.example) to `.env` in the repo root (do not commit `.env`):
+
+| Variable | Required for |
+|----------|----------------|
+| `FRED_API_KEY` | Fetching macro time series from FRED |
+| `SYBILION_API_KEY` | Sybilion forecast and drivers API |
+
+Export them in your shell or use a tool that loads `.env` before running Python.
+
+### Build frontend for production
+
+```bash
+npm run build:frontend
+```
+
+Output: `apps/frontend/dist/`
+
+### Project layout (backend package)
+
+```text
+apps/backend/forecasting/
+├── cli.py                 # CLI entry (python -m forecasting)
+├── fed_rate_pipeline.py   # orchestrator
+├── api/                   # FRED + Sybilion HTTP clients
+├── payloads/              # Sybilion request builders
+└── analysis/              # ensemble + scenario rules
+```
+
+Track-specific docs: [`tracks/forecasting-sybilion/Track_Build_on_Probability.md`](./tracks/forecasting-sybilion/Track_Build_on_Probability.md)
+
+---
+
 ## What's provided
 
 - **Compute**: Leonardo GPU Cluster (A100s). 

@@ -1,9 +1,12 @@
-import requests
 import os
-from api.http_utils import parse_json_response
+
+import requests
+
+from forecasting.api.http_utils import parse_json_response
+
 
 def sybilion_token():
-    token = os.environ.get("SYBILION_API_KEY") 
+    token = os.environ.get("SYBILION_API_KEY")
     if not token:
         raise EnvironmentError(
             "Set SYBILION_API_KEY or SYBILION_API_TOKEN before calling the Sybilion API."
@@ -16,6 +19,8 @@ def sybilion_headers():
         "Authorization": f"Bearer {sybilion_token()}",
         "Content-Type": "application/json",
     }
+
+
 class SybilionForecastApiClient:
     BASE_URL = "https://api.sybilion.dev/api/v1"
 

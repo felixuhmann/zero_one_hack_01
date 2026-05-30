@@ -1,0 +1,10 @@
+{
+  "name": "zero-one-hack",
+  "private": true,
+  "scripts": {
+    "dev:frontend": "npm run dev --prefix apps/frontend",
+    "dev": "npm run dev:frontend",
+    "build:frontend": "npm run build --prefix apps/frontend",
+    "pipeline": "cd apps/backend && python -m forecasting"
+  }
+}

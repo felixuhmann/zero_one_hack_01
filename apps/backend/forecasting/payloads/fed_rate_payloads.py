@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from api.fred_api import FREDClient
+from forecasting.api.fred_api import FREDClient
 
 # ------------------------------------------------------------------
 # Metadata für Sybilion timeseries_metadata
