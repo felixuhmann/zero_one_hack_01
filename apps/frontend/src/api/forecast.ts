@@ -30,11 +30,40 @@ export async function checkApiHealth(): Promise<{ status: string }> {
   return response.json() as Promise<{ status: string }>
 }
 
-export async function runForecastPipeline(): Promise<PipelineResponse> {
-  const response = await fetch(`${API_BASE}/forecast/run`, {
-    method: 'POST',
-    headers: { Accept: 'application/json' },
-  })
+/** Run the Fed/ECB pipeline for the series selected in Decision Studio. */
+export async function runForecastPipeline(
+  region = 'fed',
+  seriesIds?: string[],
+): Promise<PipelineResponse> {
+  const response = await fetch(
+    `${API_BASE}/forecast/run?region=${encodeURIComponent(region)}`,
+    {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(
+        seriesIds && seriesIds.length > 0 ? { series_ids: seriesIds } : {},
+      ),
+    },
+  )
+
+  if (!response.ok) {
+    throw new Error(await parseErrorMessage(response))
+  }
+
+  return response.json() as Promise<PipelineResponse>
+}
+
+/** Load the last saved aggregate without re-running Sybilion. */
+export async function fetchAggregatedForecast(
+  region = 'fed',
+): Promise<PipelineResponse> {
+  const response = await fetch(
+    `${API_BASE}/forecast/aggregated?region=${encodeURIComponent(region)}`,
+    { headers: { Accept: 'application/json' } },
+  )
 
   if (!response.ok) {
     throw new Error(await parseErrorMessage(response))

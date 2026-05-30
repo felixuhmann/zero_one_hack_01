@@ -89,13 +89,15 @@ export function FanChart({
       xLabels.push({ i, label });
     }
 
-    // backtest predicted-vs-realised overlay, anchored to history timestamps
+    // backtest held-out p50 path, anchored to history month indices (left of seam)
     const btPts = (backtest ?? [])
-      .map((d) => ({ hi: history.findIndex((h) => h.t === d.t), pred: d.pred }))
-      .filter((p) => p.hi >= 0);
-    const backtestLine = btPts.length
-      ? btPts.map((p, k) => `${k === 0 ? "M" : "L"}${x(p.hi)},${y(p.pred)}`).join(" ")
-      : null;
+      .map((d) => ({ hi: history.findIndex((h) => h.t === d.t), pred: d.pred, t: d.t }))
+      .filter((p) => p.hi >= 0)
+      .sort((a, b) => a.hi - b.hi);
+    const backtestLine =
+      btPts.length >= 2
+        ? btPts.map((p, k) => `${k === 0 ? "M" : "L"}${x(p.hi)},${y(p.pred)}`).join(" ")
+        : null;
     const backtestDots = btPts.map((p) => ({ cx: x(p.hi), cy: y(p.pred) }));
 
     return {
@@ -297,7 +299,7 @@ export function FanChart({
       )}
 
       <div className="mt-1 flex flex-wrap items-center gap-x-5 gap-y-1.5 px-1">
-        <Legend swatch="line" color="var(--st-ink-soft)" label={historyLabel} />
+        <Legend swatch="line" color="var(--st-ink-soft)" label={historyLabel || "Ground truth"} />
         <Legend swatch="dash" color="var(--st-brand)" label="Median forecast (p50)" />
         <Legend swatch="band" color="var(--st-brand)" label="50% band (p25–p75)" />
         <Legend swatch="band-faint" color="var(--st-brand)" label="90% band (p05–p95)" />

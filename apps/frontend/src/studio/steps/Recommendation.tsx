@@ -354,7 +354,6 @@ function AssumptionSlider({ a, onChange }: { a: Assumption; onChange: (v: number
     </div>
   );
 }
-
 function renderEmphasis(s: string): string {
   const escaped = s
     .replace(/&/g, "&amp;")
@@ -362,3 +361,4 @@ function renderEmphasis(s: string): string {
     .replace(/>/g, "&gt;");
   return escaped.replace(/\*\*(.+?)\*\*/g, '<strong style="color:var(--st-ink);font-weight:600">$1</strong>');
 }
+

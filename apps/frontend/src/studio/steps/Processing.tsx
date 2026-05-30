@@ -2,27 +2,54 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { Check, FastForward } from "lucide-react";
 
+import { runForecastPipeline } from "@/api/forecast";
+import type { PipelineResponse } from "@/types/forecast";
 import { JOB_STAGES, PROCESSING_FACTS, PROPOSED_SOURCES } from "@/studio/data";
 import { Eyebrow, Pill, StudioButton } from "@/studio/ui/bits";
 
 interface Props {
   include: Record<string, boolean>;
   onDone: () => void;
+  onForecastReady?: (data: PipelineResponse) => void;
 }
 
-export function Processing({ include, onDone }: Props) {
+export function Processing({ include, onDone, onForecastReady }: Props) {
   const signals = useMemo(() => PROPOSED_SOURCES.filter((s) => include[s.seriesId]), [include]);
+  const seriesIds = useMemo(() => signals.map((s) => s.seriesId), [signals]);
   const speeds = useRef(signals.map(() => 0.006 + Math.random() * 0.006));
   const [progress, setProgress] = useState<number[]>(() => signals.map(() => 0));
   const [factIdx, setFactIdx] = useState(0);
+  const [error, setError] = useState<string | null>(null);
+  const [apiDone, setApiDone] = useState(false);
   const doneFiredRef = useRef(false);
+  const fetchStarted = useRef(false);
+
+  useEffect(() => {
+    if (fetchStarted.current || seriesIds.length < 2) return;
+    fetchStarted.current = true;
+    setError(null);
+    void runForecastPipeline("fed", seriesIds)
+      .then((data) => {
+        onForecastReady?.(data);
+        setApiDone(true);
+      })
+      .catch((err) => {
+        setError(err instanceof Error ? err.message : "Forecast request failed");
+        setApiDone(true);
+      });
+  }, [seriesIds, onForecastReady]);
 
   useEffect(() => {
     const id = setInterval(() => {
-      setProgress((prev) => prev.map((p, i) => Math.min(1, p + speeds.current[i])));
+      setProgress((prev) =>
+        prev.map((p, i) => {
+          if (!apiDone) return Math.min(0.92, p + speeds.current[i]);
+          return Math.min(1, p + speeds.current[i] * 2);
+        }),
+      );
     }, 70);
     return () => clearInterval(id);
-  }, []);
+  }, [apiDone]);
 
   useEffect(() => {
     const id = setInterval(() => setFactIdx((i) => (i + 1) % PROCESSING_FACTS.length), 3200);
@@ -30,7 +57,7 @@ export function Processing({ include, onDone }: Props) {
   }, []);
 
   const overall = progress.length ? progress.reduce((a, b) => a + b, 0) / progress.length : 0;
-  const allDone = overall >= 1;
+  const allDone = apiDone && overall >= 0.85;
 
   useEffect(() => {
     if (allDone && !doneFiredRef.current) {
@@ -52,6 +79,11 @@ export function Processing({ include, onDone }: Props) {
         <h1 className="st-display text-4xl md:text-5xl" style={{ color: "var(--st-ink)" }}>
           Sybilion is forecasting
         </h1>
+        {error && (
+          <p className="text-sm" style={{ color: "var(--st-cut)" }}>
+            {error}
+          </p>
+        )}
       </div>
 
       <div className="mt-8 grid flex-1 items-center gap-8 lg:grid-cols-[360px_1fr]">

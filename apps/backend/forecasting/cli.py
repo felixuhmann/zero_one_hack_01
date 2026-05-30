@@ -7,8 +7,9 @@ import time
 from pathlib import Path
 
 import uvicorn
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import Body, FastAPI, HTTPException, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel, Field
 from fastapi.responses import FileResponse, StreamingResponse
 from starlette.middleware.base import BaseHTTPMiddleware
 
@@ -18,8 +19,19 @@ load_env()
 
 from forecasting.chat import ChatService
 from forecasting.chat import ui_stream
-from forecasting.pipeline import serialize_result
-from forecasting.regions import REGIONS, RegionError, build_pipeline, resolve_region
+from forecasting.aggregation import (
+    build_forecast_api_response,
+    load_aggregated_forecast,
+)
+from forecasting.catalog.fed_data_sources import FED_DATA_SOURCES, SelectionError
+from forecasting.selection import resolve_signal_configs
+from forecasting.regions import (
+    REGIONS,
+    RegionConfig,
+    RegionError,
+    build_pipeline,
+    resolve_region,
+)
 
 logging.basicConfig(
     level=logging.INFO,
@@ -120,28 +132,137 @@ async def chat(request: Request) -> StreamingResponse:
     )
 
 
-@app.post("/api/forecast/run")
-def run_forecast(region: str = "fed") -> dict:
-    """Run a region's forecasting pipeline and return signals, ensemble, scenario.
+class ForecastRunRequest(BaseModel):
+    """Matches the Decision Studio data-source step (selected FRED series)."""
 
-    `region` is 'fed' (default) or 'ecb'. This can take several minutes while
-    Sybilion jobs complete.
+    series_ids: list[str] | None = Field(
+        default=None,
+        description="FRED series to forecast (e.g. FEDFUNDS, DGS2). Omit for UI defaults.",
+    )
+
+
+def _parse_series_ids_query(raw: str | None) -> list[str] | None:
+    if not raw or not raw.strip():
+        return None
+    return [part.strip() for part in raw.split(",") if part.strip()]
+
+
+def _run_region_pipeline(
+    cfg: RegionConfig,
+    series_ids: list[str] | None = None,
+    *,
+    use_cache: bool = True,
+) -> dict:
+    signal_configs = resolve_signal_configs(cfg, series_ids)
+    pipeline = build_pipeline(cfg)
+    result = pipeline.run(signal_configs=signal_configs, use_cache=use_cache)
+    return build_forecast_api_response(cfg, result, signal_configs=signal_configs)
+
+
+@app.get("/api/forecast/sources")
+def list_forecast_sources(region: str = "fed") -> dict:
+    """Catalog of selectable series (same ids/roles as the Decision Studio UI)."""
+    try:
+        cfg = resolve_region(region)
+    except RegionError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    if cfg.key == "fed":
+        sources = [
+            {
+                "seriesId": row["series_id"],
+                "title": row["title"],
+                "role": row["role"],
+                "source": row["source"],
+                "cadence": row["cadence"],
+                "points": row["points"],
+                "minRequired": row["min_required"],
+                "weight": row["weight"],
+                "keywords": row["keywords"],
+                "recommended": row["recommended"],
+            }
+            for row in FED_DATA_SOURCES
+        ]
+    else:
+        sources = [
+            {
+                "seriesId": c["series_id"],
+                "title": c["series_id"],
+                "role": getattr(c.get("role"), "value", c.get("role")),
+                "weight": c.get("weight"),
+                "recommended": True,
+            }
+            for c in cfg.signal_configs
+        ]
+
+    return {"region": cfg.key, "region_label": cfg.label, "sources": sources}
+
+
+@app.post("/api/forecast/run")
+def run_forecast(
+    region: str = "fed",
+    series_ids: str | None = Query(
+        default=None,
+        description="Comma-separated FRED ids (alternative to JSON body)",
+    ),
+    force_refresh: bool = Query(
+        default=False,
+        description="Re-fetch FRED and re-run Sybilion even when artifacts exist on disk",
+    ),
+    body: ForecastRunRequest | None = Body(default=None),
+) -> dict:
+    """Run Sybilion for the selected series and return one aggregated JSON.
+
+    Pass ``series_ids`` in the body (Decision Studio) or as a query param.
+    When ``forecast.json`` and ``input.json`` already exist under
+    ``artifacts/<region>/<SERIES_ID>/``, that series is loaded from disk and
+    skipped unless ``force_refresh=true``.
+
+    The response ``signals`` object has one key per selected series, each with
+    Sybilion ``forecast``, ``external_signals``, ``backtest_metrics``, and
+    ``backtest_trajectories`` artifacts.
     """
     try:
         cfg = resolve_region(region)
     except RegionError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
+    selected = None
+    if body and body.series_ids:
+        selected = body.series_ids
+    else:
+        selected = _parse_series_ids_query(series_ids)
+
     try:
-        pipeline = build_pipeline(cfg)
-        result = pipeline.run(signal_configs=cfg.signal_configs)
-        return serialize_result(result)
+        return _run_region_pipeline(cfg, selected, use_cache=not force_refresh)
+    except SelectionError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
     except EnvironmentError as exc:
         raise HTTPException(status_code=503, detail=str(exc)) from exc
     except RuntimeError as exc:
         raise HTTPException(status_code=502, detail=str(exc)) from exc
     except Exception as exc:
         raise HTTPException(status_code=500, detail=str(exc)) from exc
+
+
+@app.get("/api/forecast/aggregated")
+def get_aggregated_forecast(region: str = "fed") -> dict:
+    """Return the last saved aggregated forecast (no Sybilion re-run)."""
+    try:
+        cfg = resolve_region(region)
+    except RegionError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    doc = load_aggregated_forecast(cfg.artifacts_dir)
+    if doc is None:
+        raise HTTPException(
+            status_code=404,
+            detail=(
+                f"No aggregated forecast for {cfg.label!r}. "
+                "POST /api/forecast/run first."
+            ),
+        )
+    return doc
 
 
 # Serve the built frontend (apps/frontend/dist) from the same origin as the API

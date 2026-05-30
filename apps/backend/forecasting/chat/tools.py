@@ -23,6 +23,7 @@ import time
 from typing import Any, Callable
 
 from forecasting.analysis.forecast_series import extract_forecast_series_from_signal
+from forecasting.aggregation import build_forecast_api_response
 from forecasting.pipeline import serialize_result
 from forecasting.regions import RegionConfig, build_pipeline, resolve_region
 
@@ -56,10 +57,15 @@ def _summarize_result(result: dict) -> dict:
         if item is None:
             signal_summaries[series_id] = {"status": "failed"}
             continue
+        flat = item.get("forecast_series")
+        if isinstance(flat, dict) and flat:
+            points = len(flat)
+        else:
+            points = len(extract_forecast_series_from_signal(item))
         signal_summaries[series_id] = {
-            "status": (item.get("job") or {}).get("status"),
+            "status": item.get("status") or (item.get("job") or {}).get("status"),
             "weight": item.get("weight"),
-            "forecast_points": len(extract_forecast_series_from_signal(item)),
+            "forecast_points": points,
         }
 
     return {
@@ -113,7 +119,8 @@ def run_forecast_pipeline(region: str = "fed", **_: Any) -> dict:
     pipeline = build_pipeline(cfg)
 
     result = pipeline.run(signal_configs=cfg.signal_configs)
-    saved_path = _save_snapshot(cfg, serialize_result(result))
+    api_response = build_forecast_api_response(cfg, result)
+    saved_path = _save_snapshot(cfg, api_response)
 
     summary = _summarize_result(result)
     summary["region"] = cfg.key

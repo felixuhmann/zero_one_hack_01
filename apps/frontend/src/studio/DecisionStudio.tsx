@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { Check } from "lucide-react";
 
+import type { PipelineResponse } from "@/types/forecast";
 import {
   DEFAULT_CALIBRATION,
   PROPOSED_SOURCES,
@@ -33,6 +34,7 @@ export function DecisionStudio() {
   const [include, setInclude] = useState<Record<string, boolean>>(() =>
     Object.fromEntries(PROPOSED_SOURCES.map((s) => [s.seriesId, s.recommended])),
   );
+  const [forecast, setForecast] = useState<PipelineResponse | null>(null);
 
   const reached = useMemo(() => {
     const order = STEPS.map((s) => s.id);
@@ -156,6 +158,7 @@ export function DecisionStudio() {
               {step === "processing" && (
                 <Processing
                   include={include}
+                  onForecastReady={setForecast}
                   onDone={() => go("forecast")}
                 />
               )}
@@ -164,6 +167,7 @@ export function DecisionStudio() {
                   calibration={calibration}
                   onCalibrationChange={setCalibration}
                   include={include}
+                  aggregatedForecast={forecast}
                   onBack={() => go("sources")}
                   onNext={() => go("recommendation")}
                 />
@@ -175,6 +179,7 @@ export function DecisionStudio() {
                   onRestart={() => {
                     setStep("country");
                     setCountry(null);
+                    setForecast(null);
                   }}
                 />
               )}

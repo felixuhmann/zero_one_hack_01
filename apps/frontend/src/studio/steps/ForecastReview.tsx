@@ -1,19 +1,9 @@
 import { useMemo, useState } from "react";
 import { ArrowLeft, ArrowRight, LineChart, Scale } from "lucide-react";
 
-import {
-  CURRENT_RATE,
-  PROPOSED_SOURCES,
-  TEMPERAMENTS,
-  backtestOverlay,
-  buildForecastBand,
-  defaultAssumptions,
-  evaluateDecision,
-  fundsHistory,
-  getSeriesForecast,
-  type CalibrationState,
-  type SeriesForecast,
-} from "@/studio/data";
+import { TEMPERAMENTS, type CalibrationState } from "@/studio/data";
+import type { PipelineResponse } from "@/types/forecast";
+import { buildSeriesChartView, buildTargetChartView } from "@/lib/sybilionCharts";
 import { FanChart } from "@/studio/charts/FanChart";
 import { AgentBubble, Eyebrow, Pill, StatBlock, StudioButton } from "@/studio/ui/bits";
 
@@ -21,56 +11,92 @@ interface Props {
   calibration: CalibrationState;
   onCalibrationChange: (v: CalibrationState) => void;
   include: Record<string, boolean>;
+  aggregatedForecast?: PipelineResponse | null;
   onBack: () => void;
   onNext: () => void;
 }
 
-export function ForecastReview({ calibration, onCalibrationChange, include, onBack, onNext }: Props) {
+export function ForecastReview({
+  calibration,
+  onCalibrationChange,
+  include,
+  aggregatedForecast,
+  onBack,
+  onNext,
+}: Props) {
   const [horizon, setHorizon] = useState<3 | 6 | 12>(calibration.horizon);
   const [activeTab, setActiveTab] = useState(0);
 
   const setCal = <K extends keyof CalibrationState>(k: K, v: CalibrationState[K]) =>
     onCalibrationChange({ ...calibration, [k]: v });
 
-  // the funds-rate path reacts live to the calibration controls
-  const decision = useMemo(
-    () => evaluateDecision(calibration, defaultAssumptions()),
-    [calibration],
-  );
-  const history = useMemo(() => fundsHistory(), []);
-  const band = useMemo(() => buildForecastBand(decision.driftBps), [decision.driftBps]);
-  const backtest = useMemo(() => backtestOverlay().map((d) => ({ t: d.t, pred: d.pred })), []);
-
-  // Fixed y-axis: history + backtest are static real data; only the forecast
-  // fan should move when the reaction function changes. The domain spans the
-  // full range the forecast can ever reach (driftBps is clamped to -175..100).
-  const fundsYDomain = useMemo<[number, number]>(() => {
-    const vals = [
-      ...history.map((h) => h.v),
-      ...backtest.map((b) => b.pred),
-      ...buildForecastBand(-175).flatMap((b) => [b.p05, b.p95]),
-      ...buildForecastBand(100).flatMap((b) => [b.p05, b.p95]),
-    ];
-    return [Math.min(...vals) - 0.25, Math.max(...vals) + 0.25];
-  }, [history, backtest]);
-
-  // per-series Sybilion forecasts for every selected input (the policy target
-  // FEDFUNDS is the dynamic graph below, so it is excluded from the tabs)
-  const seriesList = useMemo(
+  const targetChart = useMemo(
     () =>
-      PROPOSED_SOURCES.filter((s) => include[s.seriesId] && s.seriesId !== "FEDFUNDS")
-        .map((s) => getSeriesForecast(s.seriesId))
-        .filter((s): s is SeriesForecast => s !== null),
-    [include],
+      aggregatedForecast
+        ? buildTargetChartView(
+            aggregatedForecast.signals,
+            aggregatedForecast.target_series_id,
+            aggregatedForecast.data_sources,
+          )
+        : null,
+    [aggregatedForecast],
   );
-  const active = seriesList[Math.min(activeTab, seriesList.length - 1)] ?? null;
 
-  const hp = band[horizon];
-  const medianDelta = hp.p50 - CURRENT_RATE;
-  const rangeWidth = hp.p95 - hp.p05;
+  const seriesList = useMemo(() => {
+    if (!aggregatedForecast?.included_series_ids) return [];
+    const target = aggregatedForecast.target_series_id;
+    return aggregatedForecast.included_series_ids
+      .filter((id) => id !== target && include[id])
+      .map((id) =>
+        buildSeriesChartView(
+          aggregatedForecast.signals[id],
+          id,
+          aggregatedForecast.data_sources,
+        ),
+      )
+      .filter((s): s is NonNullable<typeof s> => s !== null);
+  }, [aggregatedForecast, include]);
+
+  const active = seriesList[Math.min(activeTab, Math.max(0, seriesList.length - 1))] ?? null;
+
+  const hp = targetChart?.band[Math.min(horizon, targetChart.band.length - 1)];
+  const seam = targetChart?.band[0];
+  const currentRate = seam?.history ?? seam?.p50 ?? 0;
+  const medianDelta = hp ? hp.p50 - currentRate : 0;
+  const rangeWidth = hp ? hp.p95 - hp.p05 : 0;
   const impliedCuts = Math.max(0, Math.round(-medianDelta / 0.25));
   const priceWeight = 100 - calibration.mandate;
-  const evidenceLabel = calibration.risk > 60 ? "Preemptive" : calibration.risk < 35 ? "Cautious" : "Measured";
+  const evidenceLabel =
+    calibration.risk > 60 ? "Preemptive" : calibration.risk < 35 ? "Cautious" : "Measured";
+
+  if (!aggregatedForecast) {
+    return (
+      <div className="space-y-4">
+        <Eyebrow>Step 04 · Forecast</Eyebrow>
+        <p className="text-sm" style={{ color: "var(--st-muted)" }}>
+          No Sybilion aggregate loaded. Go back and run the processing step with the backend online.
+        </p>
+        <StudioButton variant="ghost" onClick={onBack}>
+          <ArrowLeft className="h-4 w-4" /> Back
+        </StudioButton>
+      </div>
+    );
+  }
+
+  if (!targetChart) {
+    return (
+      <div className="space-y-4">
+        <Eyebrow>Step 04 · Forecast</Eyebrow>
+        <p className="text-sm" style={{ color: "var(--st-cut)" }}>
+          Could not build a chart for {aggregatedForecast.target_series_id ?? "the target series"}.
+          Check that Sybilion returned forecast and input artifacts for that signal.
+        </p>
+        <StudioButton variant="ghost" onClick={onBack}>
+          <ArrowLeft className="h-4 w-4" /> Back
+        </StudioButton>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-7">
@@ -81,14 +107,17 @@ export function ForecastReview({ calibration, onCalibrationChange, include, onBa
         </h1>
         <div className="max-w-2xl">
           <AgentBubble>
-            Sybilion returned a probabilistic forecast for{" "}
-            <span style={{ color: "var(--st-brand)" }}>each signal you approved</span> — tab through them
-            below. The calibrated funds-rate path then re-derives live as you tune your reaction function.
+            Ground truth from the submitted FRED series,{" "}
+            <span style={{ color: "var(--st-brand)" }}>held-out backtest medians (p50)</span>, and
+            forward quantile fans from Sybilion for{" "}
+            <span className="st-mono" style={{ color: "var(--st-brand)" }}>
+              {aggregatedForecast.included_series_ids?.join(", ")}
+            </span>
+            .
           </AgentBubble>
         </div>
       </div>
 
-      {/* per-series forecasts — tab through every selected input */}
       <div className="st-panel p-5">
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2">
@@ -125,7 +154,8 @@ export function ForecastReview({ calibration, onCalibrationChange, include, onBa
                 {active.title}
               </span>
               <span className="st-mono text-[11px]" style={{ color: "var(--st-faint)" }}>
-                now {fmtVal(active.start, active)} → 12M median {fmtVal(active.terminal, active)}
+                last observed {fmtVal(active.history[active.history.length - 1]?.v ?? 0, active)} →
+                horizon p50 {fmtVal(active.band[active.band.length - 1]?.p50 ?? 0, active)}
               </span>
             </div>
             <FanChart
@@ -135,7 +165,9 @@ export function ForecastReview({ calibration, onCalibrationChange, include, onBa
               horizonMonths={horizon}
               unit={active.unit}
               decimals={active.decimals}
-              historyLabel="Realised"
+              historyLabel="Ground truth (FRED)"
+              backtest={active.backtest}
+              yDomain={active.yDomain}
             />
             <p className="mt-2 text-[12px] leading-relaxed" style={{ color: "var(--st-muted)" }}>
               {active.read}
@@ -143,20 +175,19 @@ export function ForecastReview({ calibration, onCalibrationChange, include, onBa
           </>
         ) : (
           <p className="py-10 text-center text-[13px]" style={{ color: "var(--st-faint)" }}>
-            No input signals selected — go back and approve at least one data source.
+            No other signals selected — only the policy target is shown below.
           </p>
         )}
       </div>
 
-      {/* dynamic funds-rate path + calibration controls */}
       <div className="grid gap-5 lg:grid-cols-[1fr_320px]">
         <div className="st-panel p-5">
           <div className="mb-3 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <span className="text-sm font-medium" style={{ color: "var(--st-ink)" }}>
-                Federal Funds Rate · calibrated path
+                Policy rate · Sybilion fan
               </span>
-              <Pill tone="brand">FEDFUNDS</Pill>
+              <Pill tone="brand">{aggregatedForecast.target_series_id ?? "FEDFUNDS"}</Pill>
             </div>
             <div className="flex gap-1">
               {([3, 6, 12] as const).map((h) => (
@@ -175,11 +206,22 @@ export function ForecastReview({ calibration, onCalibrationChange, include, onBa
               ))}
             </div>
           </div>
-          <FanChart history={history} band={band} horizonMonths={horizon} backtest={backtest} yDomain={fundsYDomain} />
+          <FanChart
+            history={targetChart.history}
+            band={targetChart.band}
+            horizonMonths={horizon}
+            unit={targetChart.unit}
+            decimals={targetChart.decimals}
+            historyLabel="Ground truth (FRED)"
+            backtest={targetChart.backtest}
+            yDomain={targetChart.yDomain}
+          />
+          <p className="mt-2 text-[12px] leading-relaxed" style={{ color: "var(--st-muted)" }}>
+            {targetChart.read}
+          </p>
         </div>
 
         <div className="space-y-4">
-          {/* reaction function — drives the path above */}
           <div className="st-panel p-5">
             <div className="flex items-center gap-2">
               <Scale className="h-4 w-4" style={{ color: "var(--st-brand)" }} />
@@ -188,7 +230,7 @@ export function ForecastReview({ calibration, onCalibrationChange, include, onBa
               </span>
             </div>
             <p className="mt-0.5 text-[11px]" style={{ color: "var(--st-faint)" }}>
-              Tune your stance — the funds-rate path re-derives live
+              Calibration for the decision step — chart shows Sybilion output as returned
             </p>
 
             <div className="mt-4 space-y-4">
@@ -259,12 +301,27 @@ export function ForecastReview({ calibration, onCalibrationChange, include, onBa
             </div>
           </div>
 
-          <div className="st-panel grid grid-cols-2 gap-4 p-5">
-            <StatBlock label={`Median @ ${horizon}M`} value={`${hp.p50.toFixed(2)}%`} tone="brand" sub={`${medianDelta >= 0 ? "+" : ""}${(medianDelta * 100).toFixed(0)} bps`} />
-            <StatBlock label="90% band width" value={`${(rangeWidth * 100).toFixed(0)}`} sub="bps of uncertainty" />
-            <StatBlock label="Implied cuts" value={impliedCuts} sub="× 25 bps priced" tone="cut" />
-            <StatBlock label="p05 / p95" value={`${hp.p05.toFixed(1)}–${hp.p95.toFixed(1)}`} sub="tail outcomes" />
-          </div>
+          {hp && (
+            <div className="st-panel grid grid-cols-2 gap-4 p-5">
+              <StatBlock
+                label={`Median @ ${horizon}M`}
+                value={`${hp.p50.toFixed(targetChart.decimals)}${targetChart.unit}`}
+                tone="brand"
+                sub={`${medianDelta >= 0 ? "+" : ""}${(medianDelta * 100).toFixed(0)} bps`}
+              />
+              <StatBlock
+                label="90% band width"
+                value={`${(rangeWidth * 100).toFixed(0)}`}
+                sub="bps of uncertainty"
+              />
+              <StatBlock label="Implied cuts" value={impliedCuts} sub="× 25 bps priced" tone="cut" />
+              <StatBlock
+                label="p05 / p95"
+                value={`${hp.p05.toFixed(targetChart.decimals)}–${hp.p95.toFixed(targetChart.decimals)}`}
+                sub="tail outcomes"
+              />
+            </div>
+          )}
         </div>
       </div>
 

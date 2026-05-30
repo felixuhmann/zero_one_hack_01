@@ -76,6 +76,14 @@ _FORECAST_METADATA: dict[str, dict] = {
             "wage inflation", "sticky inflation", "compensation",
         ],
     },
+    "NFCI": {
+        "title": "Chicago Fed Financial Conditions Index Forecast",
+        "description": "Chicago Fed National Financial Conditions Index, monthly",
+        "keywords": [
+            "financial conditions", "credit spreads", "transmission",
+            "Chicago Fed", "NFCI", "monetary policy",
+        ],
+    },
     "NAPM": {
         "title": "NAPM / ISM Manufacturing Activity Forecast",
         "description": "FRED manufacturing activity series NAPM, using the legacy NAPM series until 2000 and the ISM manufacturing PMI series thereafter.",
@@ -122,12 +130,17 @@ _DRIVERS_METADATA: dict[str, dict] = {
         "description": "Average hourly earnings of all private employees, sourced from FRED.",
         "keywords": ["wage growth", "hourly earnings", "wage inflation", "labor costs"],
     },
+    "NFCI": {
+        "title": "Chicago Fed Financial Conditions Monthly",
+        "description": "Chicago Fed National Financial Conditions Index, sourced from FRED.",
+        "keywords": ["financial conditions", "credit spreads", "transmission", "NFCI"],
+    },
 }
 
 # Serien die als YoY-%-Veränderung transformiert werden müssen
 _YOY_TRANSFORM_SERIES = {"PCEPILFE", "PAYEMS", "CES0500000003"}
 
-_FORECAST_FILTERS = {"categories": [3], "regions": [42]}
+_FORECAST_FILTERS = {"categories": [3], "regions": [42], "limit": 1000}
 _DRIVERS_FILTERS  = {"categories": [3, 7], "limit": 20, "regions": [42]}
 
 

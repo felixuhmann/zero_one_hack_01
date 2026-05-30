@@ -61,25 +61,32 @@ class BasePayloadBuilder(ABC):
     # Public — gleich für alle Subklassen
     # ------------------------------------------------------------------
 
+    def fetch_timeseries(self, series_id: str, periods: int = 60) -> dict[str, float]:
+        """Fetch and transform FRED data for one series (call sequentially to avoid 429)."""
+        return self._fetch_and_transform(series_id, periods)
+
     def build_forecast_payload(
         self,
         series_id: str,
         periods: int = 60,
         recency_factor: float = 0.75,
+        timeseries: dict[str, float] | None = None,
     ) -> dict:
         """Baut den Payload für einen Sybilion Forecast-Job."""
-        timeseries = self._fetch_and_transform(series_id, periods)
-        meta       = self._metadata(series_id, self.forecast_metadata)
+        if timeseries is None:
+            timeseries = self._fetch_and_transform(series_id, periods)
+        meta = self._metadata(series_id, self.forecast_metadata)
 
         return {
-            "backtest":            True,
-            "filters":             self.forecast_filters,
-            "frequency":           "monthly",
-            "hard_horizon":        3,
-            "pipeline_version":    self.pipeline_version,
-            "recency_factor":      recency_factor,
-            "soft_horizon":        6,
-            "timeseries":          timeseries,
+            "backtest": True,
+            "filters": self.forecast_filters,
+            "frequency": "monthly",
+            "hard_horizon": 3,
+            "pipeline_version": self.pipeline_version,
+            "recency_factor": recency_factor,
+            "soft_horizon": 6,
+            "strictly_positive": False,
+            "timeseries": timeseries,
             "timeseries_metadata": meta,
         }
 

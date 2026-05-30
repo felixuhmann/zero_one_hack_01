@@ -5,7 +5,7 @@ import { checkApiHealth, runForecastPipeline } from '@/api/forecast'
 import { Button } from '@/components/ui/button'
 import type { PipelineResponse } from '@/types/forecast'
 import {
-  extractForecastValues,
+  extractSignalForecastValues,
   forecastPointCount,
 } from '@/types/forecast'
 
@@ -63,9 +63,16 @@ export function ForecastDashboard() {
           Pipeline results
         </h1>
         <p className="max-w-2xl text-muted-foreground">
-          Runs the backend pipeline (FRED → Sybilion → ensemble → scenario).
-          This can take several minutes while Sybilion jobs finish.
+          Runs the backend pipeline (FRED → Sybilion → ensemble → scenario) and
+          returns aggregated Sybilion artifacts per signal. This can take several
+          minutes while jobs finish.
         </p>
+        {data?.version && (
+          <p className="text-xs text-muted-foreground">
+            Aggregate v{data.version} · {data.region_label ?? data.region}
+            {data.snapshot_path ? ` · ${data.snapshot_path}` : ''}
+          </p>
+        )}
         <div className="flex flex-wrap items-center gap-3 pt-2">
           <Button
             type="button"
@@ -252,23 +259,24 @@ export function ForecastDashboard() {
                   <h3 className="font-mono font-semibold">{seriesId}</h3>
                   {signal ? (
                     <span className="text-xs text-muted-foreground">
-                      {signal.job.status ?? 'unknown'} · weight{' '}
+                      {signal.status ?? signal.job?.status ?? 'unknown'} · weight{' '}
                       {(signal.weight * 100).toFixed(0)}% ·{' '}
                       {forecastPointCount(signal)} points
+                      {signal.artifacts?.external_signals
+                        ? ` · drivers`
+                        : ''}
                     </span>
                   ) : (
                     <span className="text-xs text-destructive">Failed</span>
                   )}
                 </div>
-                {signal?.forecast?.data?.forecast_series && (
+                {forecastPointCount(signal) > 0 && (
                   <details className="mt-3">
                     <summary className="cursor-pointer text-sm text-muted-foreground">
                       Forecast points
                     </summary>
                     <ul className="mt-2 max-h-32 overflow-auto font-mono text-xs">
-                      {extractForecastValues(
-                        signal.forecast.data.forecast_series,
-                      ).map(({ date, value }) => (
+                      {extractSignalForecastValues(signal).map(({ date, value }) => (
                         <li key={date} className="flex justify-between gap-4">
                           <span>{date}</span>
                           <span>{value}</span>

@@ -9,6 +9,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from forecasting.analysis.ensemble_engine import EnsembleEngine
 from forecasting.analysis.forecast_series import pick_forecast_payload
 from forecasting.analysis.scenario_classifier import ScenarioClassifier
+from forecasting.artifacts_cache import has_cached_signal, load_cached_signal
 from forecasting.api.fred_api import FREDClient
 from forecasting.api.sybilion_forecast_api import SybilionForecastApiClient
 from forecasting.payloads.base_payload_builder import BasePayloadBuilder
@@ -82,6 +83,8 @@ class RateForecastPipeline:
         self,
         signal_configs: list[dict],
         max_workers: int = 4,
+        *,
+        use_cache: bool = True,
     ) -> dict:
         """Run the complete pipeline.
 
@@ -92,7 +95,17 @@ class RateForecastPipeline:
             "scenario": { scenario, confidence, delta_3m, ... },
         }
         """
-        signals = self._run_signals_parallel(signal_configs, max_workers)
+        needs_fetch = [
+            cfg
+            for cfg in signal_configs
+            if not (use_cache and has_cached_signal(self.artifacts_base_dir, cfg["series_id"]))
+        ]
+        timeseries_cache = (
+            self._prefetch_fred_timeseries(needs_fetch) if needs_fetch else {}
+        )
+        signals = self._run_signals_parallel(
+            signal_configs, max_workers, timeseries_cache, use_cache=use_cache
+        )
         ensemble = self._synthesize_ensemble(signals)
         scenario = self._classify_scenario(ensemble, signals, signal_configs)
 
@@ -100,6 +113,7 @@ class RateForecastPipeline:
             "signals": signals,
             "ensemble": ensemble,
             "scenario": scenario,
+            "signal_configs": signal_configs,
         }
 
     def get_drivers(
@@ -122,17 +136,34 @@ class RateForecastPipeline:
 
         return result
 
+    def _prefetch_fred_timeseries(self, signal_configs: list[dict]) -> dict[str, dict]:
+        """Fetch all FRED series sequentially (avoids FRED HTTP 429 under parallel load)."""
+        cache: dict[str, dict] = {}
+        for cfg in signal_configs:
+            series_id = cfg["series_id"]
+            logger.info("fetching FRED series %s", series_id)
+            cache[series_id] = self.payload_builder.fetch_timeseries(series_id)
+        return cache
+
     def _run_signals_parallel(
         self,
         signal_configs: list[dict],
         max_workers: int,
+        timeseries_cache: dict[str, dict],
+        *,
+        use_cache: bool = True,
     ) -> dict:
         """Submit all signals to Sybilion in parallel and collect results."""
         results = {}
 
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
             futures = {
-                executor.submit(self._run_single_signal, cfg): cfg["series_id"]
+                executor.submit(
+                    self._run_single_signal,
+                    cfg,
+                    timeseries_cache.get(cfg["series_id"]),
+                    use_cache,
+                ): cfg["series_id"]
                 for cfg in signal_configs
             }
             for future in as_completed(futures):
@@ -158,19 +189,45 @@ class RateForecastPipeline:
         logger.info("classifying scenario")
         return self.scenario_classifier.classify(ensemble, signals, signal_configs)
 
-    def _run_single_signal(self, cfg: dict) -> dict:
+    def _run_single_signal(
+        self,
+        cfg: dict,
+        timeseries: dict[str, float] | None = None,
+        use_cache: bool = True,
+    ) -> dict:
+        series_id = cfg["series_id"]
+        if use_cache and has_cached_signal(self.artifacts_base_dir, series_id):
+            return load_cached_signal(cfg, self.artifacts_base_dir)
+
+        output_dir = os.path.join(self.artifacts_base_dir, series_id)
+        os.makedirs(output_dir, exist_ok=True)
+
         payload = self.payload_builder.build_forecast_payload(
-            series_id=cfg["series_id"],
+            series_id=series_id,
             recency_factor=cfg["recency_factor"],
+            timeseries=timeseries,
         )
-        output_dir = os.path.join(self.artifacts_base_dir, cfg["series_id"])
+        with open(
+            os.path.join(output_dir, "submit_payload.json"),
+            "w",
+            encoding="utf-8",
+        ) as f:
+            json.dump(payload, f, indent=2)
+
         job, artifacts = self._submit_and_poll(payload, output_dir)
+
+        json_artifacts = {
+            name.removesuffix(".json"): payload
+            for name, payload in artifacts.items()
+            if name.endswith(".json") and isinstance(payload, dict)
+        }
 
         return {
             "series_id": cfg["series_id"],
             "weight": cfg["weight"],
             "job": job,
             "forecast": pick_forecast_payload(artifacts),
+            "artifacts": json_artifacts,
         }
 
     def _submit_and_poll(
