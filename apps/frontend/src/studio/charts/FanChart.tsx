@@ -11,6 +11,9 @@ interface FanChartProps {
   decimals?: number;
   historyLabel?: string;
   backtest?: { t: string; pred: number }[];
+  // optional overlay: our reaction-function model's prescribed quantile fan,
+  // aligned to the same forecast months as `band`
+  model?: { band: BandPoint[]; label?: string };
   // fixed y-axis range; when set, tweaking the forecast won't rescale the
   // static history/backtest portion of the chart
   yDomain?: [number, number];
@@ -34,6 +37,7 @@ export function FanChart({
   decimals = 2,
   historyLabel = "Realised funds rate",
   backtest,
+  model: modelOverlay,
   yDomain,
 }: FanChartProps) {
   const wrapRef = useRef<HTMLDivElement>(null);
@@ -49,6 +53,7 @@ export function FanChart({
     const allVals: number[] = [
       ...history.map((p) => p.v),
       ...band.flatMap((b) => [b.p05, b.p95]),
+      ...(modelOverlay?.band ?? []).flatMap((b) => [b.p05, b.p95]),
     ];
     const min = yDomain ? yDomain[0] : Math.min(...allVals) - 0.25;
     const max = yDomain ? yDomain[1] : Math.max(...allVals) + 0.25;
@@ -75,6 +80,32 @@ export function FanChart({
     };
 
     const medianLine = band.map((b, k) => `${k === 0 ? "M" : "L"}${x(fIdx(k))},${y(b.p50)}`).join(" ");
+
+    // our reaction-function model overlay (aligned to the same forecast months)
+    const mBand = modelOverlay?.band ?? [];
+    const mLen = Math.min(mBand.length, band.length);
+    const modelMedian =
+      mLen >= 2
+        ? mBand.slice(0, mLen).map((b, k) => `${k === 0 ? "M" : "L"}${x(fIdx(k))},${y(b.p50)}`).join(" ")
+        : null;
+    const modelArea =
+      mLen >= 2
+        ? (() => {
+            const top = mBand
+              .slice(0, mLen)
+              .map((b, k) => `${k === 0 ? "M" : "L"}${x(fIdx(k))},${y(b.p95)}`)
+              .join(" ");
+            const bottom = mBand
+              .slice(0, mLen)
+              .slice()
+              .reverse()
+              .map((b, k) => `L${x(fIdx(mLen - 1 - k))},${y(b.p05)}`)
+              .join(" ");
+            return `${top} ${bottom} Z`;
+          })()
+        : null;
+    const modelEnd =
+      mLen >= 2 ? { cx: x(fIdx(mLen - 1)), cy: y(mBand[mLen - 1].p50) } : null;
 
     const yTicks: { v: number; y: number }[] = [];
     const step = (max - min) / 4;
@@ -111,6 +142,10 @@ export function FanChart({
       area90: areaPath((b) => b.p05, (b) => b.p95),
       area50: areaPath((b) => b.p25, (b) => b.p75),
       medianLine,
+      modelMedian,
+      modelArea,
+      modelEnd,
+      modelLabel: modelOverlay?.label,
       yTicks,
       xLabels,
       histLen,
@@ -119,7 +154,7 @@ export function FanChart({
       backtestLine,
       backtestDots,
     };
-  }, [history, band, backtest, yDomain]);
+  }, [history, band, backtest, modelOverlay, yDomain]);
 
   const horizonIdx = model.fIdx(Math.min(horizonMonths, band.length - 1));
 
@@ -151,6 +186,10 @@ export function FanChart({
           <linearGradient id="fan50" x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor="var(--st-brand)" stopOpacity="0.4" />
             <stop offset="100%" stopColor="var(--st-brand)" stopOpacity="0.16" />
+          </linearGradient>
+          <linearGradient id="fanModel" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="var(--st-model)" stopOpacity="0.16" />
+            <stop offset="100%" stopColor="var(--st-model)" stopOpacity="0.03" />
           </linearGradient>
         </defs>
 
@@ -277,6 +316,35 @@ export function FanChart({
           transition={{ duration: 1, ease: "easeInOut", delay: 0.35 }}
         />
 
+        {/* reaction-function model overlay (our own Fed forecast) */}
+        {model.modelArea && (
+          <motion.path
+            d={model.modelArea}
+            fill="url(#fanModel)"
+            stroke="var(--st-model)"
+            strokeWidth="1"
+            strokeOpacity="0.3"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+          />
+        )}
+        {model.modelMedian && (
+          <motion.path
+            d={model.modelMedian}
+            fill="none"
+            stroke="var(--st-model)"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            initial={{ pathLength: 0 }}
+            animate={{ pathLength: 1 }}
+            transition={{ duration: 1, ease: "easeInOut", delay: 0.45 }}
+          />
+        )}
+        {model.modelEnd && (
+          <circle cx={model.modelEnd.cx} cy={model.modelEnd.cy} r="3.5" fill="var(--st-model)" stroke="var(--st-bg)" strokeWidth="1.5" />
+        )}
+
         {/* hover scrubber */}
         {hover != null && hoverData && (
           <g>
@@ -303,6 +371,9 @@ export function FanChart({
         <Legend swatch="dash" color="var(--st-brand)" label="Median forecast (p50)" />
         <Legend swatch="band" color="var(--st-brand)" label="50% band (p25–p75)" />
         <Legend swatch="band-faint" color="var(--st-brand)" label="90% band (p05–p95)" />
+        {model.modelMedian && (
+          <Legend swatch="line" color="var(--st-model)" label={model.modelLabel ?? "Reaction-function model (p50)"} />
+        )}
         {model.backtestLine && <Legend swatch="dash" color="var(--st-hold)" label="Backtest (held-out prediction)" />}
       </div>
     </div>

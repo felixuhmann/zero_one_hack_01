@@ -560,7 +560,79 @@ export interface DecisionResult {
   dissent: string;
 }
 
-const NATURAL_UNRATE = 4.3;
+export const NATURAL_UNRATE = 4.3;
+
+/** Point-in-time macro inputs the reaction function consumes. */
+export interface ReactionInputs {
+  corepce: number; // core PCE inflation, % YoY
+  unrate: number; // unemployment rate, %
+  marketcuts: number; // bps of cuts(−)/hikes(+) the curve prices over 12m
+  expectations: number; // long-run inflation expectations, %
+}
+
+export interface ReactionAnalysis {
+  contributions: DriverContribution[];
+  tilt: number; // raw signed tilt (− dovish .. + hawkish)
+  actTilt: number; // tilt after the chair's risk gain
+  riskGain: number;
+}
+
+/**
+ * Core of the Fed reaction function: turn macro inputs + the chair's
+ * calibration into a signed dovish/hawkish tilt with a transparent breakdown.
+ *
+ * Shared by the next-meeting decision (`evaluateDecision`) and the policy-rate
+ * forecast fan (`buildReactionForecast` in `fedModel.ts`) so the chart overlay
+ * and the call are always produced by the *same* model.
+ */
+export function reactionContributions(
+  inp: ReactionInputs,
+  cal: CalibrationState,
+): ReactionAnalysis {
+  // mandate weights (price stability vs employment)
+  const employW = cal.mandate / 100;
+  const priceW = 1 - employW;
+
+  const inflationGap = inp.corepce - 2.0;
+  const laborGap = inp.unrate - NATURAL_UNRATE; // + = slack
+  const expGap = inp.expectations - 2.0;
+
+  // signed contributions to the cut(−)/hike(+) tilt
+  const cInfl = priceW * inflationGap * 1.15;
+  const cLabor = -employW * laborGap * 1.4;
+  const cMarket = inp.marketcuts * 0.006;
+  const cExp = expGap * 0.9;
+
+  const contributions: DriverContribution[] = [
+    {
+      label: "Inflation vs target",
+      value: cInfl,
+      detail: `Core PCE ${inp.corepce.toFixed(1)}% is ${inflationGap >= 0 ? "+" : ""}${inflationGap.toFixed(1)}pp vs 2%, weighted ${(priceW * 100).toFixed(0)}% on price stability.`,
+    },
+    {
+      label: "Labor mandate",
+      value: cLabor,
+      detail: `Unemployment ${inp.unrate.toFixed(1)}% vs ~${NATURAL_UNRATE}% natural; ${laborGap > 0 ? "slack" : "tightness"} weighted ${(employW * 100).toFixed(0)}%.`,
+    },
+    {
+      label: "Market-implied path",
+      value: cMarket,
+      detail: `Curve prices ${Math.round(inp.marketcuts)} bps over 12m — ${inp.marketcuts < 0 ? "easing" : "tightening"} pressure.`,
+    },
+    {
+      label: "Expectations anchor",
+      value: cExp,
+      detail: `Long-run expectations at ${inp.expectations.toFixed(1)}% (${expGap > 0.4 ? "drifting" : "anchored"}).`,
+    },
+  ];
+
+  const tilt = cInfl + cLabor + cMarket + cExp;
+  // risk tolerance scales how aggressively the chair acts on a given tilt
+  const riskGain = 0.7 + (cal.risk / 100) * 0.8;
+  const actTilt = tilt * riskGain;
+
+  return { contributions, tilt, actTilt, riskGain };
+}
 
 /**
  * Transparent, reactive policy model. Takes the chair's calibration + current
@@ -571,53 +643,15 @@ export function evaluateDecision(
   assumptions: Assumption[],
 ): DecisionResult {
   const get = (id: string) => assumptions.find((a) => a.id === id)!;
-  const corepce = get("corepce").value;
-  const unrate = get("unrate").value;
-  const marketcuts = get("marketcuts").value;
-  const expectations = get("expectations").value;
+  const inputs: ReactionInputs = {
+    corepce: get("corepce").value,
+    unrate: get("unrate").value,
+    marketcuts: get("marketcuts").value,
+    expectations: get("expectations").value,
+  };
+  const expGap = inputs.expectations - 2.0;
 
-  // mandate weights (price stability vs employment)
-  const employW = cal.mandate / 100;
-  const priceW = 1 - employW;
-
-  const inflationGap = corepce - 2.0;
-  const laborGap = unrate - NATURAL_UNRATE; // + = slack
-  const expGap = expectations - 2.0;
-
-  // signed contributions to the cut(−)/hike(+) tilt
-  const cInfl = priceW * inflationGap * 1.15;
-  const cLabor = -employW * laborGap * 1.4;
-  const cMarket = marketcuts * 0.006;
-  const cExp = expGap * 0.9;
-
-  const contributions: DriverContribution[] = [
-    {
-      label: "Inflation vs target",
-      value: cInfl,
-      detail: `Core PCE ${corepce.toFixed(1)}% is ${inflationGap >= 0 ? "+" : ""}${inflationGap.toFixed(1)}pp vs 2%, weighted ${(priceW * 100).toFixed(0)}% on price stability.`,
-    },
-    {
-      label: "Labor mandate",
-      value: cLabor,
-      detail: `Unemployment ${unrate.toFixed(1)}% vs ~${NATURAL_UNRATE}% natural; ${laborGap > 0 ? "slack" : "tightness"} weighted ${(employW * 100).toFixed(0)}%.`,
-    },
-    {
-      label: "Market-implied path",
-      value: cMarket,
-      detail: `Curve prices ${marketcuts} bps over 12m — ${marketcuts < 0 ? "easing" : "tightening"} pressure.`,
-    },
-    {
-      label: "Expectations anchor",
-      value: cExp,
-      detail: `Long-run expectations at ${expectations.toFixed(1)}% (${expGap > 0.4 ? "drifting" : "anchored"}).`,
-    },
-  ];
-
-  let tilt = cInfl + cLabor + cMarket + cExp;
-
-  // risk tolerance scales how aggressively the chair acts on a given tilt
-  const riskGain = 0.7 + (cal.risk / 100) * 0.8;
-  const actTilt = tilt * riskGain;
+  const { contributions, actTilt } = reactionContributions(inputs, cal);
 
   // a chair tolerating more inflation requires a bigger hawkish tilt to hike
   const hikeBar = 0.45 + cal.inflationTolerance * 0.25;
@@ -637,7 +671,7 @@ export function evaluateDecision(
   const driftBps = clamp(Math.round(actTilt * -90), -175, 100);
 
   // confidence: agreement among the four signed signals + decisiveness
-  const signs = [cInfl, cLabor, cMarket, cExp].map((v) => Math.sign(v));
+  const signs = contributions.map((c) => Math.sign(c.value));
   const dovish = signs.filter((s) => s < 0).length;
   const hawkish = signs.filter((s) => s > 0).length;
   const agreement = Math.max(dovish, hawkish) / 4;

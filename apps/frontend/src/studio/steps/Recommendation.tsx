@@ -1,16 +1,23 @@
 import { useMemo, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { ArrowLeft, MessageCircleQuestion, RotateCcw, Sliders, Zap } from "lucide-react";
+import { ArrowLeft, LineChart, MessageCircleQuestion, RotateCcw, Sliders, Zap } from "lucide-react";
 
 import {
-  defaultAssumptions,
   evaluateDecision,
   type Assumption,
   type CalibrationState,
   type Decision,
   type DecisionResult,
 } from "@/studio/data";
+import {
+  buildReactionForecast,
+  deriveReactionAssumptions,
+  shiftsFromAssumptions,
+} from "@/studio/fedModel";
+import { buildTargetChartView } from "@/lib/sybilionCharts";
+import type { PipelineResponse } from "@/types/forecast";
 import { DecisionGauge } from "@/studio/charts/DecisionGauge";
+import { FanChart } from "@/studio/charts/FanChart";
 import { Eyebrow, Pill, StudioButton, StudioNote } from "@/studio/ui/bits";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -19,6 +26,7 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 interface Props {
   calibration: CalibrationState;
+  aggregatedForecast?: PipelineResponse | null;
   onBack: () => void;
   onRestart: () => void;
 }
@@ -29,24 +37,26 @@ const DECISION_TONE: Record<Decision, "cut" | "hold" | "hike"> = {
   hike: "hike",
 };
 
-const SCENARIOS: { id: string; label: string; apply: (a: Assumption[]) => Assumption[]; note: string }[] = [
-  { id: "base", label: "Baseline", apply: () => defaultAssumptions(), note: "Reset to the current data: core PCE 3.0%, unemployment 4.4%, market pricing ~1.3 cuts." },
+// Scenarios shift the input prediction timeseries on top of the forecast-derived
+// baseline (`base`), so the what-if always starts from the previous page's data.
+const SCENARIOS: { id: string; label: string; apply: (base: Assumption[]) => Assumption[]; note: string }[] = [
+  { id: "base", label: "Baseline", apply: (base) => base.map((x) => ({ ...x })), note: "Reset to the forecast inputs carried over from the previous page." },
   {
     id: "labor",
     label: "Labor shock",
-    apply: (a) => a.map((x) => (x.id === "unrate" ? { ...x, value: 5.4 } : x.id === "marketcuts" ? { ...x, value: -90 } : x)),
+    apply: (base) => base.map((x) => (x.id === "unrate" ? { ...x, value: 5.4 } : x.id === "marketcuts" ? { ...x, value: -90 } : x)),
     note: "Unemployment jumps to 5.4% and the curve prices 90 bps of cuts. The employment mandate now dominates — this should flip the call.",
   },
   {
     id: "inflation",
     label: "Inflation re-accelerates",
-    apply: (a) => a.map((x) => (x.id === "corepce" ? { ...x, value: 3.9 } : x)),
+    apply: (base) => base.map((x) => (x.id === "corepce" ? { ...x, value: 3.9 } : x)),
     note: "Core PCE re-accelerates to 3.9%. The price-stability side reasserts and the easing bias should fade.",
   },
   {
     id: "unanchor",
     label: "Expectations un-anchor",
-    apply: (a) => a.map((x) => (x.id === "expectations" ? { ...x, value: 3.1 } : x)),
+    apply: (base) => base.map((x) => (x.id === "expectations" ? { ...x, value: 3.1 } : x)),
     note: "Long-run expectations drift to 3.1%. Per the 2025 framework, policy should act forcefully to re-anchor — this overrides activity data.",
   },
 ];
@@ -57,20 +67,66 @@ const CHALLENGES = [
   { id: "cautious", q: "Push back — you're too cautious.", a: "Fair challenge. If you raise the evidence threshold toward 'preemptive' in calibration, the bar to move drops and policy can front-load. Try the Labor-shock scenario to see how fast the call pivots when the data justify it." },
 ];
 
-export function Recommendation({ calibration, onBack, onRestart }: Props) {
-  const [assumptions, setAssumptions] = useState<Assumption[]>(() => defaultAssumptions());
+export function Recommendation({ calibration, aggregatedForecast, onBack, onRestart }: Props) {
+  // Baseline inputs align with the previous page's forecasts (or fall back to
+  // the framework defaults when the pipeline was skipped).
+  const baseAssumptions = useMemo(
+    () => deriveReactionAssumptions(aggregatedForecast),
+    [aggregatedForecast],
+  );
+  const [assumptions, setAssumptions] = useState<Assumption[]>(baseAssumptions);
+  const [seededFor, setSeededFor] = useState(aggregatedForecast);
   const [activeScenario, setActiveScenario] = useState("base");
   const [scenarioNote, setScenarioNote] = useState<string | null>(null);
   const [challenge, setChallenge] = useState<string | null>(null);
 
+  // Re-seed the sliders if the upstream forecast changes (new session/run).
+  if (seededFor !== aggregatedForecast) {
+    setSeededFor(aggregatedForecast);
+    setAssumptions(baseAssumptions);
+    setActiveScenario("base");
+    setScenarioNote(null);
+  }
+
   const baseline = useMemo<DecisionResult>(
-    () => evaluateDecision(calibration, defaultAssumptions()),
-    [calibration],
+    () => evaluateDecision(calibration, baseAssumptions),
+    [calibration, baseAssumptions],
   );
   const result = useMemo(
     () => evaluateDecision(calibration, assumptions),
     [calibration, assumptions],
   );
+
+  // Same model + data as the Forecast page; here the input prediction timeseries
+  // can be nudged (parallel shifts) to read off the what-if policy-rate path.
+  const targetChart = useMemo(
+    () =>
+      aggregatedForecast
+        ? buildTargetChartView(
+            aggregatedForecast.signals,
+            aggregatedForecast.target_series_id,
+            aggregatedForecast.data_sources,
+          )
+        : null,
+    [aggregatedForecast],
+  );
+  const reaction = useMemo(
+    () =>
+      buildReactionForecast(
+        aggregatedForecast,
+        calibration,
+        shiftsFromAssumptions(assumptions, aggregatedForecast),
+      ),
+    [aggregatedForecast, calibration, assumptions],
+  );
+  const reactionYDomain = useMemo<[number, number] | undefined>(() => {
+    if (!targetChart) return undefined;
+    if (!reaction) return targetChart.yDomain;
+    return [
+      Math.min(targetChart.yDomain[0], ...reaction.band.map((b) => b.p05)),
+      Math.max(targetChart.yDomain[1], ...reaction.band.map((b) => b.p95)),
+    ];
+  }, [targetChart, reaction]);
 
   const shifted = assumptions.some((a) => a.value !== a.baseline);
   const decisionChanged = result.headline !== baseline.headline;
@@ -84,7 +140,7 @@ export function Recommendation({ calibration, onBack, onRestart }: Props) {
   function applyScenario(id: string) {
     const s = SCENARIOS.find((x) => x.id === id);
     if (!s) return;
-    setAssumptions(s.apply(defaultAssumptions()));
+    setAssumptions(s.apply(baseAssumptions));
     setActiveScenario(s.id);
     setScenarioNote(s.note);
   }
@@ -225,6 +281,33 @@ export function Recommendation({ calibration, onBack, onRestart }: Props) {
               </motion.div>
             )}
           </AnimatePresence>
+
+          {targetChart && reaction && (
+            <div className="mt-5 rounded-xl border bg-muted/30 p-4">
+              <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <LineChart className="size-4 text-[var(--st-model)]" />
+                  <span className="text-[13px] font-medium text-foreground">
+                    What-if policy-rate path
+                  </span>
+                </div>
+                <span className="st-mono text-[11px] text-muted-foreground">
+                  reaction-function model · {reaction.modelTerminal.toFixed(targetChart.decimals)}
+                  {targetChart.unit} at horizon
+                </span>
+              </div>
+              <FanChart
+                history={targetChart.history}
+                band={targetChart.band}
+                horizonMonths={Math.min(6, targetChart.band.length - 1)}
+                unit={targetChart.unit}
+                decimals={targetChart.decimals}
+                historyLabel="Ground truth (FRED)"
+                model={{ band: reaction.band, label: "Reaction-function model (p50)" }}
+                yDomain={reactionYDomain}
+              />
+            </div>
+          )}
 
           <div className="mt-5 grid gap-x-8 gap-y-4 sm:grid-cols-2">
             {assumptions.map((a) => (

@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { ArrowLeft, ArrowRight, LineChart, Scale } from "lucide-react";
 
 import { TEMPERAMENTS, type CalibrationState } from "@/studio/data";
+import { buildReactionForecast } from "@/studio/fedModel";
 import type { PipelineResponse } from "@/types/forecast";
 import { buildSeriesChartView, buildTargetChartView } from "@/lib/sybilionCharts";
 import { FanChart } from "@/studio/charts/FanChart";
@@ -63,7 +64,27 @@ export function ForecastReview({
 
   const active = seriesList[Math.min(activeTab, Math.max(0, seriesList.length - 1))] ?? null;
 
+  // Our own reaction-function forecast, driven by the other signals' forecasts
+  // + the calibration sliders. Recomputes whenever the chair re-tunes.
+  const reaction = useMemo(
+    () => buildReactionForecast(aggregatedForecast, calibration),
+    [aggregatedForecast, calibration],
+  );
+
+  // Widen the y-domain so the model band is never clipped against the Sybilion fan.
+  const targetYDomain = useMemo<[number, number] | undefined>(() => {
+    if (!targetChart) return undefined;
+    if (!reaction) return targetChart.yDomain;
+    const vals = [
+      ...targetChart.yDomain,
+      ...reaction.band.flatMap((b) => [b.p05, b.p95]),
+    ];
+    return [Math.min(...vals), Math.max(...vals)];
+  }, [targetChart, reaction]);
+
   const hp = targetChart?.band[Math.min(horizon, targetChart.band.length - 1)];
+  const modelHp = reaction?.band[Math.min(horizon, reaction.band.length - 1)];
+  const modelDelta = modelHp ? modelHp.p50 - reaction!.startRate : 0;
   const seam = targetChart?.band[0];
   const currentRate = seam?.history ?? seam?.p50 ?? 0;
   const medianDelta = hp ? hp.p50 - currentRate : 0;
@@ -203,9 +224,29 @@ export function ForecastReview({
               decimals={targetChart.decimals}
               historyLabel="Ground truth (FRED)"
               backtest={targetChart.backtest}
-              yDomain={targetChart.yDomain}
+              model={reaction ? { band: reaction.band, label: "Reaction-function model (p50)" } : undefined}
+              yDomain={targetYDomain}
             />
-            <p className="mt-2 text-[12px] leading-relaxed text-muted-foreground">{targetChart.read}</p>
+            <p className="mt-2 text-[12px] leading-relaxed text-muted-foreground">
+              {targetChart.read}
+              {reaction && reaction.divergenceBps != null && (
+                <>
+                  {" "}
+                  Your reaction function lands at{" "}
+                  <span className="st-mono text-[var(--st-model)]">
+                    {reaction.modelTerminal.toFixed(targetChart.decimals)}
+                    {targetChart.unit}
+                  </span>{" "}
+                  by the horizon —{" "}
+                  <span className="st-mono">
+                    {reaction.divergenceBps === 0
+                      ? "in line with"
+                      : `${Math.abs(reaction.divergenceBps)} bps ${reaction.divergenceBps > 0 ? "above" : "below"}`}
+                  </span>{" "}
+                  the market path.
+                </>
+              )}
+            </p>
           </CardContent>
         </Card>
 
@@ -217,7 +258,9 @@ export function ForecastReview({
                 <span className="text-sm font-medium text-foreground">Your reaction function</span>
               </div>
               <p className="mt-0.5 text-[11px] text-muted-foreground">
-                Calibration for the decision step — chart shows forecast output as returned
+                Drives the{" "}
+                <span className="text-[var(--st-model)]">violet reaction-function path</span> on the
+                chart and the next-meeting call
               </p>
 
               <div className="mt-4 space-y-4">
@@ -300,6 +343,33 @@ export function ForecastReview({
                   value={`${hp.p05.toFixed(targetChart.decimals)}–${hp.p95.toFixed(targetChart.decimals)}`}
                   sub="tail outcomes"
                 />
+              </CardContent>
+            </Card>
+          )}
+
+          {modelHp && reaction && (
+            <Card className="gap-0 py-5">
+              <CardContent>
+                <div className="flex items-center gap-2">
+                  <span className="size-2 rounded-full" style={{ background: "var(--st-model)" }} />
+                  <span className="text-sm font-medium text-foreground">Reaction-function call</span>
+                </div>
+                <div className="mt-3 grid grid-cols-2 gap-4">
+                  <StatBlock
+                    label={`Model @ ${horizon}M`}
+                    value={`${modelHp.p50.toFixed(targetChart.decimals)}${targetChart.unit}`}
+                    sub={`${modelDelta >= 0 ? "+" : ""}${(modelDelta * 100).toFixed(0)} bps`}
+                  />
+                  <StatBlock
+                    label="vs market"
+                    value={
+                      reaction.divergenceBps == null
+                        ? "—"
+                        : `${reaction.divergenceBps >= 0 ? "+" : ""}${reaction.divergenceBps}`
+                    }
+                    sub="bps at horizon"
+                  />
+                </div>
               </CardContent>
             </Card>
           )}
