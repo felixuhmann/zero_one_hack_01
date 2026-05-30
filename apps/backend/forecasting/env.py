@@ -35,7 +35,16 @@ def load_env() -> None:
 
     load_dotenv(_ENV_FILE)
 
-    for name in ("FRED_API_KEY", "SYBILION_API_KEY", "SYBILION_API_TOKEN"):
+    managed_vars = (
+        "FRED_API_KEY",
+        "SYBILION_API_KEY",
+        "SYBILION_API_TOKEN",
+        # Chat (LLM) configuration — Vercel AI Gateway by default.
+        "AI_GATEWAY_API_KEY",
+        "LLM_BASE_URL",
+        "LLM_MODEL",
+    )
+    for name in managed_vars:
         if name in os.environ:
             cleaned = _strip_env(os.environ.get(name))
             if cleaned:

@@ -93,7 +93,7 @@ The Vite dev server proxies `/api` to `http://127.0.0.1:8000`. Start the API in 
 npm run dev:backend
 ```
 
-Endpoints: `GET /api/health`, `POST /api/forecast/run` (runs the full pipeline; can take a long time).
+Endpoints: `GET /api/health`, `POST /api/chat` (streaming chat for the frontend; see [`docs/chat-api.md`](./docs/chat-api.md)), `POST /api/forecast/run` (runs the full pipeline; can take a long time).
 
 The frontend uses **Tailwind CSS v4** with **shadcn/ui** (`@tailwindcss/vite` plugin). Add components with `npx shadcn@latest add <name>` from `apps/frontend/`.
 
@@ -122,6 +122,11 @@ Copy [`.env.example`](./.env.example) to `.env` in the repo root (do not commit 
 |----------|----------------|
 | `FRED_API_KEY` | Fetching macro time series from FRED |
 | `SYBILION_API_KEY` | Sybilion forecast and drivers API |
+| `AI_GATEWAY_API_KEY` | Chat endpoint (`POST /api/chat`) — LLM via Vercel AI Gateway |
+
+Optional chat overrides: `LLM_MODEL` (default `anthropic/claude-sonnet-4.6`) and
+`LLM_BASE_URL` (any OpenAI-compatible endpoint, e.g. a self-hosted / Leonardo
+vLLM server). See [`docs/chat-api.md`](./docs/chat-api.md) for the full contract.
 
 The backend loads `.env` automatically on startup (`forecasting.env.load_env`). Do not put real keys in `.env.example`.
 

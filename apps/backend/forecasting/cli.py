@@ -3,13 +3,16 @@ from __future__ import annotations
 import json
 
 import uvicorn
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import StreamingResponse
 
 from forecasting.env import load_env
 
 load_env()
 
+from forecasting.chat import ChatService
+from forecasting.chat import ui_stream
 from forecasting.analysis.ensemble_engine import EnsembleEngine
 from forecasting.analysis.forecast_series import extract_forecast_series_from_signal
 from forecasting.analysis.scenario_classifier import ScenarioClassifier
@@ -122,6 +125,31 @@ def _print_result(result: dict) -> None:
 @app.get("/api/health")
 def health() -> dict[str, str]:
     return {"status": "ok"}
+
+
+@app.post("/api/chat")
+async def chat(request: Request) -> StreamingResponse:
+    """Streaming chat endpoint consumed by the AI SDK `useChat` frontend.
+
+    Accepts the `DefaultChatTransport` body (`{ id, messages, trigger, messageId }`)
+    and returns an AI SDK UI message stream over Server-Sent Events. See
+    `docs/chat-api.md` for the full wire contract.
+    """
+    try:
+        body = await request.json()
+    except Exception as exc:  # noqa: BLE001 - malformed JSON from the client
+        raise HTTPException(status_code=400, detail="Invalid JSON body") from exc
+
+    messages = body.get("messages") if isinstance(body, dict) else None
+    body_model = body.get("model") if isinstance(body, dict) else None
+
+    service = ChatService(model=body_model if isinstance(body_model, str) else None)
+
+    return StreamingResponse(
+        service.stream(messages),
+        media_type="text/event-stream",
+        headers=ui_stream.UI_MESSAGE_STREAM_HEADERS,
+    )
 
 
 @app.post("/api/forecast/run")
