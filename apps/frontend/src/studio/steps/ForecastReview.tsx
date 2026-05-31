@@ -1,7 +1,6 @@
 import { useMemo, useState, type ReactNode } from "react";
 import { ArrowLeft, ArrowRight, CircleHelp, LineChart, Scale } from "lucide-react";
 
-import { cn } from "@/lib/utils";
 import type { CalibrationState } from "@/studio/data";
 import type { PipelineResponse } from "@/types/forecast";
 import { SCENARIO_DISPLAY_LABEL } from "@/lib/scenarioChart";

@@ -8,6 +8,7 @@ Welcome to the central repository for Zero One Hack_01, hosted by [Lumos Consult
 
 ## Quick links
 
+- 🚀 **Live demo**: [zero-one-hack.felixuhmann.com](https://zero-one-hack.felixuhmann.com/) — a hosted demo of the app, automatically running the newest commit on `main`.
 - 🌐 **Docs**: [docs.zero-one.lumos-consulting.at](https://docs.zero-one.lumos-consulting.at/)
 - 💬 **Discord**: https://discord.gg/e6rrVbcD5
 - 📍 **Venue**: AI Factory Austria (AI:AT), Vienna

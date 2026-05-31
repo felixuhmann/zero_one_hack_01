@@ -13,6 +13,29 @@ export const SCENARIO_DISPLAY_LABEL: Record<ScenarioLabel, string> = {
   hawkish: 'Hawkish',
 }
 
+/**
+ * Shift an ensemble path so its first published month sits at `anchor` (the
+ * current policy rate / seam). The chair + baseline ensembles are weighted
+ * blends of different-unit series, so their absolute level relative to the
+ * funds rate is an artifact; only the trajectory (month-over-month deltas)
+ * carries policy meaning. Anchoring removes the spurious seam jump while
+ * preserving every delta, so the drawn line's slope matches both the scenario
+ * classifier (which already works off deltas) and the next-meeting call.
+ */
+export function anchorEnsembleToValue(
+  ensemble: Record<string, number> | undefined,
+  anchor: number | null | undefined,
+): Record<string, number> | undefined {
+  if (!ensemble || anchor == null || !Number.isFinite(anchor)) return ensemble
+  const dates = Object.keys(ensemble).sort()
+  if (!dates.length) return ensemble
+  const shift = anchor - ensemble[dates[0]]
+  if (!Number.isFinite(shift)) return ensemble
+  const out: Record<string, number> = {}
+  for (const d of dates) out[d] = Math.round((ensemble[d] + shift) * 10000) / 10000
+  return out
+}
+
 /** Median ensemble path from NOW (seam) through every published ensemble month. */
 export function buildScenarioEnsemblePath(
   ensembleForecast: Record<string, number> | undefined,

@@ -93,6 +93,115 @@ export function synthesizeChairEnsemble(
   return ensemble
 }
 
+export interface ChairStepSignal {
+  seriesId: string
+  role: string
+  normWeight: number
+  /** This signal's own month-over-month move into the next meeting, in bps. */
+  signalStepBps: number
+  /** normWeight * signalStepBps — adds up across signals to the ensemble step. */
+  contributionBps: number
+}
+
+export interface ChairEnsembleStep {
+  available: boolean
+  currentDate: string | null
+  nextDate: string | null
+  current: number | null
+  next: number | null
+  /** Chair ensemble's first forward step (next published month − current), bps. */
+  stepBps: number
+  perSignal: ChairStepSignal[]
+}
+
+const EMPTY_STEP: ChairEnsembleStep = {
+  available: false,
+  currentDate: null,
+  nextDate: null,
+  current: null,
+  next: null,
+  stepBps: 0,
+  perSignal: [],
+}
+
+/**
+ * Decompose the chair-weighted ensemble's first forward step (the initial slope
+ * of the "Scenario path" line) into per-signal contributions. The contributions
+ * sum to `stepBps`, so the next-meeting call can be read straight off the same
+ * line the forecast step draws. Offset-invariant by construction: it works off
+ * month-over-month deltas, not absolute blend levels.
+ */
+export function chairEnsembleNextStep(
+  aggregated: PipelineResponse,
+  cal: CalibrationState,
+): ChairEnsembleStep {
+  const signals = aggregated.signals ?? {}
+  const configs = aggregated.signal_configs ?? []
+  const cfgById = Object.fromEntries(
+    configs.filter((c) => c.series_id).map((c) => [c.series_id!, c]),
+  )
+
+  const valid: {
+    sid: string
+    role: string
+    series: Record<string, number>
+    weight: number
+  }[] = []
+  for (const [sid, signal] of Object.entries(signals)) {
+    if (!signal || signal.status === 'failed') continue
+    const series = seriesForecastMap(signal)
+    if (!Object.keys(series).length) continue
+    const cfg = cfgById[sid]
+    const baseW = signal.weight ?? cfg?.weight ?? 0.25
+    valid.push({
+      sid,
+      role: cfg?.role ?? 'other',
+      series,
+      weight: baseW * chairSignalMultipliers(cfg?.role, cal),
+    })
+  }
+  if (!valid.length) return EMPTY_STEP
+
+  const allDates = new Set<string>()
+  for (const v of valid) for (const d of Object.keys(v.series)) allDates.add(d)
+  const dates = [...allDates].sort()
+  if (dates.length < 2) return EMPTY_STEP
+
+  const d0 = dates[0]
+  const d1 = dates[1]
+  const present = valid.filter((v) => d0 in v.series && d1 in v.series)
+  if (!present.length) return EMPTY_STEP
+
+  const totalW = present.reduce((s, v) => s + v.weight, 0) || 1
+  const perSignal: ChairStepSignal[] = present.map((v) => {
+    const normWeight = v.weight / totalW
+    const signalStepBps = (v.series[d1] - v.series[d0]) * 100
+    return {
+      seriesId: v.sid,
+      role: v.role,
+      normWeight,
+      signalStepBps,
+      contributionBps: normWeight * signalStepBps,
+    }
+  })
+
+  const stepBps = perSignal.reduce((s, p) => s + p.contributionBps, 0)
+  const current = present.reduce(
+    (s, v) => s + (v.weight / totalW) * v.series[d0],
+    0,
+  )
+
+  return {
+    available: true,
+    currentDate: d0,
+    nextDate: d1,
+    current: Math.round(current * 10000) / 10000,
+    next: Math.round((current + stepBps / 100) * 10000) / 10000,
+    stepBps: Math.round(stepBps * 100) / 100,
+    perSignal,
+  }
+}
+
 /** Catalog weights from the pipeline (no chair multipliers). */
 export function pipelineEnsembleWeightSummary(
   aggregated: PipelineResponse,

@@ -3,12 +3,12 @@ import { AnimatePresence, motion } from "motion/react";
 import { ArrowLeft, RotateCcw, Sliders } from "lucide-react";
 
 import { assumptionsFromForecast } from "@/lib/forecastAssumptions";
+import { deriveNextMeetingDecision } from "@/lib/nextMeetingDecision";
 import { SCENARIO_DISPLAY_LABEL } from "@/lib/scenarioChart";
 import { classifyScenarioFromPipeline, scenariosDiffer } from "@/lib/scenarioClassifier";
 import type { PipelineResponse } from "@/types/forecast";
 import {
   defaultAssumptions,
-  evaluateDecision,
   type Assumption,
   type CalibrationState,
   type Decision,
@@ -78,11 +78,11 @@ export function Recommendation({
   }, [aggregatedForecast, calibration]);
 
   const result = useMemo(
-    () => evaluateDecision(calibration, assumptions, { chairScenario }),
-    [calibration, assumptions, chairScenario],
+    () => deriveNextMeetingDecision(aggregatedForecast, calibration, assumptions, chairScenario),
+    [aggregatedForecast, calibration, assumptions, chairScenario],
   );
 
-  const maxContrib = Math.max(...result.contributions.map((c) => Math.abs(c.value)), 0.6);
+  const maxContrib = Math.max(...result.contributions.map((c) => Math.abs(c.value)), 8);
 
   const scenarioFlipped =
     pipelineScenario &&
@@ -111,8 +111,9 @@ export function Recommendation({
         <Eyebrow>Step 05 · Decision</Eyebrow>
         <h1 className="st-display text-4xl text-foreground md:text-5xl">The recommendation</h1>
         <p className="max-w-2xl text-[13px] leading-relaxed text-muted-foreground">
-          Uses your reaction function from the forecast step plus the macro assumptions below. The
-          ensemble path enters the tilt as a signed contribution from the scenario classifier.
+          The call <em>is</em> the chair-weighted ensemble path's first move from the forecast step,
+          rounded to a 25 bp policy increment. The bars below decompose that move by signal; shifting
+          an assumption layers a macro surprise vs the forecast on top and the call adapts.
         </p>
       </div>
 
@@ -139,10 +140,13 @@ export function Recommendation({
                 )}
               </div>
               <p className="mt-1 text-[13px] text-muted-foreground">{result.headline}</p>
+              {result.headlineDetail && (
+                <p className="st-mono mt-1 text-[11px] text-muted-foreground/80">{result.headlineDetail}</p>
+              )}
 
               {chairScenario && (
                 <div className="mt-3 rounded-md border border-border bg-muted/30 px-2.5 py-2 text-[11px] leading-relaxed text-muted-foreground">
-                  <span className="font-medium text-foreground">Scenario classifier: </span>
+                  <span className="font-medium text-foreground">Scenario classifier (3–6m trend): </span>
                   {SCENARIO_DISPLAY_LABEL[chairScenario.scenario]} · Δ3m{" "}
                   {chairScenario.delta_3m >= 0 ? "+" : ""}
                   {chairScenario.delta_3m}pp
@@ -156,7 +160,7 @@ export function Recommendation({
               )}
 
               <div className="my-5">
-                <DecisionGauge tilt={result.tilt} />
+                <DecisionGauge tilt={result.tilt} referenceTilt={result.referenceTilt} />
               </div>
 
               <div className="rounded-lg bg-muted p-3">
@@ -170,9 +174,9 @@ export function Recommendation({
 
         <Card className="h-full gap-0 py-0">
           <CardContent className="flex h-full flex-col p-6">
-            <span className="text-sm font-medium text-foreground">Why — contribution to the tilt</span>
+            <span className="text-sm font-medium text-foreground">Why — contribution to the next-meeting move</span>
             <p className="mt-0.5 text-[11px] text-muted-foreground">
-              Blue = dovish (cut), red = hawkish (hike). Bars sum to the gauge tilt.
+              Blue = dovish (cut), red = hawkish (hike). Bars sum to the call in basis points.
             </p>
             <div className="mt-4 flex flex-1 flex-col justify-between gap-3">
               {result.contributions.map((c) => (
@@ -259,7 +263,7 @@ function ContribRow({
         <span className="text-[12.5px] text-foreground/80">{label}</span>
         <span className="st-mono text-[11px]" style={{ color: dovish ? "var(--st-cut)" : "var(--st-hike)" }}>
           {value >= 0 ? "+" : ""}
-          {value.toFixed(2)}
+          {Math.round(value)} bp
         </span>
       </div>
       <div className="relative h-3.5 w-full rounded-full" style={{ background: "var(--st-line)" }}>

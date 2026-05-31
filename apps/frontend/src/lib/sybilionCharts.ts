@@ -1,5 +1,6 @@
 import type { BandPoint, SeriesPoint } from '@/studio/data'
 import {
+  anchorEnsembleToValue,
   buildScenarioEnsemblePath,
   scenarioLegendLabel,
   scenarioLineColor,
@@ -327,12 +328,15 @@ export function buildTargetChartView(
   const seamVal = seam?.history ?? seam?.p50
   const seamPt = seam && seamVal != null ? { t: seam.t, v: seamVal } : null
 
+  // Anchor both blends to the current policy rate so the drawn lines are
+  // genuine rate-path scenarios (no level snap at the seam) and their slope
+  // equals the trajectory the scenario label / next-meeting call run off.
   const baselineScenarioPath = buildScenarioEnsemblePath(
-    ensembles?.pipelineEnsemble,
+    anchorEnsembleToValue(ensembles?.pipelineEnsemble, seamVal),
     seamPt,
   )
   const scenarioPath = buildScenarioEnsemblePath(
-    ensembles?.chairEnsemble,
+    anchorEnsembleToValue(ensembles?.chairEnsemble, seamVal),
     seamPt,
   )
   const chairScenario = ensembles?.chairScenario
