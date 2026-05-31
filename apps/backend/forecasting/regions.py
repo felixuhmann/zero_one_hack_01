@@ -8,7 +8,9 @@ resolve regions through here instead of wiring pipelines up by hand.
 
 from __future__ import annotations
 
+import os
 from dataclasses import dataclass
+from pathlib import Path
 
 from forecasting.analysis.ensemble_engine import EnsembleEngine
 from forecasting.analysis.scenario_classifier import ScenarioClassifier
@@ -24,6 +26,26 @@ from forecasting.payloads.fed_rate_payloads import (
     FedRatePayloadBuilder,
 )
 from forecasting.pipeline import RateForecastPipeline
+
+
+# Backend package root (`.../apps/backend`, the parent of the `forecasting`
+# package). Anchoring artifacts here keeps the read/write location independent
+# of the process CWD — locally the server is launched from `apps/backend`, but
+# the container runs with WORKDIR=/app, so a *relative* path would resolve to
+# `/app/artifacts` (empty) instead of the image's baked-in `/app/apps/backend/
+# artifacts`, making the deployed API 404 on cached results.
+_BACKEND_ROOT = Path(__file__).resolve().parents[1]
+
+# Absolute base for persisted artifacts. Override with FORECAST_ARTIFACTS_DIR to
+# point at a mounted volume for cross-restart persistence.
+_ARTIFACTS_BASE = Path(
+    os.environ.get("FORECAST_ARTIFACTS_DIR") or (_BACKEND_ROOT / "artifacts")
+).resolve()
+
+
+def _artifacts_dir(*parts: str) -> str:
+    """Absolute path under the artifacts base, joined from ``parts``."""
+    return str(_ARTIFACTS_BASE.joinpath(*parts))
 
 
 class RegionError(ValueError):
@@ -47,14 +69,14 @@ REGIONS: dict[str, RegionConfig] = {
         label="US Federal Reserve (Fed)",
         builder_cls=FedRatePayloadBuilder,
         signal_configs=US_SIGNAL_CONFIGS,
-        artifacts_dir="artifacts/fed_rate_forecast",
+        artifacts_dir=_artifacts_dir("fed_rate_forecast"),
     ),
     "ecb": RegionConfig(
         key="ecb",
         label="European Central Bank (ECB)",
         builder_cls=ECBRatePayloadBuilder,
         signal_configs=ECB_SIGNAL_CONFIGS,
-        artifacts_dir="artifacts/ecb",
+        artifacts_dir=_artifacts_dir("ecb"),
     ),
 }
 

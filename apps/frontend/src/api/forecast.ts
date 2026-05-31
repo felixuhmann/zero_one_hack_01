@@ -89,6 +89,10 @@ export async function fetchAggregatedForecast(
 }
 
 const DEFAULT_POLL_INTERVAL_MS = 4000
+// Don't start the fallback poll right away: a healthy run resolves via the POST,
+// so polling earlier just spams `/forecast/aggregated` (404 until the first run
+// finishes). Only kick in once the request has plausibly stalled.
+const DEFAULT_POLL_START_DELAY_MS = 20000
 
 function delay(ms: number, signal?: AbortSignal): Promise<void> {
   return new Promise((resolve, reject) => {
@@ -134,9 +138,17 @@ async function aggregatedGeneratedAt(region: string): Promise<number | null> {
 export async function runForecastPipelineResilient(
   region = 'fed',
   seriesIds?: string[],
-  opts: { signal?: AbortSignal; pollIntervalMs?: number } = {},
+  opts: {
+    signal?: AbortSignal
+    pollIntervalMs?: number
+    pollStartDelayMs?: number
+  } = {},
 ): Promise<PipelineResponse> {
-  const { signal, pollIntervalMs = DEFAULT_POLL_INTERVAL_MS } = opts
+  const {
+    signal,
+    pollIntervalMs = DEFAULT_POLL_INTERVAL_MS,
+    pollStartDelayMs = DEFAULT_POLL_START_DELAY_MS,
+  } = opts
 
   // Baseline timestamp of any pre-existing aggregate, captured before we start
   // the run. We only accept a polled result strictly newer than this, so a
@@ -177,20 +189,30 @@ export async function runForecastPipelineResilient(
       })
 
     // 2) Poll the saved aggregate until a result newer than the baseline shows
-    //    up (the run finished and flushed to disk) or we're aborted.
+    //    up (the run finished and flushed to disk) or we're aborted. Wait out
+    //    an initial grace period first so healthy runs never poll at all.
     void (async () => {
+      try {
+        await delay(pollStartDelayMs, signal)
+      } catch {
+        return // aborted
+      }
       while (!settled) {
+        if (settled) return
+        const fresh = await fetchAggregatedForecast(region).catch(() => null)
+        if (fresh) {
+          const ts = typeof fresh.generated_at === 'number' ? fresh.generated_at : null
+          const isFresh = baseline === null ? ts !== null : ts !== null && ts > baseline
+          if (isFresh) {
+            succeed(fresh)
+            return
+          }
+        }
         try {
           await delay(pollIntervalMs, signal)
         } catch {
           return // aborted
         }
-        if (settled) return
-        const data = await fetchAggregatedForecast(region).catch(() => null)
-        if (!data) continue
-        const ts = typeof data.generated_at === 'number' ? data.generated_at : null
-        const isFresh = baseline === null ? ts !== null : ts !== null && ts > baseline
-        if (isFresh) succeed(data)
       }
     })()
   })
