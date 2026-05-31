@@ -1,6 +1,7 @@
-import { useMemo, useState } from "react";
-import { ArrowLeft, ArrowRight, LineChart, Scale } from "lucide-react";
+import { useMemo, useState, type ReactNode } from "react";
+import { ArrowLeft, ArrowRight, CircleHelp, LineChart, Scale } from "lucide-react";
 
+import { cn } from "@/lib/utils";
 import type { CalibrationState } from "@/studio/data";
 import type { PipelineResponse } from "@/types/forecast";
 import { SCENARIO_DISPLAY_LABEL } from "@/lib/scenarioChart";
@@ -16,8 +17,13 @@ import {
 import { scenarioInputCoverage } from "@/lib/scenarioInputCoverage";
 import { buildSeriesChartView, buildTargetChartView } from "@/lib/sybilionCharts";
 import { FanChart } from "@/studio/charts/FanChart";
-import { Eyebrow, Pill, StatBlock, StudioButton, StudioNote } from "@/studio/ui/bits";
+import { Eyebrow, Pill, StudioButton, StudioNote } from "@/studio/ui/bits";
 import { Card, CardContent } from "@/components/ui/card";
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@/components/ui/hover-card";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
@@ -39,7 +45,6 @@ export function ForecastReview({
   onBack,
   onNext,
 }: Props) {
-  const [horizon, setHorizon] = useState<3 | 6>(calibration.horizon);
   const [activeTab, setActiveTab] = useState(0);
 
   const setCal = <K extends keyof CalibrationState>(k: K, v: CalibrationState[K]) =>
@@ -120,12 +125,6 @@ export function ForecastReview({
 
   const active = seriesList[Math.min(activeTab, Math.max(0, seriesList.length - 1))] ?? null;
 
-  const hp = targetChart?.band[Math.min(horizon, targetChart.band.length - 1)];
-  const seam = targetChart?.band[0];
-  const currentRate = seam?.history ?? seam?.p50 ?? 0;
-  const medianDelta = hp ? hp.p50 - currentRate : 0;
-  const rangeWidth = hp ? hp.p95 - hp.p05 : 0;
-  const impliedCuts = Math.max(0, Math.round(-medianDelta / 0.25));
   const priceWeight = 100 - calibration.mandate;
   const evidenceLabel =
     calibration.risk > 60 ? "Preemptive" : calibration.risk < 35 ? "Cautious" : "Measured";
@@ -213,7 +212,7 @@ export function ForecastReview({
                 key={active.seriesId}
                 history={active.history}
                 band={active.band}
-                horizonMonths={horizon}
+                horizonMonths={calibration.horizon}
                 unit={active.unit}
                 decimals={active.decimals}
                 historyLabel="Ground truth (FRED)"
@@ -238,75 +237,63 @@ export function ForecastReview({
                 <span className="text-sm font-medium text-foreground">Policy rate · quantile fan</span>
                 <Pill tone="brand">{aggregatedForecast.target_series_id ?? "FEDFUNDS"}</Pill>
               </div>
-              <ToggleGroup
-                type="single"
-                variant="outline"
-                size="sm"
-                value={String(horizon)}
-                onValueChange={(v) => v && setHorizon(Number(v) as 3 | 6)}
-              >
-                {([3, 6] as const).map((h) => (
-                  <ToggleGroupItem key={h} value={String(h)} className="st-mono text-[11px]">
-                    {h}M
-                  </ToggleGroupItem>
-                ))}
-              </ToggleGroup>
             </div>
             {chairScenario && (
-              <div className="mb-3 space-y-2 text-[12px] leading-relaxed text-muted-foreground">
-                <p>
-                  Ensemble (baseline):{" "}
-                  <span className="font-medium text-foreground">
-                    {baseScenario
-                      ? SCENARIO_DISPLAY_LABEL[baseScenario.scenario]
-                      : "—"}
-                  </span>
-                  {baseScenario && (
-                    <>
-                      {" · "}
-                      {baseScenario.confidence} confidence · Δ3m{" "}
-                      {baseScenario.delta_3m >= 0 ? "+" : ""}
-                      {baseScenario.delta_3m}pp
-                    </>
-                  )}
-                </p>
-                <p>
-                  Chair-adjusted:{" "}
-                  <span
-                    className="font-medium"
-                    style={{ color: targetChart.scenarioColor || "var(--st-foreground)" }}
-                  >
-                    {SCENARIO_DISPLAY_LABEL[chairScenario.scenario]}
-                  </span>
-                  {" · "}
-                  {chairScenario.confidence} confidence · Δ3m{" "}
-                  {chairScenario.delta_3m >= 0 ? "+" : ""}
-                  {chairScenario.delta_3m}pp
-                </p>
-                {scenarioChanged && (
-                  <p className="rounded-md border border-[var(--st-brand)]/40 bg-[var(--st-brand)]/10 px-2 py-1.5 text-foreground">
-                    Re-weighting shifts the ensemble path and scenario from{" "}
+              <div className="mb-4 space-y-2.5">
+                <div className="grid grid-cols-2 gap-2">
+                  <ScenarioChip
+                    label="Baseline"
+                    scenario={
+                      baseScenario ? SCENARIO_DISPLAY_LABEL[baseScenario.scenario] : "—"
+                    }
+                    confidence={baseScenario?.confidence}
+                    delta={baseScenario?.delta_3m}
+                    color="var(--st-muted)"
+                  />
+                  <ScenarioChip
+                    label="Chair-adjusted"
+                    scenario={SCENARIO_DISPLAY_LABEL[chairScenario.scenario]}
+                    confidence={chairScenario.confidence}
+                    delta={chairScenario.delta_3m}
+                    color={targetChart.scenarioColor || "var(--st-foreground)"}
+                    info={
+                      <EnsembleHoverBody
+                        pipelineWeights={pipelineWeights}
+                        chairWeights={chairWeights}
+                      />
+                    }
+                  />
+                </div>
+                {scenarioChanged && baseScenario && (
+                  <p className="rounded-md border border-[var(--st-brand)]/40 bg-[var(--st-brand)]/10 px-2.5 py-1.5 text-[11.5px] leading-relaxed text-foreground">
+                    Re-weighting flips the call:{" "}
                     <span className="st-mono">
-                      {baseScenario && SCENARIO_DISPLAY_LABEL[baseScenario.scenario]}
+                      {SCENARIO_DISPLAY_LABEL[baseScenario.scenario]}
                     </span>{" "}
-                    (Δ3m {baseScenario && formatPp(baseScenario.delta_3m)}) to{" "}
+                    → {" "}
                     <span className="st-mono">
                       {SCENARIO_DISPLAY_LABEL[chairScenario.scenario]}
                     </span>{" "}
-                    (Δ3m {formatPp(chairScenario.delta_3m)}).
+                    ({formatPp(baseScenario.delta_3m)} → {formatPp(chairScenario.delta_3m)}).
                   </p>
+                )}
+                {inputCoverage.ensembleIds.length > 0 && (
+                  <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-muted-foreground">
+                    <span className="font-medium text-foreground">Blend</span>
+                    <span className="st-mono text-foreground">
+                      {inputCoverage.ensembleIds.join(" · ")}
+                    </span>
+                    <InfoHover>
+                      <ScenarioInputsHoverBody coverage={inputCoverage} />
+                    </InfoHover>
+                  </div>
                 )}
               </div>
             )}
-            <ScenarioInputsExplainer coverage={inputCoverage} />
-            <EnsemblePathExplainer
-              pipelineWeights={pipelineWeights}
-              chairWeights={chairWeights}
-            />
             <FanChart
               history={targetChart.history}
               band={targetChart.band}
-              horizonMonths={horizon}
+              horizonMonths={calibration.horizon}
               unit={targetChart.unit}
               decimals={targetChart.decimals}
               historyLabel="Ground truth (FRED)"
@@ -375,29 +362,6 @@ export function ForecastReview({
             </CardContent>
           </Card>
 
-          {hp && (
-            <Card className="gap-0 py-5">
-              <CardContent className="grid grid-cols-2 gap-4">
-                <StatBlock
-                  label={`Median @ ${horizon}M`}
-                  value={`${hp.p50.toFixed(targetChart.decimals)}${targetChart.unit}`}
-                  tone="brand"
-                  sub={`${medianDelta >= 0 ? "+" : ""}${(medianDelta * 100).toFixed(0)} bps`}
-                />
-                <StatBlock
-                  label="90% band width"
-                  value={`${(rangeWidth * 100).toFixed(0)}`}
-                  sub="bps of uncertainty"
-                />
-                <StatBlock label="Implied cuts" value={impliedCuts} sub="× 25 bps priced" tone="cut" />
-                <StatBlock
-                  label="p05 / p95"
-                  value={`${hp.p05.toFixed(targetChart.decimals)}–${hp.p95.toFixed(targetChart.decimals)}`}
-                  sub="tail outcomes"
-                />
-              </CardContent>
-            </Card>
-          )}
         </div>
       </div>
 
@@ -438,75 +402,181 @@ function ReactionFunctionExplainer({
   risk: number;
   inflationTolerance: number;
 }) {
-  const jobsLean = mandate > 55;
-  const priceLean = mandate < 45;
-
   return (
-    <div className="mt-3 space-y-2 rounded-md border border-border bg-muted/40 px-3 py-2.5 text-[11px] leading-relaxed text-muted-foreground">
-      <p className="font-medium text-foreground">How sliders change the forecast</p>
-      <p>
-        Sybilion runs once per series. Sliders do <span className="font-medium text-foreground">not</span>{" "}
-        re-run models or move the blue FEDFUNDS fan — they only change how much each series&apos;s{" "}
-        <span className="font-medium text-foreground">forward median</span> counts when blending a policy-rate path.
-      </p>
-      <ul className="list-inside list-disc space-y-1 pl-0.5">
-        <li>
-          <span className="font-medium text-foreground">Dual-mandate</span> — shifts weight toward labor (
-          {jobsLean ? "stronger now" : "weaker"}) vs inflation ({priceLean ? "stronger now" : "weaker"}).
-        </li>
-        <li>
-          <span className="font-medium text-foreground">Evidence threshold</span> —{" "}
-          {risk > 55 ? "preemptive: more leading / market (DGS2)" : risk < 40 ? "cautious: more FEDFUNDS anchor" : "balanced market vs target mix"}.
-        </li>
-        <li>
-          <span className="font-medium text-foreground">Inflation tolerance</span> — +{inflationTolerance.toFixed(1)}pp
-          nudges weight on the inflation series.
-        </li>
-      </ul>
-      {pipelineWeights.length > 0 && (
-        <p className="st-mono text-[10px]">
-          Baseline blend (fixed catalog): {formatWeightRow(pipelineWeights)}
-        </p>
-      )}
+    <div className="mt-3 rounded-md border border-border bg-muted/40 px-3 py-2.5 text-[11px] leading-relaxed text-muted-foreground">
+      <div className="flex items-center justify-between gap-1">
+        <span className="font-medium text-foreground">Live blend weights</span>
+        <InfoHover>
+          <ReactionHoverBody
+            mandate={mandate}
+            risk={risk}
+            inflationTolerance={inflationTolerance}
+          />
+        </InfoHover>
+      </div>
       {chairWeights.length > 0 && (
-        <p className="st-mono text-[10px]">
-          Chair blend (sliders applied): {formatWeightRow(chairWeights)}
+        <p className="st-mono mt-1.5 text-[10.5px] text-foreground">{formatWeightRow(chairWeights)}</p>
+      )}
+      {pipelineWeights.length > 0 && (
+        <p className="st-mono mt-1 text-[10px] text-muted-foreground">
+          baseline · {formatWeightRow(pipelineWeights)}
         </p>
       )}
     </div>
   );
 }
 
-function ScenarioInputsExplainer({
+function ReactionHoverBody({
+  mandate,
+  risk,
+  inflationTolerance,
+}: {
+  mandate: number;
+  risk: number;
+  inflationTolerance: number;
+}) {
+  const jobsLean = mandate > 55;
+  const priceLean = mandate < 45;
+  return (
+    <div className="space-y-2 text-[12px] leading-relaxed text-muted-foreground">
+      <p className="font-medium text-foreground">How sliders change the forecast</p>
+      <p>
+        Sybilion runs once per series. Sliders don&apos;t re-run models or move the blue FEDFUNDS
+        fan — they only change how much each series&apos; forward median counts when blending a
+        policy-rate path.
+      </p>
+      <ul className="list-inside list-disc space-y-1 pl-0.5">
+        <li>
+          <span className="font-medium text-foreground">Dual-mandate</span> — weight toward labor (
+          {jobsLean ? "stronger now" : "weaker"}) vs inflation ({priceLean ? "stronger now" : "weaker"}).
+        </li>
+        <li>
+          <span className="font-medium text-foreground">Evidence threshold</span> —{" "}
+          {risk > 55
+            ? "preemptive: more leading / market (DGS2)"
+            : risk < 40
+              ? "cautious: more FEDFUNDS anchor"
+              : "balanced market vs target mix"}
+          .
+        </li>
+        <li>
+          <span className="font-medium text-foreground">Inflation tolerance</span> — +
+          {inflationTolerance.toFixed(1)}pp nudges weight on the inflation series.
+        </li>
+      </ul>
+    </div>
+  );
+}
+
+function InfoHover({ children }: { children: ReactNode }) {
+  return (
+    <HoverCard openDelay={80} closeDelay={60}>
+      <HoverCardTrigger asChild>
+        <button
+          type="button"
+          aria-label="More detail"
+          className="inline-flex size-4 items-center justify-center rounded-full text-muted-foreground/70 transition-colors hover:text-foreground"
+        >
+          <CircleHelp className="size-3.5" />
+        </button>
+      </HoverCardTrigger>
+      <HoverCardContent align="start" className="w-80">
+        {children}
+      </HoverCardContent>
+    </HoverCard>
+  );
+}
+
+function ScenarioChip({
+  label,
+  scenario,
+  confidence,
+  delta,
+  color,
+  info,
+}: {
+  label: string;
+  scenario: string;
+  confidence?: string;
+  delta?: number;
+  color: string;
+  info?: ReactNode;
+}) {
+  return (
+    <div className="rounded-lg border border-border bg-muted/30 px-3 py-2">
+      <div className="flex items-center justify-between gap-1">
+        <Eyebrow style={{ fontSize: 9 }}>{label}</Eyebrow>
+        {info ? <InfoHover>{info}</InfoHover> : null}
+      </div>
+      <div className="mt-1 truncate text-[15px] font-medium leading-tight" style={{ color }}>
+        {scenario}
+      </div>
+      <div className="st-mono mt-0.5 text-[10.5px] text-muted-foreground">
+        {confidence ? `${confidence} conf` : "—"}
+        {delta != null && ` · Δ3m ${formatPp(delta)}`}
+      </div>
+    </div>
+  );
+}
+
+function EnsembleHoverBody({
+  pipelineWeights,
+  chairWeights,
+}: {
+  pipelineWeights: { seriesId: string; pct: number }[];
+  chairWeights: { seriesId: string; pct: number }[];
+}) {
+  return (
+    <div className="space-y-2 text-[12px] leading-relaxed text-muted-foreground">
+      <div>
+        <div className="flex items-center gap-2">
+          <span
+            className="inline-block w-5 border-t-2 border-dashed"
+            style={{ borderColor: "var(--st-muted)" }}
+          />
+          <span className="font-medium text-foreground">Baseline (gray dashed)</span>
+        </div>
+        <p className="mt-1">
+          Weighted average of each series&apos; Sybilion median using fixed catalog weights.
+          Stays put when you move sliders.
+        </p>
+        {pipelineWeights.length > 0 && (
+          <p className="st-mono mt-1 text-[10.5px] text-foreground">
+            {formatWeightRow(pipelineWeights)}
+          </p>
+        )}
+      </div>
+      <div className="border-t border-border pt-2">
+        <div className="flex items-center gap-2">
+          <span
+            className="inline-block w-5 border-t-2"
+            style={{ borderColor: "var(--st-brand)" }}
+          />
+          <span className="font-medium text-foreground">Chair (colored solid)</span>
+        </div>
+        <p className="mt-1">
+          Same medians, re-blended with your slider weights. The scenario label and chart color
+          follow this path.
+        </p>
+        {chairWeights.length > 0 && (
+          <p className="st-mono mt-1 text-[10.5px] text-foreground">
+            {formatWeightRow(chairWeights)}
+          </p>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function ScenarioInputsHoverBody({
   coverage,
 }: {
   coverage: ReturnType<typeof scenarioInputCoverage>;
 }) {
-  if (!coverage.roleRows.length && !coverage.ensembleIds.length) return null;
-
   return (
-    <div className="mb-3 rounded-md border border-border bg-muted/30 px-3 py-2.5 text-[11px] leading-relaxed text-muted-foreground">
-      <p className="font-medium text-foreground">Inputs for this run (Step 02 selection)</p>
-      <p className="mt-1">
-        <span className="font-medium text-foreground">Ensemble blend</span>
-        {coverage.ensembleIds.length ? (
-          <>
-            :{" "}
-            <span className="st-mono text-foreground">{coverage.ensembleIds.join(" · ")}</span>
-            <span className="text-muted-foreground"> — each series&apos;s forward median is weighted in.</span>
-          </>
-        ) : (
-          " — no valid forecasts in the aggregate."
-        )}
-      </p>
-      {coverage.droppedIds.length > 0 && (
-        <p className="mt-1 text-[var(--st-cut)]">
-          Excluded from blend (failed or empty):{" "}
-          <span className="st-mono">{coverage.droppedIds.join(" · ")}</span>
-        </p>
-      )}
-      <p className="mt-2 font-medium text-foreground">Scenario classifier</p>
-      <ul className="mt-1 space-y-1">
+    <div className="space-y-2 text-[11.5px] leading-relaxed text-muted-foreground">
+      <p className="font-medium text-foreground">Scenario classifier roles</p>
+      <ul className="space-y-1">
         {coverage.roleRows.map((row) => (
           <li key={row.label} className="flex flex-wrap items-baseline gap-x-1.5">
             <span
@@ -519,45 +589,27 @@ function ScenarioInputsExplainer({
             {row.seriesId ? (
               <span className="st-mono text-foreground">{row.seriesId}</span>
             ) : (
-              <span className="italic">not in selection</span>
+              <span className="italic">not selected</span>
             )}
-            <span className="w-full text-[10px] text-muted-foreground sm:w-auto">({row.ruleHint})</span>
+            <span className="w-full text-[10px] sm:w-auto">({row.ruleHint})</span>
           </li>
         ))}
       </ul>
-      <p className="mt-1.5 text-[10px]">
-        Δ3m / Δ6m always come from the blended ensemble path. Tabs above only hide charts — change inputs on
-        Step 02 and re-run to alter the blend.
-      </p>
+      {coverage.droppedIds.length > 0 && (
+        <p className="text-[var(--st-cut)]">
+          Excluded (failed/empty):{" "}
+          <span className="st-mono">{coverage.droppedIds.join(" · ")}</span>
+        </p>
+      )}
       {coverage.contextInBlendOnly.length > 0 && (
-        <p className="mt-1.5 text-[10px]">
-          In ensemble only (no classifier rule):{" "}
+        <p>
+          In blend only (no classifier rule):{" "}
           <span className="st-mono">{coverage.contextInBlendOnly.join(" · ")}</span>
         </p>
       )}
-    </div>
-  );
-}
-
-function EnsemblePathExplainer({
-  pipelineWeights,
-  chairWeights,
-}: {
-  pipelineWeights: { seriesId: string; pct: number }[];
-  chairWeights: { seriesId: string; pct: number }[];
-}) {
-  return (
-    <div className="mb-3 rounded-md border border-dashed border-border px-3 py-2 text-[11px] leading-relaxed text-muted-foreground">
-      <p>
-        <span className="font-medium text-foreground">Gray dashed</span> — baseline ensemble: weighted average of
-        each series&apos;s Sybilion median using{" "}
-        <span className="font-medium text-foreground">fixed catalog weights</span> from the pipeline
-        {pipelineWeights.length > 0 ? ` (${formatWeightRow(pipelineWeights)})` : ""}. Unchanged when you move sliders.
-      </p>
-      <p className="mt-1.5">
-        <span className="font-medium text-foreground">Colored solid</span> — chair ensemble: same medians,
-        re-blended with slider-adjusted weights
-        {chairWeights.length > 0 ? ` (${formatWeightRow(chairWeights)})` : ""}. Scenario label and color follow this path.
+      <p className="border-t border-border pt-1.5 text-[10.5px]">
+        Δ3m / Δ6m always come from the blended ensemble path. Change inputs on Step 02 and re-run
+        to alter the blend.
       </p>
     </div>
   );

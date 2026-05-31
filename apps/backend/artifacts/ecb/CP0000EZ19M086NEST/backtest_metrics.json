@@ -1,0 +1,53 @@
+{
+  "data": {
+    "12m": {
+      "forecast_end": "2026-01-01",
+      "forecast_start": "2025-01-01",
+      "metrics": {
+        "MAE": 0.164411,
+        "MAPE": 8.148469,
+        "MASE": 1.36304,
+        "RMSE": 0.164411,
+        "RMSSE": 0.964646
+      },
+      "tests": {}
+    },
+    "24m": {
+      "forecast_end": "2026-01-01",
+      "forecast_start": "2024-01-01",
+      "metrics": {
+        "MAE": 0.164411,
+        "MAPE": 8.148469,
+        "MASE": 1.36304,
+        "RMSE": 0.164411,
+        "RMSSE": 0.964646
+      },
+      "tests": {}
+    },
+    "60m": {
+      "forecast_end": "2026-01-01",
+      "forecast_start": "2021-01-01",
+      "metrics": {
+        "MAE": 0.164411,
+        "MAPE": 8.148469,
+        "MASE": 1.36304,
+        "RMSE": 0.164411,
+        "RMSSE": 0.964646
+      },
+      "tests": {}
+    },
+    "6m": {
+      "forecast_end": "2026-01-01",
+      "forecast_start": "2025-07-01",
+      "metrics": {
+        "MAE": 0.076017,
+        "MAPE": 3.788821,
+        "MASE": 0.786566,
+        "RMSE": 0.076017,
+        "RMSSE": 0.596127
+      },
+      "tests": {}
+    }
+  },
+  "version": "1.1"
+}

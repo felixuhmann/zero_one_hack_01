@@ -388,22 +388,24 @@ export function FanChart({
           transition={{ duration: 0.9, ease: "easeInOut" }}
         />
 
-        {/* backtest: held-out predicted path over realised history */}
+        {/* backtest: held-out predicted path over realised history.
+            Violet dotted overlay, sits left of the seam so it never overlaps
+            the forecast median. */}
         {chart.backtestLine && (
           <>
             <motion.path
               d={chart.backtestLine}
               fill="none"
-              stroke="var(--st-hold)"
-              strokeWidth="2"
-              strokeDasharray="2 3"
+              stroke="var(--st-backtest)"
+              strokeWidth="1.75"
+              strokeDasharray="1 4"
               strokeLinecap="round"
-              initial={{ pathLength: 0 }}
-              animate={{ pathLength: 1 }}
-              transition={{ duration: 0.9, ease: "easeInOut", delay: 0.2 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 0.85 }}
+              transition={{ duration: 0.6, ease: "easeInOut", delay: 0.2 }}
             />
             {chart.backtestDots.map((d, i) => (
-              <circle key={i} cx={d.cx} cy={d.cy} r="2" fill="var(--st-hold)" />
+              <circle key={i} cx={d.cx} cy={d.cy} r="1.6" fill="var(--st-backtest)" opacity={0.85} />
             ))}
           </>
         )}
@@ -444,7 +446,8 @@ export function FanChart({
           </>
         )}
 
-        {/* median forecast */}
+        {/* median forecast — opacity fade (not pathLength, which would hijack
+            strokeDasharray and render the dashes as a solid line) */}
         <motion.path
           d={chart.medianLine}
           fill="none"
@@ -452,9 +455,9 @@ export function FanChart({
           strokeWidth="2.5"
           strokeDasharray="6 5"
           strokeLinecap="round"
-          initial={{ pathLength: 0 }}
-          animate={{ pathLength: 1 }}
-          transition={{ duration: 1, ease: "easeInOut", delay: 0.35 }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.6, ease: "easeInOut", delay: 0.35 }}
         />
 
         {/* hover scrubber */}
@@ -481,7 +484,7 @@ export function FanChart({
                 cx={chart.x(hoverState.col)}
                 cy={chart.y(hoverState.data.v)}
                 r="4"
-                fill="var(--st-hold)"
+                fill="var(--st-backtest)"
               />
             ) : hoverState.data.kind === "scenario" ? (
               <circle
@@ -539,17 +542,28 @@ export function FanChart({
         />
       )}
 
-      <div className="mt-1 flex flex-wrap items-center gap-x-5 gap-y-1.5 px-1">
-        <Legend swatch="line" color="var(--st-ink-soft)" label={historyLabel || "Ground truth"} />
-        <Legend swatch="dash" color="var(--st-brand)" label="Median forecast (p50)" />
-        <Legend swatch="band" color="var(--st-brand)" label="50% band (p25–p75)" />
-        <Legend swatch="band-faint" color="var(--st-brand)" label="90% band (p05–p95)" />
-        {chart.backtestLine && <Legend swatch="dash" color="var(--st-hold)" label="Backtest (held-out prediction)" />}
-        {chart.baselineLine && (
-          <Legend swatch="dash" color="var(--st-muted)" label={baselineScenarioLegend} />
-        )}
-        {(chart.scenarioLine || chart.scenarioDots.length > 0) && (
-          <Legend swatch="line" color={scenarioColor} label={scenarioLegend} />
+      <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-2 px-1">
+        <LegendGroup title="Forecast">
+          <Legend swatch="line" color="var(--st-ink-soft)" label={historyLabel || "Ground truth"} />
+          <Legend swatch="dash" color="var(--st-brand)" label="Median (p50)" />
+          <Legend swatch="band" color="var(--st-brand)" label="50% band" />
+          <Legend swatch="band-faint" color="var(--st-brand)" label="90% band" />
+          {chart.backtestLine && (
+            <Legend swatch="dot" color="var(--st-backtest)" label="Backtest (held-out)" />
+          )}
+        </LegendGroup>
+        {(chart.baselineLine || chart.scenarioLine || chart.scenarioDots.length > 0) && (
+          <>
+            <span className="hidden h-3.5 w-px shrink-0 self-center sm:inline-block" style={{ background: "var(--st-line-strong)" }} />
+            <LegendGroup title="Policy blend">
+              {chart.baselineLine && (
+                <Legend swatch="dash" color="var(--st-muted)" label={baselineScenarioLegend} />
+              )}
+              {(chart.scenarioLine || chart.scenarioDots.length > 0) && (
+                <Legend swatch="line-dot" color={scenarioColor} label={scenarioLegend} />
+              )}
+            </LegendGroup>
+          </>
         )}
       </div>
     </div>
@@ -598,7 +612,7 @@ function Tooltip({
           <div className="st-eyebrow mb-0.5" style={{ fontSize: 8, color: "var(--st-muted)" }}>
             Backtest p50
           </div>
-          <div className="st-mono text-sm" style={{ color: "var(--st-hold)" }}>
+          <div className="st-mono text-sm" style={{ color: "var(--st-backtest)" }}>
             {fmt(data.v)}
           </div>
         </div>
@@ -637,25 +651,57 @@ function Tooltip({
   );
 }
 
+function LegendGroup({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div className="flex flex-wrap items-center gap-x-3.5 gap-y-1.5">
+      <span className="st-eyebrow" style={{ fontSize: 8.5, letterSpacing: "0.14em" }}>
+        {title}
+      </span>
+      {children}
+    </div>
+  );
+}
+
 function Legend({ swatch, color, label }: { swatch: string; color: string; label: string }) {
+  const isBand = swatch === "band" || swatch === "band-faint";
+  const isDashed = swatch === "dash";
+  const isDotted = swatch === "dot";
+
   return (
     <div className="flex items-center gap-1.5">
-      <span
-        className="inline-block"
-        style={{
-          width: 16,
-          height: swatch === "band" || swatch === "band-faint" ? 9 : 2,
-          borderRadius: 2,
-          background:
-            swatch === "band"
-              ? `color-mix(in oklch, ${color} 38%, transparent)`
-              : swatch === "band-faint"
-                ? `color-mix(in oklch, ${color} 16%, transparent)`
+      {swatch === "line-dot" ? (
+        <span className="relative inline-block" style={{ width: 16, height: 6 }}>
+          <span
+            className="absolute left-0 top-1/2 -translate-y-1/2"
+            style={{ width: 16, height: 2, borderRadius: 2, background: color }}
+          />
+          <span
+            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full"
+            style={{ width: 5, height: 5, background: color }}
+          />
+        </span>
+      ) : (
+        <span
+          className="inline-block"
+          style={{
+            width: 16,
+            height: isBand ? 9 : 2,
+            borderRadius: 2,
+            background: isBand
+              ? swatch === "band"
+                ? `color-mix(in oklch, ${color} 38%, transparent)`
+                : `color-mix(in oklch, ${color} 16%, transparent)`
+              : isDashed || isDotted
+                ? "transparent"
                 : color,
-          borderTop: swatch === "dash" ? `2px dashed ${color}` : undefined,
-          backgroundClip: swatch === "dash" ? "border-box" : undefined,
-        }}
-      />
+            borderTop: isDashed
+              ? `2px dashed ${color}`
+              : isDotted
+                ? `2px dotted ${color}`
+                : undefined,
+          }}
+        />
+      )}
       <span style={{ color: "var(--st-muted)", fontSize: 11 }}>{label}</span>
     </div>
   );

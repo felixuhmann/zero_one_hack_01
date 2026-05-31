@@ -1,0 +1,307 @@
+{
+  "region": "fed",
+  "generated_at": 1780134884350,
+  "result": {
+    "signals": {
+      "UNRATE": null,
+      "FEDFUNDS": {
+        "series_id": "FEDFUNDS",
+        "weight": 0.3,
+        "job": {
+          "artifacts": [
+            {
+              "name": "backtest_metrics.json",
+              "size": 1119,
+              "content_type": "application/json",
+              "href": "/api/v1/forecasts/e1ce21f6-cb32-4e76-b416-0d534cbe5d17/artifacts/backtest_metrics.json"
+            },
+            {
+              "name": "backtest_trajectories.json",
+              "size": 29889,
+              "content_type": "application/json",
+              "href": "/api/v1/forecasts/e1ce21f6-cb32-4e76-b416-0d534cbe5d17/artifacts/backtest_trajectories.json"
+            },
+            {
+              "name": "external_signals.json",
+              "size": 59399,
+              "content_type": "application/json",
+              "href": "/api/v1/forecasts/e1ce21f6-cb32-4e76-b416-0d534cbe5d17/artifacts/external_signals.json"
+            },
+            {
+              "name": "forecast.json",
+              "size": 2099,
+              "content_type": "application/json",
+              "href": "/api/v1/forecasts/e1ce21f6-cb32-4e76-b416-0d534cbe5d17/artifacts/forecast.json"
+            },
+            {
+              "name": "input.json",
+              "size": 2035,
+              "content_type": "application/json",
+              "href": "/api/v1/forecasts/e1ce21f6-cb32-4e76-b416-0d534cbe5d17/artifacts/input.json"
+            }
+          ],
+          "created_at": "2026-05-30T09:47:38Z",
+          "eur_cents_final": 159,
+          "job_id": "e1ce21f6-cb32-4e76-b416-0d534cbe5d17",
+          "pipeline_type": "forecast",
+          "run_id": "019e7848-34b3-751b-b731-8e2fd6107be0",
+          "settled": true,
+          "settled_at": "2026-05-30T09:52:53Z",
+          "status": "completed",
+          "workflow_id": "forecast-e1ce21f6-cb32-4e76-b416-0d534cbe5d17"
+        },
+        "forecast": {
+          "data": {
+            "forecast_end": "2026-07-01",
+            "forecast_horizon": 3,
+            "forecast_series": {
+              "2026-05-01": {
+                "forecast": 3.519309,
+                "quantile_forecast": {
+                  "0.05": 3.179999,
+                  "0.10": 3.348611,
+                  "0.15": 3.356589,
+                  "0.20": 3.420378,
+                  "0.25": 3.420378,
+                  "0.30": 3.42801,
+                  "0.35": 3.429318,
+                  "0.40": 3.429318,
+                  "0.45": 3.509467,
+                  "0.50": 3.519309,
+                  "0.55": 3.529151,
+                  "0.60": 3.6093,
+                  "0.65": 3.6093,
+                  "0.70": 3.610608,
+                  "0.75": 3.61824,
+                  "0.80": 3.61824,
+                  "0.85": 3.682029,
+                  "0.90": 3.690007,
+                  "0.95": 3.858619
+                }
+              },
+              "2026-06-01": {
+                "forecast": 3.380633,
+                "quantile_forecast": {
+                  "0.05": 2.939719,
+                  "0.10": 3.112059,
+                  "0.15": 3.128272,
+                  "0.20": 3.193509,
+                  "0.25": 3.193509,
+                  "0.30": 3.211974,
+                  "0.35": 3.215634,
+                  "0.40": 3.23515,
+                  "0.45": 3.343744,
+                  "0.50": 3.380633,
+                  "0.55": 3.417523,
+                  "0.60": 3.526117,
+                  "0.65": 3.545632,
+                  "0.70": 3.549292,
+                  "0.75": 3.567757,
+                  "0.80": 3.567757,
+                  "0.85": 3.632995,
+                  "0.90": 3.649208,
+                  "0.95": 3.821548
+                }
+              },
+              "2026-07-01": {
+                "forecast": 3.238504,
+                "quantile_forecast": {
+                  "0.05": 2.453629,
+                  "0.10": 2.706921,
+                  "0.15": 2.776616,
+                  "0.20": 2.869657,
+                  "0.25": 2.87118,
+                  "0.30": 2.889645,
+                  "0.35": 2.961002,
+                  "0.40": 3.002936,
+                  "0.45": 3.124474,
+                  "0.50": 3.238504,
+                  "0.55": 3.352535,
+                  "0.60": 3.474073,
+                  "0.65": 3.516007,
+                  "0.70": 3.587364,
+                  "0.75": 3.605829,
+                  "0.80": 3.607351,
+                  "0.85": 3.700393,
+                  "0.90": 3.770088,
+                  "0.95": 4.02338
+                }
+              }
+            },
+            "forecast_start": "2026-05-01",
+            "last_valid_data_index": "2026-04-01"
+          },
+          "version": "1.1"
+        }
+      },
+      "PCEPILFE": null,
+      "DGS2": {
+        "series_id": "DGS2",
+        "weight": 0.25,
+        "job": {
+          "artifacts": [
+            {
+              "name": "backtest_metrics.json",
+              "size": 1114,
+              "content_type": "application/json",
+              "href": "/api/v1/forecasts/e1edc6b2-b8bb-4970-9748-f7b8b80192a4/artifacts/backtest_metrics.json"
+            },
+            {
+              "name": "backtest_trajectories.json",
+              "size": 29886,
+              "content_type": "application/json",
+              "href": "/api/v1/forecasts/e1edc6b2-b8bb-4970-9748-f7b8b80192a4/artifacts/backtest_trajectories.json"
+            },
+            {
+              "name": "external_signals.json",
+              "size": 75686,
+              "content_type": "application/json",
+              "href": "/api/v1/forecasts/e1edc6b2-b8bb-4970-9748-f7b8b80192a4/artifacts/external_signals.json"
+            },
+            {
+              "name": "forecast.json",
+              "size": 2101,
+              "content_type": "application/json",
+              "href": "/api/v1/forecasts/e1edc6b2-b8bb-4970-9748-f7b8b80192a4/artifacts/forecast.json"
+            },
+            {
+              "name": "input.json",
+              "size": 2054,
+              "content_type": "application/json",
+              "href": "/api/v1/forecasts/e1edc6b2-b8bb-4970-9748-f7b8b80192a4/artifacts/input.json"
+            }
+          ],
+          "created_at": "2026-05-30T09:47:38Z",
+          "eur_cents_final": 129,
+          "job_id": "e1edc6b2-b8bb-4970-9748-f7b8b80192a4",
+          "pipeline_type": "forecast",
+          "run_id": "019e7848-34fc-7883-b823-e4c3eb2f8053",
+          "settled": true,
+          "settled_at": "2026-05-30T09:54:34Z",
+          "status": "completed",
+          "workflow_id": "forecast-e1edc6b2-b8bb-4970-9748-f7b8b80192a4"
+        },
+        "forecast": {
+          "data": {
+            "forecast_end": "2026-08-01",
+            "forecast_horizon": 3,
+            "forecast_series": {
+              "2026-06-01": {
+                "forecast": 3.78798,
+                "quantile_forecast": {
+                  "0.05": 3.502697,
+                  "0.10": 3.530734,
+                  "0.15": 3.635237,
+                  "0.20": 3.731549,
+                  "0.25": 3.738968,
+                  "0.30": 3.740674,
+                  "0.35": 3.740674,
+                  "0.40": 3.768245,
+                  "0.45": 3.7751,
+                  "0.50": 3.78798,
+                  "0.55": 3.80086,
+                  "0.60": 3.807714,
+                  "0.65": 3.835285,
+                  "0.70": 3.835285,
+                  "0.75": 3.836992,
+                  "0.80": 3.844411,
+                  "0.85": 3.940723,
+                  "0.90": 4.045226,
+                  "0.95": 4.073263
+                }
+              },
+              "2026-07-01": {
+                "forecast": 3.741433,
+                "quantile_forecast": {
+                  "0.05": 3.232517,
+                  "0.10": 3.454981,
+                  "0.15": 3.55469,
+                  "0.20": 3.634196,
+                  "0.25": 3.661975,
+                  "0.30": 3.666557,
+                  "0.35": 3.672257,
+                  "0.40": 3.699854,
+                  "0.45": 3.717502,
+                  "0.50": 3.741433,
+                  "0.55": 3.765364,
+                  "0.60": 3.783011,
+                  "0.65": 3.810608,
+                  "0.70": 3.816308,
+                  "0.75": 3.820891,
+                  "0.80": 3.84867,
+                  "0.85": 3.928176,
+                  "0.90": 4.027884,
+                  "0.95": 4.250348
+                }
+              },
+              "2026-08-01": {
+                "forecast": 3.696751,
+                "quantile_forecast": {
+                  "0.05": 2.957043,
+                  "0.10": 3.155272,
+                  "0.15": 3.252152,
+                  "0.20": 3.334151,
+                  "0.25": 3.365172,
+                  "0.30": 3.575604,
+                  "0.35": 3.583477,
+                  "0.40": 3.628886,
+                  "0.45": 3.662258,
+                  "0.50": 3.696751,
+                  "0.55": 3.731243,
+                  "0.60": 3.764615,
+                  "0.65": 3.810025,
+                  "0.70": 3.817897,
+                  "0.75": 4.028329,
+                  "0.80": 4.05935,
+                  "0.85": 4.141349,
+                  "0.90": 4.238229,
+                  "0.95": 4.436458
+                }
+              }
+            },
+            "forecast_start": "2026-06-01",
+            "last_valid_data_index": "2026-05-01"
+          },
+          "version": "1.1"
+        }
+      }
+    },
+    "ensemble": {
+      "ensemble_forecast": {
+        "2026-05-01": 3.5193,
+        "2026-06-01": 3.5658,
+        "2026-07-01": 3.4671,
+        "2026-08-01": 3.6968
+      },
+      "contributing_signals": [
+        "FEDFUNDS",
+        "DGS2"
+      ],
+      "normalized_weights": {
+        "FEDFUNDS": 0.5455,
+        "DGS2": 0.4545
+      },
+      "dropped_signals": [
+        "UNRATE",
+        "PCEPILFE"
+      ],
+      "backtest": {}
+    },
+    "scenario": {
+      "scenario": "hold",
+      "confidence": "low",
+      "delta_3m": -0.0522,
+      "delta_6m": -0.0522,
+      "inflation_trend": "unknown",
+      "inflation_latest": null,
+      "labor_slack": false,
+      "labor_latest": null,
+      "yield_signal": "normal",
+      "trigger": "Rate stabil: -0.05pp in 3M, -0.05pp in 6M | Inflations-Signal nicht verf\u00fcgbar | Yield Curve normal",
+      "signals_used": [
+        "FEDFUNDS",
+        "DGS2"
+      ]
+    }
+  }
+}

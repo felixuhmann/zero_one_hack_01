@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { ArrowLeft, MessageCircleQuestion, RotateCcw, Sliders, Zap } from "lucide-react";
+import { ArrowLeft, RotateCcw, Sliders } from "lucide-react";
 
 import { assumptionsFromForecast } from "@/lib/forecastAssumptions";
 import { SCENARIO_DISPLAY_LABEL } from "@/lib/scenarioChart";
@@ -12,7 +12,6 @@ import {
   type Assumption,
   type CalibrationState,
   type Decision,
-  type DecisionResult,
 } from "@/studio/data";
 import { DecisionGauge } from "@/studio/charts/DecisionGauge";
 import { Eyebrow, Pill, StudioButton, StudioNote } from "@/studio/ui/bits";
@@ -56,12 +55,6 @@ const SCENARIOS: { id: string; label: string; apply: (a: Assumption[]) => Assump
   },
 ];
 
-const CHALLENGES = [
-  { id: "cut", q: "Why not just cut now?", a: "Cutting into above-target inflation risks un-anchoring expectations — the 2025 framework's red line. The labor data isn't yet weak enough to override that, so the call stays on hold with an easing bias rather than pre-committing." },
-  { id: "lag", q: "Aren't you ignoring policy lags?", a: "No — that's exactly why the median path already drifts lower. The lag is priced into the forecast horizon; acting today would double-count it given the market has ~1.3 cuts in already." },
-  { id: "cautious", q: "Push back — you're too cautious.", a: "Fair challenge. If you raise the evidence threshold toward 'preemptive' in calibration, the bar to move drops and policy can front-load. Try the Labor-shock scenario to see how fast the call pivots when the data justify it." },
-];
-
 export function Recommendation({
   calibration,
   aggregatedForecast,
@@ -78,7 +71,6 @@ export function Recommendation({
 
   const [activeScenario, setActiveScenario] = useState("base");
   const [scenarioNote, setScenarioNote] = useState<string | null>(null);
-  const [challenge, setChallenge] = useState<string | null>(null);
 
   const { base: pipelineScenario, chair: chairScenario } = useMemo(() => {
     if (!aggregatedForecast) return { base: null, chair: null };
@@ -89,14 +81,6 @@ export function Recommendation({
     () => evaluateDecision(calibration, assumptions, { chairScenario }),
     [calibration, assumptions, chairScenario],
   );
-
-  const assumptionBaseline = useMemo<DecisionResult>(
-    () => evaluateDecision(calibration, defaultAssumptions(), { chairScenario }),
-    [calibration, chairScenario],
-  );
-
-  const shifted = assumptions.some((a) => a.value !== a.baseline);
-  const decisionChanged = result.headline !== assumptionBaseline.headline;
 
   const maxContrib = Math.max(...result.contributions.map((c) => Math.abs(c.value)), 0.6);
 
@@ -132,34 +116,8 @@ export function Recommendation({
         </p>
       </div>
 
-      <AnimatePresence>
-        {shifted && decisionChanged && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            className="overflow-hidden"
-          >
-            <div
-              className="flex items-center gap-3 rounded-xl px-4 py-3"
-              style={{
-                background: "color-mix(in oklch, var(--st-brand) 14%, var(--st-panel))",
-                border: "1px solid var(--st-brand)",
-              }}
-            >
-              <Zap className="size-4 shrink-0 text-[var(--st-brand)]" />
-              <span className="text-[13px] text-foreground">
-                Assumption shifted →{" "}
-                <span className="st-mono text-muted-foreground">{assumptionBaseline.headline}</span> to{" "}
-                <span className="st-mono text-[var(--st-brand)]">{result.headline}</span>.
-              </span>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      <div className="grid gap-5 lg:grid-cols-[1fr_1.25fr]">
-        <Card className="relative gap-0 py-0">
+      <div className="grid gap-5 lg:grid-cols-[1fr_1.25fr] lg:items-stretch">
+        <Card className="relative h-full gap-0 py-0">
             <div className="st-grain pointer-events-none absolute inset-0" />
             <CardContent className="relative p-6">
               <div className="flex items-center justify-between">
@@ -210,41 +168,25 @@ export function Recommendation({
             </CardContent>
           </Card>
 
-        <div className="space-y-4">
-          <Card className="gap-0 py-5">
-            <CardContent>
-              <span className="text-sm font-medium text-foreground">Why — contribution to the tilt</span>
-              <p className="mt-0.5 text-[11px] text-muted-foreground">
-                Blue = dovish (cut), red = hawkish (hike). Bars sum to the gauge tilt.
-              </p>
-              <div className="mt-4 space-y-3">
-                {result.contributions.map((c) => (
-                  <ContribRow
-                    key={c.label}
-                    label={c.label}
-                    value={c.value}
-                    detail={c.detail}
-                    max={maxContrib}
-                  />
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="gap-0 py-5">
-            <CardContent>
-              <span className="text-sm font-medium text-foreground">Reasoning</span>
-              <ul className="mt-3 space-y-2.5">
-                {result.rationale.map((r, i) => (
-                  <li key={i} className="flex gap-2.5 text-[13px] leading-relaxed text-foreground/80">
-                    <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-[var(--st-brand)]" />
-                    <span dangerouslySetInnerHTML={{ __html: renderEmphasis(r) }} />
-                  </li>
-                ))}
-              </ul>
-            </CardContent>
-          </Card>
-        </div>
+        <Card className="h-full gap-0 py-0">
+          <CardContent className="flex h-full flex-col p-6">
+            <span className="text-sm font-medium text-foreground">Why — contribution to the tilt</span>
+            <p className="mt-0.5 text-[11px] text-muted-foreground">
+              Blue = dovish (cut), red = hawkish (hike). Bars sum to the gauge tilt.
+            </p>
+            <div className="mt-4 flex flex-1 flex-col justify-between gap-3">
+              {result.contributions.map((c) => (
+                <ContribRow
+                  key={c.label}
+                  label={c.label}
+                  value={c.value}
+                  detail={c.detail}
+                  max={maxContrib}
+                />
+              ))}
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       <Card className="gap-0 py-5">
@@ -282,42 +224,6 @@ export function Recommendation({
               <AssumptionSlider key={a.id} a={a} onChange={(v) => setAssumption(a.id, v)} />
             ))}
           </div>
-        </CardContent>
-      </Card>
-
-      <Card className="gap-0 py-5">
-        <CardContent>
-          <div className="flex items-center gap-2">
-            <MessageCircleQuestion className="size-4 text-[var(--st-brand)]" />
-            <span className="text-sm font-medium text-foreground">Common pushback</span>
-          </div>
-          <ToggleGroup
-            type="single"
-            variant="outline"
-            size="sm"
-            value={challenge ?? ""}
-            onValueChange={(v) => setChallenge(v || null)}
-            className="mt-3 flex-wrap"
-          >
-            {CHALLENGES.map((c) => (
-              <ToggleGroupItem key={c.id} value={c.id} className="text-[12px]">
-                {c.q}
-              </ToggleGroupItem>
-            ))}
-          </ToggleGroup>
-          <AnimatePresence mode="wait">
-            {challenge && (
-              <motion.p
-                key={challenge}
-                initial={{ opacity: 0, y: 6 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -6 }}
-                className="mt-4 text-[13px] leading-relaxed text-foreground/80"
-              >
-                {CHALLENGES.find((c) => c.id === challenge)?.a}
-              </motion.p>
-            )}
-          </AnimatePresence>
         </CardContent>
       </Card>
 
@@ -399,12 +305,4 @@ function AssumptionSlider({ a, onChange }: { a: Assumption; onChange: (v: number
       <p className="mt-0.5 text-[10.5px] leading-snug text-muted-foreground">{a.hint}</p>
     </div>
   );
-}
-
-function renderEmphasis(s: string): string {
-  const escaped = s
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;");
-  return escaped.replace(/\*\*(.+?)\*\*/g, '<strong style="color:var(--st-ink);font-weight:600">$1</strong>');
 }

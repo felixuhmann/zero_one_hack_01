@@ -25,9 +25,9 @@ function arc(startDeg: number, endDeg: number, r: number) {
   const s = polar(startDeg, r);
   const e = polar(endDeg, r);
   const large = Math.abs(endDeg - startDeg) > 180 ? 1 : 0;
-  // travelling from a larger angle to a smaller one sweeps left→right across
-  // the top of the gauge (counter-clockwise on screen = sweep flag 0)
-  const sweep = startDeg > endDeg ? 0 : 1;
+  // Decreasing angle traces the top semicircle (cut → hold → hike); in SVG's
+  // y-down coords that path is clockwise (sweep flag 1).
+  const sweep = startDeg > endDeg ? 1 : 0;
   return `M${s.x},${s.y} A${r},${r} 0 ${large} ${sweep} ${e.x},${e.y}`;
 }
 

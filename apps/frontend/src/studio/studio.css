@@ -31,6 +31,9 @@
   --st-brand-dim: oklch(0.7 0.1 190);
   --st-brand-glow: oklch(0.68 0.13 190 / 26%);
 
+  /* backtest (held-out) overlay — violet, kept clear of brand/decision hues */
+  --st-backtest: oklch(0.58 0.16 300);
+
   /* decision axis: cut (dovish) -> hold -> hike (hawkish) */
   --st-cut: oklch(0.54 0.16 250);
   --st-hold: oklch(0.65 0.14 70);
@@ -54,6 +57,7 @@
   --st-cut: oklch(0.66 0.15 250);
   --st-hold: oklch(0.76 0.14 75);
   --st-hike: oklch(0.66 0.19 25);
+  --st-backtest: oklch(0.7 0.15 300);
 }
 
 .studio-root ::selection {

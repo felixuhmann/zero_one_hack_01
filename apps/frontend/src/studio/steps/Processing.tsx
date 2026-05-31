@@ -95,16 +95,16 @@ export function Processing({ include, onDone, onForecastReady }: Props) {
             <span className="absolute rounded-full" style={{ width: 244, height: 244, background: "radial-gradient(circle, var(--st-brand-glow), transparent 62%)" }} />
             {/* sweep */}
             <motion.span
-              className="absolute"
-              style={{ width: 244, height: 244, transformOrigin: "center" }}
+              className="absolute rounded-full"
+              style={{
+                width: 244,
+                height: 244,
+                transformOrigin: "center",
+                background: "conic-gradient(from 0deg, var(--st-brand-glow), transparent 28%)",
+              }}
               animate={{ rotate: 360 }}
               transition={{ duration: 2.6, repeat: Infinity, ease: "linear" }}
-            >
-              <span
-                className="absolute left-1/2 top-1/2 h-1/2 w-1/2 origin-top-left"
-                style={{ background: "conic-gradient(from 0deg, transparent, var(--st-brand-glow))", clipPath: "polygon(0 0, 100% 0, 0 100%)" }}
-              />
-            </motion.span>
+            />
 
             <svg viewBox="0 0 120 120" className="absolute h-44 w-44 -rotate-90">
               <circle cx="60" cy="60" r="52" fill="none" stroke="var(--st-line)" strokeWidth="5" />

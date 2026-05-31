@@ -1,0 +1,441 @@
+{
+  "region": "ecb",
+  "generated_at": 1780138768693,
+  "result": {
+    "signals": {
+      "LRHUTTTTEZM156S": null,
+      "CP0000EZ19M086NEST": {
+        "series_id": "CP0000EZ19M086NEST",
+        "weight": 0.25,
+        "job": {
+          "artifacts": [
+            {
+              "name": "backtest_metrics.json",
+              "size": 1111,
+              "content_type": "application/json",
+              "href": "/api/v1/forecasts/3d3b2102-7b31-4f7b-b792-a586d2a92eb0/artifacts/backtest_metrics.json"
+            },
+            {
+              "name": "backtest_trajectories.json",
+              "size": 29966,
+              "content_type": "application/json",
+              "href": "/api/v1/forecasts/3d3b2102-7b31-4f7b-b792-a586d2a92eb0/artifacts/backtest_trajectories.json"
+            },
+            {
+              "name": "external_signals.json",
+              "size": 80420,
+              "content_type": "application/json",
+              "href": "/api/v1/forecasts/3d3b2102-7b31-4f7b-b792-a586d2a92eb0/artifacts/external_signals.json"
+            },
+            {
+              "name": "forecast.json",
+              "size": 2104,
+              "content_type": "application/json",
+              "href": "/api/v1/forecasts/3d3b2102-7b31-4f7b-b792-a586d2a92eb0/artifacts/forecast.json"
+            },
+            {
+              "name": "input.json",
+              "size": 2156,
+              "content_type": "application/json",
+              "href": "/api/v1/forecasts/3d3b2102-7b31-4f7b-b792-a586d2a92eb0/artifacts/input.json"
+            }
+          ],
+          "created_at": "2026-05-30T10:40:33Z",
+          "eur_cents_final": 168,
+          "job_id": "3d3b2102-7b31-4f7b-b792-a586d2a92eb0",
+          "pipeline_type": "forecast",
+          "run_id": "019e7878-a80c-7441-914b-24808fd4ff5c",
+          "settled": true,
+          "settled_at": "2026-05-30T10:46:05Z",
+          "status": "completed",
+          "workflow_id": "forecast-3d3b2102-7b31-4f7b-b792-a586d2a92eb0"
+        },
+        "forecast": {
+          "data": {
+            "forecast_end": "2026-07-01",
+            "forecast_horizon": 3,
+            "forecast_series": {
+              "2026-05-01": {
+                "forecast": 2.583711,
+                "quantile_forecast": {
+                  "0.05": 2.312427,
+                  "0.10": 2.312427,
+                  "0.15": 2.354752,
+                  "0.20": 2.460736,
+                  "0.25": 2.495973,
+                  "0.30": 2.495973,
+                  "0.35": 2.515233,
+                  "0.40": 2.563415,
+                  "0.45": 2.576701,
+                  "0.50": 2.583711,
+                  "0.55": 2.59072,
+                  "0.60": 2.604006,
+                  "0.65": 2.652189,
+                  "0.70": 2.671449,
+                  "0.75": 2.671449,
+                  "0.80": 2.706685,
+                  "0.85": 2.81267,
+                  "0.90": 2.854994,
+                  "0.95": 2.854994
+                }
+              },
+              "2026-06-01": {
+                "forecast": 2.592277,
+                "quantile_forecast": {
+                  "0.05": 2.134582,
+                  "0.10": 2.134582,
+                  "0.15": 2.313928,
+                  "0.20": 2.40142,
+                  "0.25": 2.474176,
+                  "0.30": 2.487014,
+                  "0.35": 2.515762,
+                  "0.40": 2.571438,
+                  "0.45": 2.582406,
+                  "0.50": 2.592277,
+                  "0.55": 2.602148,
+                  "0.60": 2.613116,
+                  "0.65": 2.668792,
+                  "0.70": 2.69754,
+                  "0.75": 2.710378,
+                  "0.80": 2.783134,
+                  "0.85": 2.870625,
+                  "0.90": 3.049971,
+                  "0.95": 3.049971
+                }
+              },
+              "2026-07-01": {
+                "forecast": 2.621099,
+                "quantile_forecast": {
+                  "0.05": 1.915459,
+                  "0.10": 1.963109,
+                  "0.15": 2.114209,
+                  "0.20": 2.211173,
+                  "0.25": 2.430173,
+                  "0.30": 2.447687,
+                  "0.35": 2.510325,
+                  "0.40": 2.559756,
+                  "0.45": 2.570601,
+                  "0.50": 2.621099,
+                  "0.55": 2.671596,
+                  "0.60": 2.682441,
+                  "0.65": 2.731873,
+                  "0.70": 2.79451,
+                  "0.75": 2.812024,
+                  "0.80": 3.031024,
+                  "0.85": 3.127988,
+                  "0.90": 3.279088,
+                  "0.95": 3.326738
+                }
+              }
+            },
+            "forecast_start": "2026-05-01",
+            "last_valid_data_index": "2026-04-01"
+          },
+          "version": "1.1"
+        }
+      },
+      "ECBDFR": {
+        "series_id": "ECBDFR",
+        "weight": 0.35,
+        "job": {
+          "artifacts": [
+            {
+              "name": "backtest_metrics.json",
+              "size": 1114,
+              "content_type": "application/json",
+              "href": "/api/v1/forecasts/d93bfff8-f49d-4b45-ad68-e49e88208ff2/artifacts/backtest_metrics.json"
+            },
+            {
+              "name": "backtest_trajectories.json",
+              "size": 29865,
+              "content_type": "application/json",
+              "href": "/api/v1/forecasts/d93bfff8-f49d-4b45-ad68-e49e88208ff2/artifacts/backtest_trajectories.json"
+            },
+            {
+              "name": "external_signals.json",
+              "size": 62096,
+              "content_type": "application/json",
+              "href": "/api/v1/forecasts/d93bfff8-f49d-4b45-ad68-e49e88208ff2/artifacts/external_signals.json"
+            },
+            {
+              "name": "forecast.json",
+              "size": 2103,
+              "content_type": "application/json",
+              "href": "/api/v1/forecasts/d93bfff8-f49d-4b45-ad68-e49e88208ff2/artifacts/forecast.json"
+            },
+            {
+              "name": "input.json",
+              "size": 2019,
+              "content_type": "application/json",
+              "href": "/api/v1/forecasts/d93bfff8-f49d-4b45-ad68-e49e88208ff2/artifacts/input.json"
+            }
+          ],
+          "created_at": "2026-05-30T10:40:33Z",
+          "eur_cents_final": 148,
+          "job_id": "d93bfff8-f49d-4b45-ad68-e49e88208ff2",
+          "pipeline_type": "forecast",
+          "run_id": "019e7878-a8d1-7888-b7f2-7255d4db2b09",
+          "settled": true,
+          "settled_at": "2026-05-30T10:45:25Z",
+          "status": "completed",
+          "workflow_id": "forecast-d93bfff8-f49d-4b45-ad68-e49e88208ff2"
+        },
+        "forecast": {
+          "data": {
+            "forecast_end": "2026-08-01",
+            "forecast_horizon": 3,
+            "forecast_series": {
+              "2026-06-01": {
+                "forecast": 1.768662,
+                "quantile_forecast": {
+                  "0.05": -0.317899,
+                  "0.10": -0.1913,
+                  "0.15": -0.013049,
+                  "0.20": 0.03026,
+                  "0.25": 0.046051,
+                  "0.30": 0.111935,
+                  "0.35": 0.152038,
+                  "0.40": 0.202028,
+                  "0.45": 0.313902,
+                  "0.50": 1.768662,
+                  "0.55": 3.223422,
+                  "0.60": 3.335297,
+                  "0.65": 3.385286,
+                  "0.70": 3.42539,
+                  "0.75": 3.491274,
+                  "0.80": 3.507065,
+                  "0.85": 3.550374,
+                  "0.90": 3.728625,
+                  "0.95": 3.855224
+                }
+              },
+              "2026-07-01": {
+                "forecast": 1.627946,
+                "quantile_forecast": {
+                  "0.05": 1.230313,
+                  "0.10": 1.261607,
+                  "0.15": 1.295761,
+                  "0.20": 1.297927,
+                  "0.25": 1.330786,
+                  "0.30": 1.389154,
+                  "0.35": 1.45311,
+                  "0.40": 1.463331,
+                  "0.45": 1.514257,
+                  "0.50": 1.627946,
+                  "0.55": 1.741636,
+                  "0.60": 1.792562,
+                  "0.65": 1.802783,
+                  "0.70": 1.866739,
+                  "0.75": 1.925107,
+                  "0.80": 1.957966,
+                  "0.85": 1.960132,
+                  "0.90": 1.994286,
+                  "0.95": 2.025579
+                }
+              },
+              "2026-08-01": {
+                "forecast": 2.22372,
+                "quantile_forecast": {
+                  "0.05": 1.48745,
+                  "0.10": 1.606907,
+                  "0.15": 1.639947,
+                  "0.20": 1.715052,
+                  "0.25": 1.773545,
+                  "0.30": 1.809095,
+                  "0.35": 1.813245,
+                  "0.40": 1.839344,
+                  "0.45": 1.869262,
+                  "0.50": 2.22372,
+                  "0.55": 2.578177,
+                  "0.60": 2.608095,
+                  "0.65": 2.634194,
+                  "0.70": 2.638344,
+                  "0.75": 2.673894,
+                  "0.80": 2.732387,
+                  "0.85": 2.807492,
+                  "0.90": 2.840532,
+                  "0.95": 2.95999
+                }
+              }
+            },
+            "forecast_start": "2026-06-01",
+            "last_valid_data_index": "2026-05-01"
+          },
+          "version": "1.1"
+        }
+      },
+      "IRLTLT01EZM156N": {
+        "series_id": "IRLTLT01EZM156N",
+        "weight": 0.3,
+        "job": {
+          "artifacts": [
+            {
+              "name": "backtest_metrics.json",
+              "size": 1111,
+              "content_type": "application/json",
+              "href": "/api/v1/forecasts/818762c6-6014-43be-b1a1-ba5b521073e1/artifacts/backtest_metrics.json"
+            },
+            {
+              "name": "backtest_trajectories.json",
+              "size": 30029,
+              "content_type": "application/json",
+              "href": "/api/v1/forecasts/818762c6-6014-43be-b1a1-ba5b521073e1/artifacts/backtest_trajectories.json"
+            },
+            {
+              "name": "external_signals.json",
+              "size": 69991,
+              "content_type": "application/json",
+              "href": "/api/v1/forecasts/818762c6-6014-43be-b1a1-ba5b521073e1/artifacts/external_signals.json"
+            },
+            {
+              "name": "forecast.json",
+              "size": 2100,
+              "content_type": "application/json",
+              "href": "/api/v1/forecasts/818762c6-6014-43be-b1a1-ba5b521073e1/artifacts/forecast.json"
+            },
+            {
+              "name": "input.json",
+              "size": 2763,
+              "content_type": "application/json",
+              "href": "/api/v1/forecasts/818762c6-6014-43be-b1a1-ba5b521073e1/artifacts/input.json"
+            }
+          ],
+          "created_at": "2026-05-30T10:40:33Z",
+          "eur_cents_final": 213,
+          "job_id": "818762c6-6014-43be-b1a1-ba5b521073e1",
+          "pipeline_type": "forecast",
+          "run_id": "019e7878-a80a-723b-b075-405943d91109",
+          "settled": true,
+          "settled_at": "2026-05-30T10:47:35Z",
+          "status": "completed",
+          "workflow_id": "forecast-818762c6-6014-43be-b1a1-ba5b521073e1"
+        },
+        "forecast": {
+          "data": {
+            "forecast_end": "2026-04-01",
+            "forecast_horizon": 3,
+            "forecast_series": {
+              "2026-02-01": {
+                "forecast": 3.117569,
+                "quantile_forecast": {
+                  "0.05": 2.826313,
+                  "0.10": 2.887158,
+                  "0.15": 2.891344,
+                  "0.20": 2.92155,
+                  "0.25": 2.988059,
+                  "0.30": 3.020325,
+                  "0.35": 3.051206,
+                  "0.40": 3.051206,
+                  "0.45": 3.058853,
+                  "0.50": 3.117569,
+                  "0.55": 3.176285,
+                  "0.60": 3.183933,
+                  "0.65": 3.183933,
+                  "0.70": 3.214813,
+                  "0.75": 3.247079,
+                  "0.80": 3.313588,
+                  "0.85": 3.343794,
+                  "0.90": 3.34798,
+                  "0.95": 3.408825
+                }
+              },
+              "2026-03-01": {
+                "forecast": 2.988271,
+                "quantile_forecast": {
+                  "0.05": 2.830408,
+                  "0.10": 2.838713,
+                  "0.15": 2.864097,
+                  "0.20": 2.924673,
+                  "0.25": 2.933182,
+                  "0.30": 2.94085,
+                  "0.35": 2.945539,
+                  "0.40": 2.952404,
+                  "0.45": 2.968975,
+                  "0.50": 2.988271,
+                  "0.55": 3.007567,
+                  "0.60": 3.024138,
+                  "0.65": 3.031003,
+                  "0.70": 3.035692,
+                  "0.75": 3.04336,
+                  "0.80": 3.051869,
+                  "0.85": 3.112445,
+                  "0.90": 3.13783,
+                  "0.95": 3.146134
+                }
+              },
+              "2026-04-01": {
+                "forecast": 3.0074,
+                "quantile_forecast": {
+                  "0.05": 2.679915,
+                  "0.10": 2.786329,
+                  "0.15": 2.827656,
+                  "0.20": 2.841606,
+                  "0.25": 2.879044,
+                  "0.30": 2.880193,
+                  "0.35": 2.910017,
+                  "0.40": 2.927647,
+                  "0.45": 2.929405,
+                  "0.50": 3.0074,
+                  "0.55": 3.085396,
+                  "0.60": 3.087154,
+                  "0.65": 3.104784,
+                  "0.70": 3.134607,
+                  "0.75": 3.135757,
+                  "0.80": 3.173195,
+                  "0.85": 3.187145,
+                  "0.90": 3.228472,
+                  "0.95": 3.334886
+                }
+              }
+            },
+            "forecast_start": "2026-02-01",
+            "last_valid_data_index": "2026-01-01"
+          },
+          "version": "1.1"
+        }
+      }
+    },
+    "ensemble": {
+      "ensemble_forecast": {
+        "2026-02-01": 3.1176,
+        "2026-03-01": 2.9883,
+        "2026-04-01": 3.0074,
+        "2026-05-01": 2.5837,
+        "2026-06-01": 2.1118,
+        "2026-07-01": 2.0418,
+        "2026-08-01": 2.2237
+      },
+      "contributing_signals": [
+        "CP0000EZ19M086NEST",
+        "ECBDFR",
+        "IRLTLT01EZM156N"
+      ],
+      "normalized_weights": {
+        "CP0000EZ19M086NEST": 0.2778,
+        "ECBDFR": 0.3889,
+        "IRLTLT01EZM156N": 0.3333
+      },
+      "dropped_signals": [
+        "LRHUTTTTEZM156S"
+      ],
+      "backtest": {}
+    },
+    "scenario": {
+      "scenario": "hold",
+      "confidence": "low",
+      "delta_3m": -0.1102,
+      "delta_6m": -1.0758,
+      "inflation_trend": "stable",
+      "inflation_latest": 2.621099,
+      "labor_slack": false,
+      "labor_latest": null,
+      "yield_signal": "unknown",
+      "trigger": "Rate stabil: -0.11pp in 3M, -1.08pp in 6M",
+      "signals_used": [
+        "CP0000EZ19M086NEST",
+        "ECBDFR",
+        "IRLTLT01EZM156N"
+      ]
+    }
+  }
+}
