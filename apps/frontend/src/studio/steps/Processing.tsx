@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { Check, FastForward } from "lucide-react";
 
-import { runForecastPipeline } from "@/api/forecast";
+import { runForecastPipelineResilient } from "@/api/forecast";
 import type { PipelineResponse } from "@/types/forecast";
 import { JOB_STAGES, PROCESSING_FACTS, PROPOSED_SOURCES } from "@/studio/data";
 import { Eyebrow, Pill, StudioButton } from "@/studio/ui/bits";
@@ -23,21 +23,23 @@ export function Processing({ include, onDone, onForecastReady }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [apiDone, setApiDone] = useState(false);
   const doneFiredRef = useRef(false);
-  const fetchStarted = useRef(false);
 
   useEffect(() => {
-    if (fetchStarted.current || seriesIds.length < 2) return;
-    fetchStarted.current = true;
+    if (seriesIds.length < 2) return;
     setError(null);
-    void runForecastPipeline("fed", seriesIds)
+    const controller = new AbortController();
+    void runForecastPipelineResilient("fed", seriesIds, { signal: controller.signal })
       .then((data) => {
+        if (controller.signal.aborted) return;
         onForecastReady?.(data);
         setApiDone(true);
       })
       .catch((err) => {
+        if (controller.signal.aborted) return;
         setError(err instanceof Error ? err.message : "Forecast request failed");
         setApiDone(true);
       });
+    return () => controller.abort();
   }, [seriesIds, onForecastReady]);
 
   useEffect(() => {

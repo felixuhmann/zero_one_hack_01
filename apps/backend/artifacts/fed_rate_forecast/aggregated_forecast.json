@@ -2,7 +2,7 @@
   "version": "2.1",
   "region": "fed",
   "region_label": "US Federal Reserve (Fed)",
-  "generated_at": 1780212711520,
+  "generated_at": 1780213047898,
   "target_series_id": "FEDFUNDS",
   "included_series_ids": [
     "FEDFUNDS",
@@ -18138,15 +18138,15 @@
     },
     "contributing_signals": [
       "FEDFUNDS",
+      "PCEPILFE",
       "UNRATE",
-      "DGS2",
-      "PCEPILFE"
+      "DGS2"
     ],
     "normalized_weights": {
       "FEDFUNDS": 0.3,
+      "PCEPILFE": 0.25,
       "UNRATE": 0.2,
-      "DGS2": 0.25,
-      "PCEPILFE": 0.25
+      "DGS2": 0.25
     },
     "dropped_signals": [],
     "backtest": {}
@@ -18164,9 +18164,9 @@
     "trigger": "Rate stabil: -0.04pp in 3M, -0.04pp in 6M | Yield Curve normal",
     "signals_used": [
       "FEDFUNDS",
+      "PCEPILFE",
       "UNRATE",
-      "DGS2",
-      "PCEPILFE"
+      "DGS2"
     ]
   }
 }
